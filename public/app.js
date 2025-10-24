@@ -368,10 +368,10 @@ class CampingApp {
             difficult: 'bg-red-100 text-red-800'
         };
         const typeIcons = {
-            car_camping: 'fa-car',
-            backpacking: 'fa-hiking',
-            rv_camping: 'fa-truck',
-            glamping: 'fa-bed'
+            car_camping: 'directions_car',
+            backpacking: 'hiking',
+            rv_camping: 'rv_hookup',
+            glamping: 'hotel'
         };
 
         const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
@@ -379,54 +379,54 @@ class CampingApp {
         const canJoin = this.currentUser && !isParticipant && trip.current_participants < trip.max_participants;
 
         return `
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200" 
+            <div class="apple-card hover:shadow-lg transition-all cursor-pointer border border-gray-100" 
                  onclick="app.showTripDetails(${trip.id})">
                 <div class="p-6">
-                    <div class="flex justify-between items-start mb-3">
-                        <h4 class="text-lg font-bold text-gray-800 line-clamp-1">${trip.title}</h4>
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 line-clamp-1">${trip.title}</h4>
                         <div class="flex gap-1">
-                            <span class="px-2 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]}">
+                            <span class="px-3 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]} font-medium">
                                 ${trip.difficulty_level}
                             </span>
                         </div>
                     </div>
                     
-                    <div class="space-y-2 text-sm text-gray-600 mb-4">
+                    <div class="space-y-3 text-sm text-gray-600 mb-4">
                         <div class="flex items-center">
-                            <i class="fas fa-map-marker-alt w-4 mr-2 text-gray-400"></i>
-                            <span class="truncate">${trip.location}</span>
+                            <span class="material-icons text-base mr-3 text-gray-400">place</span>
+                            <span class="truncate font-medium">${trip.location}</span>
                         </div>
                         <div class="flex items-center">
-                            <i class="fas fa-calendar w-4 mr-2 text-gray-400"></i>
-                            <span>${startDate}</span>
+                            <span class="material-icons text-base mr-3 text-gray-400">event</span>
+                            <span class="font-medium">${startDate}</span>
                         </div>
                         <div class="flex items-center">
-                            <i class="fas fa-users w-4 mr-2 text-gray-400"></i>
-                            <span>${trip.current_participants}/${trip.max_participants} going</span>
+                            <span class="material-icons text-base mr-3 text-gray-400">group</span>
+                            <span class="font-medium">${trip.current_participants}/${trip.max_participants} going</span>
                         </div>
                     </div>
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center text-xs text-gray-500">
-                            <i class="fas ${typeIcons[trip.trip_type]} mr-1"></i>
-                            <span>${trip.trip_type.replace('_', ' ')}</span>
+                            <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
+                            <span class="font-medium">${trip.trip_type.replace('_', ' ')}</span>
                         </div>
                         
                         ${isOrganizer ? `
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                <i class="fas fa-crown mr-1"></i>Organizer
+                            <span class="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+                                <span class="material-icons text-xs mr-1">star</span>Organizer
                             </span>
                         ` : isParticipant ? `
-                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                <i class="fas fa-check mr-1"></i>Joined
+                            <span class="text-xs bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+                                <span class="material-icons text-xs mr-1">check_circle</span>Joined
                             </span>
                         ` : canJoin ? `
-                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                                <i class="fas fa-plus mr-1"></i>Available
+                            <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-medium">
+                                <span class="material-icons text-xs mr-1">add_circle</span>Available
                             </span>
                         ` : `
-                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                                <i class="fas fa-times mr-1"></i>Full
+                            <span class="text-xs bg-red-100 text-red-800 px-3 py-1 rounded-full font-medium">
+                                <span class="material-icons text-xs mr-1">cancel</span>Full
                             </span>
                         `}
                     </div>
@@ -444,10 +444,10 @@ class CampingApp {
             difficult: 'bg-red-100 text-red-800'
         };
         const typeIcons = {
-            car_camping: 'fa-car',
-            backpacking: 'fa-hiking',
-            rv_camping: 'fa-truck',
-            glamping: 'fa-bed'
+            car_camping: 'directions_car',
+            backpacking: 'hiking',
+            rv_camping: 'rv_hookup',
+            glamping: 'hotel'
         };
 
         const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
