@@ -20,9 +20,9 @@ class CampingApp {
         document.getElementById('loginFormElement').addEventListener('submit', (e) => this.handleLogin(e));
         document.getElementById('registerFormElement').addEventListener('submit', (e) => this.handleRegister(e));
         
-        // Dashboard actions
-        document.getElementById('logoutBtn').addEventListener('click', () => this.handleLogout());
-        document.getElementById('userProfileBtn').addEventListener('click', () => this.showUserProfile());
+        // Header actions (available when logged in)
+        document.getElementById('headerLogoutBtn').addEventListener('click', () => this.handleLogout());
+        document.getElementById('headerUserProfileBtn').addEventListener('click', () => this.showUserProfile());
         
         // Main action buttons
         document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripSection());
@@ -65,8 +65,11 @@ class CampingApp {
         document.getElementById('authContainer').classList.add('hidden');
         document.getElementById('dashboardContainer').classList.remove('hidden');
         
+        // Show user info in header
+        document.getElementById('headerUserSection').classList.remove('hidden');
+        document.getElementById('headerUserName').textContent = `${user.firstName} ${user.lastName}`;
+        
         this.currentUser = user;
-        document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
         
         // Load user's trips when dashboard is shown
         this.loadMyTrips();
@@ -75,6 +78,7 @@ class CampingApp {
     showAuthForms() {
         document.getElementById('dashboardContainer').classList.add('hidden');
         document.getElementById('authContainer').classList.remove('hidden');
+        document.getElementById('headerUserSection').classList.add('hidden');
         this.loginForm.classList.remove('hidden');
         this.registerForm.classList.add('hidden');
     }
