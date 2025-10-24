@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoTogether - Login</title>
+    <title>GoTogether - Camping Adventures</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -11,12 +11,14 @@
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">GoTogether</h1>
-            <p class="text-gray-600">Welcome back! Please sign in to your account.</p>
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🏕️ GoTogether</h1>
+            <p class="text-gray-600">Discover and join amazing camping adventures!</p>
         </div>
 
         <!-- Auth Container -->
-        <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+        <div id="authContainer" class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+        <!-- Dashboard Container -->
+        <div id="dashboardContainer" class="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-8 hidden">
             <!-- Login Form -->
             <div id="loginForm">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Sign In</h2>
@@ -80,23 +82,46 @@
                 </p>
             </div>
 
+        </div>
+
+        <!-- Dashboard Container -->
+        <div id="dashboardContainer" class="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-8 hidden">
             <!-- Dashboard (shown after login) -->
-            <div id="dashboard" class="hidden">
-                <div class="text-center">
-                    <div class="mb-6">
-                        <i class="fas fa-user-circle text-6xl text-blue-600 mb-4"></i>
-                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Welcome!</h2>
+            <div id="dashboard">
+                <!-- User Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Welcome back!</h2>
                         <p id="userInfo" class="text-gray-600"></p>
                     </div>
-                    <div class="space-y-4">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <p class="text-sm text-gray-600">You are successfully logged in!</p>
-                            <p class="text-xs text-gray-500 mt-2">Your session is secure with HTTP-only cookies.</p>
-                        </div>
-                        <button id="logoutBtn" 
-                                class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
-                        </button>
+                    <button id="logoutBtn" 
+                            class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 mb-6">
+                    <button id="createTripBtn" 
+                            class="flex-1 bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>Create New Trip
+                    </button>
+                    <button id="refreshTripsBtn" 
+                            class="bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                        <i class="fas fa-refresh mr-2"></i>Refresh
+                    </button>
+                </div>
+
+                <!-- Trips List -->
+                <div id="tripsContainer">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Upcoming Camping Trips</h3>
+                    <div id="tripsList" class="space-y-4">
+                        <!-- Trips will be loaded here -->
+                    </div>
+                    <div id="noTrips" class="text-center py-8 text-gray-500 hidden">
+                        <i class="fas fa-mountain text-4xl mb-4"></i>
+                        <p>No camping trips scheduled yet.</p>
+                        <p class="text-sm">Create the first adventure!</p>
                     </div>
                 </div>
             </div>
@@ -104,6 +129,126 @@
 
         <!-- Error/Success Messages -->
         <div id="messageContainer" class="max-w-md mx-auto mt-4"></div>
+    </div>
+
+    <!-- Trip Creation Modal -->
+    <div id="createTripModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-semibold text-gray-800">Create New Camping Trip</h3>
+                        <button id="closeTripModal" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <form id="createTripForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="md:col-span-2">
+                                <label for="tripTitle" class="block text-sm font-medium text-gray-700 mb-2">Trip Title *</label>
+                                <input type="text" id="tripTitle" required maxlength="255"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                       placeholder="e.g., Yosemite Backpacking Adventure">
+                            </div>
+
+                            <div>
+                                <label for="tripLocation" class="block text-sm font-medium text-gray-700 mb-2">Location *</label>
+                                <input type="text" id="tripLocation" required maxlength="255"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                       placeholder="e.g., Yosemite National Park, CA">
+                            </div>
+
+                            <div>
+                                <label for="tripCampground" class="block text-sm font-medium text-gray-700 mb-2">Campground</label>
+                                <input type="text" id="tripCampground" maxlength="255"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                       placeholder="e.g., Upper Pines Campground">
+                            </div>
+
+                            <div>
+                                <label for="tripStartDate" class="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                                <input type="date" id="tripStartDate" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label for="tripEndDate" class="block text-sm font-medium text-gray-700 mb-2">End Date *</label>
+                                <input type="date" id="tripEndDate" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label for="tripMaxParticipants" class="block text-sm font-medium text-gray-700 mb-2">Max Participants *</label>
+                                <input type="number" id="tripMaxParticipants" required min="1" max="50" value="8"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label for="tripDifficulty" class="block text-sm font-medium text-gray-700 mb-2">Difficulty Level *</label>
+                                <select id="tripDifficulty" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option value="">Select difficulty</option>
+                                    <option value="easy">Easy - Beginner friendly</option>
+                                    <option value="moderate">Moderate - Some experience needed</option>
+                                    <option value="difficult">Difficult - Advanced campers only</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="tripType" class="block text-sm font-medium text-gray-700 mb-2">Trip Type *</label>
+                                <select id="tripType" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option value="">Select type</option>
+                                    <option value="car_camping">Car Camping</option>
+                                    <option value="backpacking">Backpacking</option>
+                                    <option value="rv_camping">RV Camping</option>
+                                    <option value="glamping">Glamping</option>
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="tripDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <textarea id="tripDescription" rows="4" maxlength="2000"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                          placeholder="Describe the camping trip, what to expect, what to bring, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 pt-4">
+                            <button type="button" id="cancelTripBtn"
+                                    class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+                                <i class="fas fa-plus mr-2"></i>Create Trip
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trip Details Modal -->
+    <div id="tripDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="tripDetailsTitle" class="text-2xl font-semibold text-gray-800"></h3>
+                        <button id="closeTripDetailsModal" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div id="tripDetailsContent">
+                        <!-- Trip details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
