@@ -47,6 +47,20 @@ class CampingApp {
             startDate.setDate(startDate.getDate() + 1);
             document.getElementById('tripEndDate').min = startDate.toISOString().split('T')[0];
         });
+        
+        // Show/hide trip code display based on visibility selection
+        document.getElementById('tripPrivate').addEventListener('change', () => {
+            if (document.getElementById('tripPrivate').checked) {
+                this.generateTripCode();
+                document.getElementById('tripCodeDisplay').classList.remove('hidden');
+            }
+        });
+        
+        document.getElementById('tripPublic').addEventListener('change', () => {
+            if (document.getElementById('tripPublic').checked) {
+                document.getElementById('tripCodeDisplay').classList.add('hidden');
+            }
+        });
     }
 
     showRegisterForm() {
@@ -364,6 +378,17 @@ class CampingApp {
         }
     }
 
+    generateTripCode() {
+        // Generate a unique 6-character alphanumeric code
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 6; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('generatedTripCode').textContent = code;
+        return code;
+    }
+
     handleJoinByCode() {
         const tripCode = document.getElementById('tripCode').value.trim();
         if (!tripCode) {
@@ -626,16 +651,18 @@ class CampingApp {
     async handleCreateTrip(e) {
         e.preventDefault();
 
+        const isPrivate = document.getElementById('tripPrivate').checked;
+        const tripCode = isPrivate ? document.getElementById('generatedTripCode').textContent : null;
+        
         const formData = {
             title: document.getElementById('tripTitle').value,
             description: document.getElementById('tripDescription').value,
             location: document.getElementById('tripLocation').value,
-            campground: document.getElementById('tripCampground').value,
             startDate: document.getElementById('tripStartDate').value,
             endDate: document.getElementById('tripEndDate').value,
-            maxParticipants: parseInt(document.getElementById('tripMaxParticipants').value),
-            difficultyLevel: document.getElementById('tripDifficulty').value,
-            tripType: document.getElementById('tripType').value
+            tripType: document.getElementById('tripType').value,
+            isPublic: document.getElementById('tripPublic').checked,
+            tripCode: tripCode
         };
 
         try {

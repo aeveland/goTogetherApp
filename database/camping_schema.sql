@@ -4,17 +4,19 @@ CREATE TABLE IF NOT EXISTS camping_trips (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     location VARCHAR(255) NOT NULL,
-    campground VARCHAR(255),
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    max_participants INTEGER DEFAULT 8,
-    difficulty_level VARCHAR(20) CHECK (difficulty_level IN ('easy', 'moderate', 'difficult')),
     trip_type VARCHAR(30) CHECK (trip_type IN ('car_camping', 'backpacking', 'rv_camping', 'glamping')),
     organizer_id INTEGER REFERENCES users(id),
+    is_public BOOLEAN DEFAULT true,
+    trip_code VARCHAR(10) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT true
 );
+
+-- Add index for trip_code lookups
+CREATE INDEX IF NOT EXISTS idx_camping_trips_code ON camping_trips(trip_code);
 
 -- Trip participants table (many-to-many relationship)
 CREATE TABLE IF NOT EXISTS trip_participants (

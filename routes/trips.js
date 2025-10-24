@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
       FROM camping_trips ct
       LEFT JOIN users u ON ct.organizer_id = u.id
       LEFT JOIN trip_participants tp ON ct.id = tp.trip_id AND tp.status = 'confirmed'
-      WHERE ct.is_active = true AND ct.start_date >= CURRENT_DATE
+      WHERE ct.is_active = true AND ct.start_date >= CURRENT_DATE AND ct.is_public = true
       GROUP BY ct.id, u.first_name, u.last_name
       ORDER BY ct.start_date ASC
     `);
@@ -117,12 +117,11 @@ router.post('/', authenticateToken, [
   body('title').trim().isLength({ min: 3, max: 255 }).withMessage('Title must be 3-255 characters'),
   body('description').optional().trim().isLength({ max: 2000 }).withMessage('Description too long'),
   body('location').trim().isLength({ min: 3, max: 255 }).withMessage('Location must be 3-255 characters'),
-  body('campground').optional().trim().isLength({ max: 255 }),
   body('startDate').isISO8601().withMessage('Invalid start date'),
   body('endDate').isISO8601().withMessage('Invalid end date'),
-  body('maxParticipants').isInt({ min: 1, max: 50 }).withMessage('Max participants must be 1-50'),
-  body('difficultyLevel').isIn(['easy', 'moderate', 'difficult']).withMessage('Invalid difficulty level'),
-  body('tripType').isIn(['car_camping', 'backpacking', 'rv_camping', 'glamping']).withMessage('Invalid trip type')
+  body('tripType').isIn(['car_camping', 'backpacking', 'rv_camping', 'glamping']).withMessage('Invalid trip type'),
+  body('isPublic').isBoolean().withMessage('isPublic must be boolean'),
+  body('tripCode').optional().trim().isLength({ min: 6, max: 10 }).withMessage('Trip code must be 6-10 characters')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -134,12 +133,11 @@ router.post('/', authenticateToken, [
       title,
       description,
       location,
-      campground,
       startDate,
       endDate,
-      maxParticipants,
-      difficultyLevel,
-      tripType
+      tripType,
+      isPublic,
+      tripCode
     } = req.body;
 
     // Validate dates
@@ -159,13 +157,13 @@ router.post('/', authenticateToken, [
     // Create trip
     const result = await pool.query(`
       INSERT INTO camping_trips (
-        title, description, location, campground, start_date, end_date,
-        max_participants, difficulty_level, trip_type, organizer_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        title, description, location, start_date, end_date,
+        trip_type, organizer_id, is_public, trip_code
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `, [
-      title, description, location, campground, startDate, endDate,
-      maxParticipants, difficultyLevel, tripType, req.user.id
+      title, description, location, startDate, endDate,
+      tripType, req.user.id, isPublic, tripCode
     ]);
 
     // Automatically add organizer as participant
