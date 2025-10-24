@@ -22,14 +22,13 @@ class CampingApp {
         
         // Dashboard actions
         document.getElementById('logoutBtn').addEventListener('click', () => this.handleLogout());
-        document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripModal());
+        document.getElementById('toggleCreateTripBtn').addEventListener('click', () => this.toggleCreateTripSection());
         document.getElementById('refreshTripsBtn').addEventListener('click', () => this.loadTrips());
         
-        // Modal actions
-        document.getElementById('closeTripModal').addEventListener('click', () => this.hideCreateTripModal());
-        document.getElementById('cancelTripBtn').addEventListener('click', () => this.hideCreateTripModal());
+        // Inline form actions
+        document.getElementById('cancelCreateTripBtn').addEventListener('click', () => this.hideCreateTripSection());
+        document.getElementById('cancelCreateTripBtn2').addEventListener('click', () => this.hideCreateTripSection());
         document.getElementById('createTripForm').addEventListener('submit', (e) => this.handleCreateTrip(e));
-        document.getElementById('closeTripDetailsModal').addEventListener('click', () => this.hideTripDetailsModal());
         
         // Set minimum date to tomorrow
         const tomorrow = new Date();
@@ -270,9 +269,12 @@ class CampingApp {
             glamping: 'fa-bed'
         };
 
+        const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
+        const isParticipant = trip.participants && trip.participants.some(p => p.name === `${this.currentUser.firstName} ${this.currentUser.lastName}`);
+        const canJoin = this.currentUser && !isParticipant && trip.current_participants < trip.max_participants;
+
         return `
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer" 
-                 onclick="app.showTripDetails(${trip.id})">
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow" id="trip-${trip.id}">
                 <div class="flex justify-between items-start mb-4">
                     <h4 class="text-xl font-semibold text-gray-800">${trip.title}</h4>
                     <div class="flex gap-2">
@@ -286,45 +288,96 @@ class CampingApp {
                     </div>
                 </div>
                 
-                <div class="space-y-2 text-sm text-gray-600 mb-4">
-                    <div class="flex items-center">
-                        <i class="fas fa-map-marker-alt w-4 mr-2"></i>
-                        <span>${trip.location}</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt w-4 mr-2"></i>
+                            <span>${trip.location}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar w-4 mr-2"></i>
+                            <span>${startDate} - ${endDate}</span>
+                        </div>
+                        ${trip.campground ? `
+                            <div class="flex items-center">
+                                <i class="fas fa-campground w-4 mr-2"></i>
+                                <span>${trip.campground}</span>
+                            </div>
+                        ` : ''}
                     </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-calendar w-4 mr-2"></i>
-                        <span>${startDate} - ${endDate}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-users w-4 mr-2"></i>
-                        <span>${trip.current_participants}/${trip.max_participants} participants</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-user-tie w-4 mr-2"></i>
-                        <span>Organized by ${trip.organizer_name}</span>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div class="flex items-center">
+                            <i class="fas fa-users w-4 mr-2"></i>
+                            <span>${trip.current_participants}/${trip.max_participants} participants</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-user-tie w-4 mr-2"></i>
+                            <span>Organized by ${trip.organizer_name}</span>
+                        </div>
                     </div>
                 </div>
 
-                ${trip.description ? `<p class="text-gray-700 text-sm line-clamp-2">${trip.description}</p>` : ''}
+                ${trip.description ? `<p class="text-gray-700 text-sm mb-4">${trip.description}</p>` : ''}
                 
-                <div class="mt-4 flex justify-between items-center">
-                    <div class="text-sm text-gray-500">
-                        ${trip.campground ? `📍 ${trip.campground}` : ''}
-                    </div>
-                    <button class="text-blue-600 hover:text-blue-800 font-medium text-sm">
-                        View Details →
+                <div class="flex gap-2 pt-4 border-t">
+                    ${canJoin ? `
+                        <button onclick="app.joinTrip(${trip.id})" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>Join Trip
+                        </button>
+                    ` : ''}
+                    ${isParticipant && !isOrganizer ? `
+                        <button onclick="app.leaveTrip(${trip.id})" 
+                                class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
+                            <i class="fas fa-minus mr-2"></i>Leave Trip
+                        </button>
+                    ` : ''}
+                    ${isOrganizer ? `
+                        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-md">
+                            <i class="fas fa-crown mr-2"></i>You organize this trip
+                        </div>
+                    ` : ''}
+                    <button onclick="app.toggleTripDetails(${trip.id})" 
+                            class="ml-auto text-blue-600 hover:text-blue-800 font-medium">
+                        <span id="toggle-text-${trip.id}">Show Details</span> <i class="fas fa-chevron-down ml-1" id="toggle-icon-${trip.id}"></i>
                     </button>
+                </div>
+                
+                <!-- Expandable Details -->
+                <div id="trip-details-${trip.id}" class="hidden mt-4 pt-4 border-t bg-gray-50 -mx-6 -mb-6 px-6 pb-6 rounded-b-lg">
+                    <div class="text-sm text-gray-600">
+                        <p class="font-medium mb-2">Trip Participants:</p>
+                        <div id="participants-${trip.id}" class="space-y-1">
+                            <!-- Participants will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
     }
 
-    showCreateTripModal() {
-        document.getElementById('createTripModal').classList.remove('hidden');
+    toggleCreateTripSection() {
+        const section = document.getElementById('createTripSection');
+        const button = document.getElementById('toggleCreateTripBtn');
+        
+        if (section.classList.contains('hidden')) {
+            section.classList.remove('hidden');
+            button.innerHTML = '<i class="fas fa-times mr-2"></i>Cancel';
+            button.classList.remove('bg-green-600', 'hover:bg-green-700');
+            button.classList.add('bg-gray-600', 'hover:bg-gray-700');
+        } else {
+            this.hideCreateTripSection();
+        }
     }
 
-    hideCreateTripModal() {
-        document.getElementById('createTripModal').classList.add('hidden');
+    hideCreateTripSection() {
+        const section = document.getElementById('createTripSection');
+        const button = document.getElementById('toggleCreateTripBtn');
+        
+        section.classList.add('hidden');
+        button.innerHTML = '<i class="fas fa-plus mr-2"></i>Create New Trip';
+        button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+        button.classList.add('bg-green-600', 'hover:bg-green-700');
         document.getElementById('createTripForm').reset();
     }
 
@@ -357,7 +410,7 @@ class CampingApp {
 
             if (response.ok) {
                 this.showMessage('Camping trip created successfully!', 'success');
-                this.hideCreateTripModal();
+                this.hideCreateTripSection();
                 this.loadTrips(); // Refresh the trips list
             } else {
                 if (data.errors) {
@@ -373,106 +426,57 @@ class CampingApp {
         }
     }
 
-    async showTripDetails(tripId) {
-        try {
-            const response = await fetch(`/api/trips/${tripId}`, {
-                credentials: 'include'
-            });
+    async toggleTripDetails(tripId) {
+        const detailsDiv = document.getElementById(`trip-details-${tripId}`);
+        const toggleText = document.getElementById(`toggle-text-${tripId}`);
+        const toggleIcon = document.getElementById(`toggle-icon-${tripId}`);
+        
+        if (detailsDiv.classList.contains('hidden')) {
+            // Show details
+            try {
+                const response = await fetch(`/api/trips/${tripId}`, {
+                    credentials: 'include'
+                });
 
-            if (response.ok) {
-                const data = await response.json();
-                this.renderTripDetails(data.trip);
-                document.getElementById('tripDetailsModal').classList.remove('hidden');
-            } else {
-                this.showMessage('Failed to load trip details', 'error');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.renderTripParticipants(tripId, data.trip.participants);
+                    detailsDiv.classList.remove('hidden');
+                    toggleText.textContent = 'Hide Details';
+                    toggleIcon.classList.remove('fa-chevron-down');
+                    toggleIcon.classList.add('fa-chevron-up');
+                } else {
+                    this.showMessage('Failed to load trip details', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading trip details:', error);
+                this.showMessage('Network error loading trip details', 'error');
             }
-        } catch (error) {
-            console.error('Error loading trip details:', error);
-            this.showMessage('Network error loading trip details', 'error');
+        } else {
+            // Hide details
+            detailsDiv.classList.add('hidden');
+            toggleText.textContent = 'Show Details';
+            toggleIcon.classList.remove('fa-chevron-up');
+            toggleIcon.classList.add('fa-chevron-down');
         }
     }
 
-    renderTripDetails(trip) {
-        const startDate = new Date(trip.start_date).toLocaleDateString();
-        const endDate = new Date(trip.end_date).toLocaleDateString();
-        const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
-        const isParticipant = trip.participants.some(p => p.name === `${this.currentUser.firstName} ${this.currentUser.lastName}`);
-        const canJoin = this.currentUser && !isParticipant && trip.current_participants < trip.max_participants;
-
-        document.getElementById('tripDetailsTitle').textContent = trip.title;
-        document.getElementById('tripDetailsContent').innerHTML = `
-            <div class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-2">📍 Location</h4>
-                        <p class="text-gray-600">${trip.location}</p>
-                        ${trip.campground ? `<p class="text-sm text-gray-500">${trip.campground}</p>` : ''}
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-2">📅 Dates</h4>
-                        <p class="text-gray-600">${startDate} - ${endDate}</p>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-2">👥 Participants</h4>
-                        <p class="text-gray-600">${trip.current_participants}/${trip.max_participants} joined</p>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-2">🏕️ Trip Type</h4>
-                        <p class="text-gray-600">${trip.trip_type.replace('_', ' ')} • ${trip.difficulty_level}</p>
-                    </div>
+    renderTripParticipants(tripId, participants) {
+        const participantsDiv = document.getElementById(`participants-${tripId}`);
+        
+        if (participants && participants.length > 0) {
+            participantsDiv.innerHTML = participants.map(p => `
+                <div class="flex items-center">
+                    <i class="fas fa-user-circle mr-2 text-gray-400"></i>
+                    <span>${p.name}</span>
+                    <span class="text-xs text-gray-400 ml-2">joined ${new Date(p.joined_at).toLocaleDateString()}</span>
                 </div>
-
-                ${trip.description ? `
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-2">📝 Description</h4>
-                        <p class="text-gray-600">${trip.description}</p>
-                    </div>
-                ` : ''}
-
-                <div>
-                    <h4 class="font-semibold text-gray-800 mb-2">👤 Organizer</h4>
-                    <p class="text-gray-600">${trip.organizer_name}</p>
-                </div>
-
-                ${trip.participants.length > 0 ? `
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-2">🏕️ Participants</h4>
-                        <div class="space-y-1">
-                            ${trip.participants.map(p => `
-                                <div class="flex items-center text-gray-600">
-                                    <i class="fas fa-user-circle mr-2"></i>
-                                    <span>${p.name}</span>
-                                    <span class="text-xs text-gray-400 ml-2">joined ${new Date(p.joined_at).toLocaleDateString()}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-
-                ${this.currentUser ? `
-                    <div class="flex gap-4 pt-4 border-t">
-                        ${canJoin ? `
-                            <button onclick="app.joinTrip(${trip.id})" 
-                                    class="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
-                                <i class="fas fa-plus mr-2"></i>Join Trip
-                            </button>
-                        ` : ''}
-                        ${isParticipant && !isOrganizer ? `
-                            <button onclick="app.leaveTrip(${trip.id})" 
-                                    class="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
-                                <i class="fas fa-minus mr-2"></i>Leave Trip
-                            </button>
-                        ` : ''}
-                        ${isOrganizer ? `
-                            <div class="flex-1 bg-blue-100 text-blue-800 py-2 px-4 rounded-md text-center">
-                                <i class="fas fa-crown mr-2"></i>You organize this trip
-                            </div>
-                        ` : ''}
-                    </div>
-                ` : ''}
-            </div>
-        `;
+            `).join('');
+        } else {
+            participantsDiv.innerHTML = '<p class="text-gray-500 italic">No participants yet</p>';
+        }
     }
+
 
     async joinTrip(tripId) {
         try {
@@ -485,7 +489,6 @@ class CampingApp {
 
             if (response.ok) {
                 this.showMessage('Successfully joined the trip!', 'success');
-                this.hideTripDetailsModal();
                 this.loadTrips(); // Refresh trips list
             } else {
                 this.showMessage(data.error || 'Failed to join trip', 'error');
@@ -511,7 +514,6 @@ class CampingApp {
 
             if (response.ok) {
                 this.showMessage('Successfully left the trip', 'success');
-                this.hideTripDetailsModal();
                 this.loadTrips(); // Refresh trips list
             } else {
                 this.showMessage(data.error || 'Failed to leave trip', 'error');
@@ -522,9 +524,6 @@ class CampingApp {
         }
     }
 
-    hideTripDetailsModal() {
-        document.getElementById('tripDetailsModal').classList.add('hidden');
-    }
 }
 
 // Global app instance for onclick handlers
