@@ -22,8 +22,13 @@ class CampingApp {
         
         // Dashboard actions
         document.getElementById('logoutBtn').addEventListener('click', () => this.handleLogout());
-        document.getElementById('toggleCreateTripBtn').addEventListener('click', () => this.toggleCreateTripSection());
-        document.getElementById('refreshTripsBtn').addEventListener('click', () => this.loadTrips());
+        document.getElementById('userProfileBtn').addEventListener('click', () => this.showUserProfile());
+        
+        // Main action buttons
+        document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripSection());
+        document.getElementById('joinTripBtn').addEventListener('click', () => this.showJoinTripsView());
+        document.getElementById('browseTripsBtn').addEventListener('click', () => this.showBrowseTripsView());
+        document.getElementById('backToMyTripsBtn').addEventListener('click', () => this.showMyTripsView());
         
         // Inline form actions
         document.getElementById('cancelCreateTripBtn').addEventListener('click', () => this.hideCreateTripSection());
@@ -61,10 +66,10 @@ class CampingApp {
         document.getElementById('dashboardContainer').classList.remove('hidden');
         
         this.currentUser = user;
-        document.getElementById('userInfo').textContent = `${user.firstName} ${user.lastName} (${user.email})`;
+        document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
         
-        // Load trips when dashboard is shown
-        this.loadTrips();
+        // Load user's trips when dashboard is shown
+        this.loadMyTrips();
     }
 
     showAuthForms() {
@@ -220,8 +225,68 @@ class CampingApp {
         document.getElementById('registerFormElement').reset();
     }
 
-    // Camping Trip Methods
-    async loadTrips() {
+    // Dashboard Navigation Methods
+    showMyTripsView() {
+        document.getElementById('myTripsContainer').classList.remove('hidden');
+        document.getElementById('allTripsContainer').classList.add('hidden');
+        document.getElementById('createTripSection').classList.add('hidden');
+        this.loadMyTrips();
+    }
+
+    showBrowseTripsView() {
+        document.getElementById('myTripsContainer').classList.add('hidden');
+        document.getElementById('allTripsContainer').classList.remove('hidden');
+        document.getElementById('createTripSection').classList.add('hidden');
+        this.loadAllTrips();
+    }
+
+    showJoinTripsView() {
+        // Same as browse for now - could be filtered differently later
+        this.showBrowseTripsView();
+    }
+
+    showCreateTripSection() {
+        document.getElementById('createTripSection').classList.remove('hidden');
+        document.getElementById('myTripsContainer').classList.add('hidden');
+        document.getElementById('allTripsContainer').classList.add('hidden');
+    }
+
+    hideCreateTripSection() {
+        document.getElementById('createTripSection').classList.add('hidden');
+        document.getElementById('myTripsContainer').classList.remove('hidden');
+        document.getElementById('allTripsContainer').classList.add('hidden');
+        const detailsSection = document.getElementById('tripDetailsSection');
+        if (detailsSection) detailsSection.classList.add('hidden');
+        document.getElementById('createTripForm').reset();
+    }
+
+    showUserProfile() {
+        // Placeholder for user profile functionality
+        this.showMessage('User profile coming soon!', 'info');
+    }
+
+    // Trip Loading Methods
+    async loadMyTrips() {
+        try {
+            const response = await fetch('/api/trips/my', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.myTrips = data.trips;
+                this.renderMyTrips();
+            } else {
+                // If endpoint doesn't exist, fall back to filtering all trips
+                await this.loadAllTripsAndFilterMine();
+            }
+        } catch (error) {
+            console.error('Error loading my trips:', error);
+            await this.loadAllTripsAndFilterMine();
+        }
+    }
+
+    async loadAllTripsAndFilterMine() {
         try {
             const response = await fetch('/api/trips', {
                 credentials: 'include'
@@ -229,8 +294,14 @@ class CampingApp {
 
             if (response.ok) {
                 const data = await response.json();
-                this.trips = data.trips;
-                this.renderTrips();
+                // Filter to only trips user is participating in or organizing
+                this.myTrips = data.trips.filter(trip => {
+                    const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
+                    const isParticipant = trip.participants && trip.participants.some(p => 
+                        p.name === `${this.currentUser.firstName} ${this.currentUser.lastName}`);
+                    return isOrganizer || isParticipant;
+                });
+                this.renderMyTrips();
             } else {
                 this.showMessage('Failed to load trips', 'error');
             }
@@ -240,18 +311,124 @@ class CampingApp {
         }
     }
 
-    renderTrips() {
-        const tripsList = document.getElementById('tripsList');
-        const noTrips = document.getElementById('noTrips');
+    async loadAllTrips() {
+        try {
+            const response = await fetch('/api/trips', {
+                credentials: 'include'
+            });
 
-        if (this.trips.length === 0) {
+            if (response.ok) {
+                const data = await response.json();
+                this.allTrips = data.trips;
+                this.renderAllTrips();
+            } else {
+                this.showMessage('Failed to load trips', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading trips:', error);
+            this.showMessage('Network error loading trips', 'error');
+        }
+    }
+
+    renderMyTrips() {
+        const tripsList = document.getElementById('myTripsList');
+        const noTrips = document.getElementById('noMyTrips');
+
+        if (!this.myTrips || this.myTrips.length === 0) {
             tripsList.innerHTML = '';
             noTrips.classList.remove('hidden');
             return;
         }
 
         noTrips.classList.add('hidden');
-        tripsList.innerHTML = this.trips.map(trip => this.createTripCard(trip)).join('');
+        tripsList.innerHTML = this.myTrips.map(trip => this.createTripSnapshotCard(trip)).join('');
+    }
+
+    renderAllTrips() {
+        const tripsList = document.getElementById('allTripsList');
+
+        if (!this.allTrips || this.allTrips.length === 0) {
+            tripsList.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500"><p>No public trips available</p></div>';
+            return;
+        }
+
+        tripsList.innerHTML = this.allTrips.map(trip => this.createTripSnapshotCard(trip)).join('');
+    }
+
+    createTripSnapshotCard(trip) {
+        const startDate = new Date(trip.start_date).toLocaleDateString();
+        const endDate = new Date(trip.end_date).toLocaleDateString();
+        const difficultyColors = {
+            easy: 'bg-green-100 text-green-800',
+            moderate: 'bg-yellow-100 text-yellow-800',
+            difficult: 'bg-red-100 text-red-800'
+        };
+        const typeIcons = {
+            car_camping: 'fa-car',
+            backpacking: 'fa-hiking',
+            rv_camping: 'fa-truck',
+            glamping: 'fa-bed'
+        };
+
+        const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
+        const isParticipant = trip.participants && trip.participants.some(p => p.name === `${this.currentUser.firstName} ${this.currentUser.lastName}`);
+        const canJoin = this.currentUser && !isParticipant && trip.current_participants < trip.max_participants;
+
+        return `
+            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200" 
+                 onclick="app.showTripDetails(${trip.id})">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="text-lg font-bold text-gray-800 line-clamp-1">${trip.title}</h4>
+                        <div class="flex gap-1">
+                            <span class="px-2 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]}">
+                                ${trip.difficulty_level}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm text-gray-600 mb-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt w-4 mr-2 text-gray-400"></i>
+                            <span class="truncate">${trip.location}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar w-4 mr-2 text-gray-400"></i>
+                            <span>${startDate}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-users w-4 mr-2 text-gray-400"></i>
+                            <span>${trip.current_participants}/${trip.max_participants} going</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center text-xs text-gray-500">
+                            <i class="fas ${typeIcons[trip.trip_type]} mr-1"></i>
+                            <span>${trip.trip_type.replace('_', ' ')}</span>
+                        </div>
+                        
+                        ${isOrganizer ? `
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                <i class="fas fa-crown mr-1"></i>Organizer
+                            </span>
+                        ` : isParticipant ? `
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                <i class="fas fa-check mr-1"></i>Joined
+                            </span>
+                        ` : canJoin ? `
+                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                <i class="fas fa-plus mr-1"></i>Available
+                            </span>
+                        ` : `
+                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                                <i class="fas fa-times mr-1"></i>Full
+                            </span>
+                        `}
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     createTripCard(trip) {
@@ -411,7 +588,7 @@ class CampingApp {
             if (response.ok) {
                 this.showMessage('Camping trip created successfully!', 'success');
                 this.hideCreateTripSection();
-                this.loadTrips(); // Refresh the trips list
+                this.loadMyTrips(); // Refresh the user's trips list
             } else {
                 if (data.errors) {
                     const errorMessages = data.errors.map(err => err.msg).join(', ');
@@ -426,39 +603,143 @@ class CampingApp {
         }
     }
 
-    async toggleTripDetails(tripId) {
-        const detailsDiv = document.getElementById(`trip-details-${tripId}`);
-        const toggleText = document.getElementById(`toggle-text-${tripId}`);
-        const toggleIcon = document.getElementById(`toggle-icon-${tripId}`);
-        
-        if (detailsDiv.classList.contains('hidden')) {
-            // Show details
-            try {
-                const response = await fetch(`/api/trips/${tripId}`, {
-                    credentials: 'include'
-                });
+    async showTripDetails(tripId) {
+        try {
+            const response = await fetch(`/api/trips/${tripId}`, {
+                credentials: 'include'
+            });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    this.renderTripParticipants(tripId, data.trip.participants);
-                    detailsDiv.classList.remove('hidden');
-                    toggleText.textContent = 'Hide Details';
-                    toggleIcon.classList.remove('fa-chevron-down');
-                    toggleIcon.classList.add('fa-chevron-up');
-                } else {
-                    this.showMessage('Failed to load trip details', 'error');
-                }
-            } catch (error) {
-                console.error('Error loading trip details:', error);
-                this.showMessage('Network error loading trip details', 'error');
+            if (response.ok) {
+                const data = await response.json();
+                this.renderTripDetailsPage(data.trip);
+            } else {
+                this.showMessage('Failed to load trip details', 'error');
             }
-        } else {
-            // Hide details
-            detailsDiv.classList.add('hidden');
-            toggleText.textContent = 'Show Details';
-            toggleIcon.classList.remove('fa-chevron-up');
-            toggleIcon.classList.add('fa-chevron-down');
+        } catch (error) {
+            console.error('Error loading trip details:', error);
+            this.showMessage('Network error loading trip details', 'error');
         }
+    }
+
+    renderTripDetailsPage(trip) {
+        const startDate = new Date(trip.start_date).toLocaleDateString();
+        const endDate = new Date(trip.end_date).toLocaleDateString();
+        const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
+        const isParticipant = trip.participants && trip.participants.some(p => p.name === `${this.currentUser.firstName} ${this.currentUser.lastName}`);
+        const canJoin = this.currentUser && !isParticipant && trip.current_participants < trip.max_participants;
+
+        // Hide other sections and show trip details
+        document.getElementById('myTripsContainer').classList.add('hidden');
+        document.getElementById('allTripsContainer').classList.add('hidden');
+        document.getElementById('createTripSection').classList.add('hidden');
+        
+        // Create or show trip details section
+        let detailsSection = document.getElementById('tripDetailsSection');
+        if (!detailsSection) {
+            detailsSection = document.createElement('div');
+            detailsSection.id = 'tripDetailsSection';
+            detailsSection.className = 'mt-8';
+            document.getElementById('dashboard').appendChild(detailsSection);
+        }
+        
+        detailsSection.classList.remove('hidden');
+        detailsSection.innerHTML = `
+            <div class="mb-6">
+                <button id="backFromDetailsBtn" class="text-blue-600 hover:text-blue-800 font-medium mb-4">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Trips
+                </button>
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2">${trip.title}</h2>
+                            <p class="text-gray-600">Organized by ${trip.organizer_name}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 text-sm rounded-full bg-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-100 text-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-800">
+                                ${trip.difficulty_level}
+                            </span>
+                            <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800">
+                                ${trip.trip_type.replace('_', ' ')}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-2">📍 Location</h3>
+                                <p class="text-gray-600">${trip.location}</p>
+                                ${trip.campground ? `<p class="text-sm text-gray-500">${trip.campground}</p>` : ''}
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-2">📅 Dates</h3>
+                                <p class="text-gray-600">${startDate} - ${endDate}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-2">👥 Participants</h3>
+                                <p class="text-gray-600">${trip.current_participants}/${trip.max_participants} joined</p>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-2">🏕️ Trip Type</h3>
+                                <p class="text-gray-600">${trip.trip_type.replace('_', ' ')} • ${trip.difficulty_level}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${trip.description ? `
+                        <div class="mb-8">
+                            <h3 class="font-semibold text-gray-800 mb-3">📝 Description</h3>
+                            <p class="text-gray-600 leading-relaxed">${trip.description}</p>
+                        </div>
+                    ` : ''}
+
+                    ${trip.participants && trip.participants.length > 0 ? `
+                        <div class="mb-8">
+                            <h3 class="font-semibold text-gray-800 mb-4">🏕️ Who's Going</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${trip.participants.map(p => `
+                                    <div class="flex items-center bg-gray-50 p-3 rounded-lg">
+                                        <i class="fas fa-user-circle text-2xl text-gray-400 mr-3"></i>
+                                        <div>
+                                            <div class="font-medium text-gray-800">${p.name}</div>
+                                            <div class="text-sm text-gray-500">joined ${new Date(p.joined_at).toLocaleDateString()}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="flex gap-4 pt-6 border-t">
+                        ${canJoin ? `
+                            <button onclick="app.joinTrip(${trip.id})" 
+                                    class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+                                <i class="fas fa-plus mr-2"></i>Join This Trip
+                            </button>
+                        ` : ''}
+                        ${isParticipant && !isOrganizer ? `
+                            <button onclick="app.leaveTrip(${trip.id})" 
+                                    class="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
+                                <i class="fas fa-minus mr-2"></i>Leave Trip
+                            </button>
+                        ` : ''}
+                        ${isOrganizer ? `
+                            <div class="bg-blue-100 text-blue-800 px-6 py-3 rounded-md">
+                                <i class="fas fa-crown mr-2"></i>You organize this trip
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add back button event listener
+        document.getElementById('backFromDetailsBtn').addEventListener('click', () => {
+            detailsSection.classList.add('hidden');
+            this.showMyTripsView();
+        });
     }
 
     renderTripParticipants(tripId, participants) {
@@ -489,7 +770,10 @@ class CampingApp {
 
             if (response.ok) {
                 this.showMessage('Successfully joined the trip!', 'success');
-                this.loadTrips(); // Refresh trips list
+                this.loadMyTrips(); // Refresh trips list
+                if (this.allTrips) {
+                    this.loadAllTrips(); // Also refresh all trips if showing
+                }
             } else {
                 this.showMessage(data.error || 'Failed to join trip', 'error');
             }
@@ -514,7 +798,10 @@ class CampingApp {
 
             if (response.ok) {
                 this.showMessage('Successfully left the trip', 'success');
-                this.loadTrips(); // Refresh trips list
+                this.loadMyTrips(); // Refresh trips list
+                if (this.allTrips) {
+                    this.loadAllTrips(); // Also refresh all trips if showing
+                }
             } else {
                 this.showMessage(data.error || 'Failed to leave trip', 'error');
             }
