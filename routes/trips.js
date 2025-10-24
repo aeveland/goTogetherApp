@@ -11,24 +11,13 @@ router.get('/my', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     
     const result = await pool.query(`
-      SELECT DISTINCT
+      SELECT 
         ct.*,
         u.first_name || ' ' || u.last_name as organizer_name,
-        COUNT(tp.user_id) as current_participants,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'name', u2.first_name || ' ' || u2.last_name,
-              'joined_at', tp2.joined_at
-            )
-          ) FILTER (WHERE tp2.user_id IS NOT NULL), 
-          '[]'
-        ) as participants
+        COUNT(tp.user_id) as current_participants
       FROM camping_trips ct
       LEFT JOIN users u ON ct.organizer_id = u.id
       LEFT JOIN trip_participants tp ON ct.id = tp.trip_id AND tp.status = 'confirmed'
-      LEFT JOIN trip_participants tp2 ON ct.id = tp2.trip_id AND tp2.status = 'confirmed'
-      LEFT JOIN users u2 ON tp2.user_id = u2.id
       WHERE ct.is_active = true 
         AND ct.start_date >= CURRENT_DATE
         AND (ct.organizer_id = $1 OR EXISTS (
