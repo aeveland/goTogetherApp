@@ -234,6 +234,10 @@ class CampingApp {
         document.getElementById('myTripsContainer').classList.remove('hidden');
         document.getElementById('allTripsContainer').classList.add('hidden');
         document.getElementById('createTripSection').classList.add('hidden');
+        const detailsSection = document.getElementById('tripDetailsSection');
+        if (detailsSection) detailsSection.classList.add('hidden');
+        const joinSection = document.getElementById('joinTripSection');
+        if (joinSection) joinSection.classList.add('hidden');
         this.loadMyTrips();
     }
 
@@ -241,12 +245,80 @@ class CampingApp {
         document.getElementById('myTripsContainer').classList.add('hidden');
         document.getElementById('allTripsContainer').classList.remove('hidden');
         document.getElementById('createTripSection').classList.add('hidden');
+        const detailsSection = document.getElementById('tripDetailsSection');
+        if (detailsSection) detailsSection.classList.add('hidden');
+        const joinSection = document.getElementById('joinTripSection');
+        if (joinSection) joinSection.classList.add('hidden');
         this.loadAllTrips();
     }
 
     showJoinTripsView() {
-        // Same as browse for now - could be filtered differently later
-        this.showBrowseTripsView();
+        // Hide other sections and show join trip interface
+        document.getElementById('myTripsContainer').classList.add('hidden');
+        document.getElementById('allTripsContainer').classList.add('hidden');
+        document.getElementById('createTripSection').classList.add('hidden');
+        
+        // Create or show join trip section
+        let joinSection = document.getElementById('joinTripSection');
+        if (!joinSection) {
+            joinSection = document.createElement('div');
+            joinSection.id = 'joinTripSection';
+            joinSection.className = 'mt-8';
+            joinSection.innerHTML = `
+                <div class="apple-card p-8 max-w-2xl mx-auto">
+                    <div class="text-center mb-8">
+                        <span class="material-icons text-4xl text-blue-600 mb-4 block">search</span>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 tracking-tight">Join a Trip</h3>
+                        <p class="text-gray-600">Enter a trip code or search for trips to join</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label for="tripCode" class="block text-sm font-medium text-gray-700 mb-2">Trip Code</label>
+                            <div class="flex gap-3">
+                                <input type="text" id="tripCode" placeholder="Enter trip code (e.g., CAMP2024)"
+                                       class="flex-1 form-input">
+                                <button id="joinByCodeBtn" class="apple-button text-white px-6 py-3 font-medium">
+                                    Join
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Ask the trip organizer for the trip code</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="text-gray-400 mb-4">or</div>
+                            <button id="searchTripsBtn" class="text-blue-600 hover:text-blue-800 font-medium">
+                                Search for public trips to join
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t">
+                        <button id="backFromJoinBtn" class="text-gray-600 hover:text-gray-800 font-medium flex items-center">
+                            <span class="material-icons text-sm mr-2">arrow_back</span>Back to Dashboard
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('dashboard').appendChild(joinSection);
+        }
+        
+        joinSection.classList.remove('hidden');
+        
+        // Add event listeners
+        document.getElementById('backFromJoinBtn').addEventListener('click', () => {
+            joinSection.classList.add('hidden');
+            this.showMyTripsView();
+        });
+        
+        document.getElementById('searchTripsBtn').addEventListener('click', () => {
+            joinSection.classList.add('hidden');
+            this.showBrowseTripsView();
+        });
+        
+        document.getElementById('joinByCodeBtn').addEventListener('click', () => {
+            this.handleJoinByCode();
+        });
     }
 
     showCreateTripSection() {
@@ -261,6 +333,8 @@ class CampingApp {
         document.getElementById('allTripsContainer').classList.add('hidden');
         const detailsSection = document.getElementById('tripDetailsSection');
         if (detailsSection) detailsSection.classList.add('hidden');
+        const joinSection = document.getElementById('joinTripSection');
+        if (joinSection) joinSection.classList.add('hidden');
         document.getElementById('createTripForm').reset();
     }
 
@@ -288,6 +362,17 @@ class CampingApp {
             console.error('Error loading my trips:', error);
             await this.loadAllTripsAndFilterMine();
         }
+    }
+
+    handleJoinByCode() {
+        const tripCode = document.getElementById('tripCode').value.trim();
+        if (!tripCode) {
+            this.showMessage('Please enter a trip code', 'error');
+            return;
+        }
+        
+        // TODO: Implement join by code functionality
+        this.showMessage('Join by code feature coming soon!', 'info');
     }
 
     async loadAllTripsAndFilterMine() {
