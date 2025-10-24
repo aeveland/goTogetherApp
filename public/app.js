@@ -622,30 +622,6 @@ class CampingApp {
         `;
     }
 
-    toggleCreateTripSection() {
-        const section = document.getElementById('createTripSection');
-        const button = document.getElementById('toggleCreateTripBtn');
-        
-        if (section.classList.contains('hidden')) {
-            section.classList.remove('hidden');
-            button.innerHTML = '<i class="fas fa-times mr-2"></i>Cancel';
-            button.classList.remove('bg-green-600', 'hover:bg-green-700');
-            button.classList.add('bg-gray-600', 'hover:bg-gray-700');
-        } else {
-            this.hideCreateTripSection();
-        }
-    }
-
-    hideCreateTripSection() {
-        const section = document.getElementById('createTripSection');
-        const button = document.getElementById('toggleCreateTripBtn');
-        
-        section.classList.add('hidden');
-        button.innerHTML = '<i class="fas fa-plus mr-2"></i>Create New Trip';
-        button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-        button.classList.add('bg-green-600', 'hover:bg-green-700');
-        document.getElementById('createTripForm').reset();
-    }
 
     async handleCreateTrip(e) {
         e.preventDefault();
