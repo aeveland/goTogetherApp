@@ -5,6 +5,49 @@ const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Get user's trips (trips they've joined or organized)
+router.get('/my', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const result = await pool.query(`
+      SELECT DISTINCT
+        ct.*,
+        u.first_name || ' ' || u.last_name as organizer_name,
+        COUNT(tp.user_id) as current_participants,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'name', u2.first_name || ' ' || u2.last_name,
+              'joined_at', tp2.joined_at
+            )
+          ) FILTER (WHERE tp2.user_id IS NOT NULL), 
+          '[]'
+        ) as participants
+      FROM camping_trips ct
+      LEFT JOIN users u ON ct.organizer_id = u.id
+      LEFT JOIN trip_participants tp ON ct.id = tp.trip_id AND tp.status = 'confirmed'
+      LEFT JOIN trip_participants tp2 ON ct.id = tp2.trip_id AND tp2.status = 'confirmed'
+      LEFT JOIN users u2 ON tp2.user_id = u2.id
+      WHERE ct.is_active = true 
+        AND ct.start_date >= CURRENT_DATE
+        AND (ct.organizer_id = $1 OR EXISTS (
+          SELECT 1 FROM trip_participants tp3 
+          WHERE tp3.trip_id = ct.id AND tp3.user_id = $1 AND tp3.status = 'confirmed'
+        ))
+      GROUP BY ct.id, u.first_name, u.last_name
+      ORDER BY ct.start_date ASC
+    `, [userId]);
+
+    res.json({
+      trips: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching user trips:', error);
+    res.status(500).json({ error: 'Failed to fetch user trips' });
+  }
+});
+
 // Get all upcoming camping trips
 router.get('/', async (req, res) => {
   try {
