@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: gotogether
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gotogether-postgres-v2
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
