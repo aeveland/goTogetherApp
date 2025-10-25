@@ -22,7 +22,14 @@ class CampingApp {
         
         // Header actions (available when logged in)
         document.getElementById('headerLogoutBtn').addEventListener('click', () => this.handleLogout());
-        document.getElementById('headerUserProfileBtn').addEventListener('click', () => this.showUserProfile());
+        document.getElementById('headerUserProfileBtn').addEventListener('click', () => this.showUserProfile(this.currentUser.id));
+        
+        // Profile actions
+        document.getElementById('backFromProfileBtn').addEventListener('click', () => this.showMyTripsView());
+        document.getElementById('editProfileBtn').addEventListener('click', () => this.showEditProfile());
+        document.getElementById('cancelEditProfileBtn').addEventListener('click', () => this.showProfileView());
+        document.getElementById('cancelEditProfileBtn2').addEventListener('click', () => this.showProfileView());
+        document.getElementById('updateProfileForm').addEventListener('submit', (e) => this.handleUpdateProfile(e));
         
         // Main action buttons
         document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripSection());
@@ -352,9 +359,157 @@ class CampingApp {
         document.getElementById('createTripForm').reset();
     }
 
-    showUserProfile() {
-        // Placeholder for user profile functionality
-        this.showMessage('User profile coming soon!', 'info');
+    async showUserProfile(userId) {
+        try {
+            const response = await fetch(`/api/profile/${userId}`, {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.displayProfile(data.user, data.isOwnProfile);
+            } else {
+                this.showMessage('Failed to load profile', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            this.showMessage('Error loading profile', 'error');
+        }
+    }
+    
+    displayProfile(user, isOwnProfile) {
+        // Hide other sections
+        document.getElementById('dashboardContainer').style.display = 'none';
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('profileContainer').style.display = 'block';
+        document.getElementById('profileView').style.display = 'block';
+        document.getElementById('profileEditForm').style.display = 'none';
+        
+        // Set profile title
+        document.getElementById('profileTitle').textContent = `${user.first_name} ${user.last_name}`;
+        
+        // Show/hide edit button
+        const editBtn = document.getElementById('editProfileBtn');
+        if (isOwnProfile) {
+            editBtn.classList.remove('hidden');
+        } else {
+            editBtn.classList.add('hidden');
+        }
+        
+        // Fill profile data
+        document.getElementById('profileName').textContent = `${user.first_name} ${user.last_name}`;
+        document.getElementById('profileBio').textContent = user.bio || 'No bio provided';
+        
+        // Handle phone display
+        const phoneSection = document.getElementById('profilePhoneSection');
+        if (isOwnProfile) {
+            phoneSection.style.display = 'block';
+            document.getElementById('profilePhone').textContent = user.phone || 'Not provided';
+        } else {
+            phoneSection.style.display = 'none';
+        }
+        
+        // Camper type with nice formatting
+        const camperTypeMap = {
+            tent: 'Tent Camping',
+            trailer: 'Travel Trailer',
+            rv: 'RV/Motorhome',
+            van: 'Van/Camper Van',
+            fifth_wheel: '5th Wheel'
+        };
+        document.getElementById('profileCamperType').textContent = user.camper_type ? camperTypeMap[user.camper_type] : 'Not specified';
+        document.getElementById('profileGroupSize').textContent = user.group_size ? `${user.group_size} ${user.group_size === 1 ? 'person' : 'people'}` : 'Not specified';
+        
+        // Dietary restrictions with nice formatting
+        const dietaryMap = {
+            vegetarian: 'Vegetarian',
+            vegan: 'Vegan',
+            gluten_free: 'Gluten-Free',
+            dairy_free: 'Dairy-Free',
+            nut_allergy: 'Nut Allergy',
+            kosher: 'Kosher',
+            halal: 'Halal',
+            other: 'Other'
+        };
+        document.getElementById('profileDietary').textContent = user.dietary_restrictions ? dietaryMap[user.dietary_restrictions] : 'None';
+        
+        // Member since
+        const memberSince = new Date(user.created_at).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long' 
+        });
+        document.getElementById('profileMemberSince').textContent = memberSince;
+        
+        this.currentProfileUser = user;
+        this.isOwnProfile = isOwnProfile;
+    }
+    
+    showEditProfile() {
+        document.getElementById('profileView').style.display = 'none';
+        document.getElementById('profileEditForm').style.display = 'block';
+        
+        // Fill edit form with current data
+        const user = this.currentProfileUser;
+        document.getElementById('editFirstName').value = user.first_name || '';
+        document.getElementById('editLastName').value = user.last_name || '';
+        document.getElementById('editBio').value = user.bio || '';
+        document.getElementById('editPhone').value = user.phone || '';
+        document.getElementById('editCamperType').value = user.camper_type || '';
+        document.getElementById('editGroupSize').value = user.group_size || 1;
+        document.getElementById('editDietary').value = user.dietary_restrictions || '';
+    }
+    
+    showProfileView() {
+        document.getElementById('profileEditForm').style.display = 'none';
+        document.getElementById('profileView').style.display = 'block';
+    }
+    
+    async handleUpdateProfile(e) {
+        e.preventDefault();
+        
+        const formData = {
+            firstName: document.getElementById('editFirstName').value,
+            lastName: document.getElementById('editLastName').value,
+            bio: document.getElementById('editBio').value,
+            camperType: document.getElementById('editCamperType').value,
+            groupSize: parseInt(document.getElementById('editGroupSize').value),
+            dietaryRestrictions: document.getElementById('editDietary').value,
+            phone: document.getElementById('editPhone').value
+        };
+        
+        try {
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                this.showMessage('Profile updated successfully!', 'success');
+                // Update current user data
+                this.currentUser.firstName = data.user.first_name;
+                this.currentUser.lastName = data.user.last_name;
+                // Update header display
+                document.getElementById('headerUserName').textContent = `${data.user.first_name} ${data.user.last_name}`;
+                // Refresh profile display
+                this.displayProfile(data.user, true);
+            } else {
+                if (data.errors) {
+                    const errorMessages = data.errors.map(err => err.msg).join(', ');
+                    this.showMessage(errorMessages, 'error');
+                } else {
+                    this.showMessage(data.error || 'Failed to update profile', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
     }
 
     // Trip Loading Methods

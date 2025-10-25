@@ -304,6 +304,180 @@
                     </div>
                 </div>
             </div>
+
+            <!-- User Profile Container -->
+            <div id="profileContainer" style="display: none;">
+                <!-- Profile View -->
+                <div id="profileView">
+                    <div class="apple-card p-8 max-w-3xl mx-auto">
+                        <div class="flex justify-between items-start mb-8">
+                            <div>
+                                <h2 id="profileTitle" class="text-3xl font-bold text-gray-900 tracking-tight mb-2"></h2>
+                                <p class="text-gray-600">Camping Profile</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button id="editProfileBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium hidden">
+                                    <span class="material-icons text-sm mr-2">edit</span>Edit Profile
+                                </button>
+                                <button id="backFromProfileBtn" class="text-gray-600 hover:text-gray-800 font-medium flex items-center">
+                                    <span class="material-icons text-sm mr-2">arrow_back</span>Back to Dashboard
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Personal Information -->
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                        <span class="material-icons text-xl mr-2">person</span>Personal Information
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="text-sm font-medium text-gray-600">Name</label>
+                                            <p id="profileName" class="text-gray-900 font-medium"></p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm font-medium text-gray-600">Bio</label>
+                                            <p id="profileBio" class="text-gray-900"></p>
+                                        </div>
+                                        <div id="profilePhoneSection">
+                                            <label class="text-sm font-medium text-gray-600">Phone</label>
+                                            <p id="profilePhone" class="text-gray-900"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Camping Preferences -->
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                        <span class="material-icons text-xl mr-2">outdoor_grill</span>Camping Style
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="text-sm font-medium text-gray-600">Camper Type</label>
+                                            <p id="profileCamperType" class="text-gray-900 font-medium"></p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm font-medium text-gray-600">Group Size</label>
+                                            <p id="profileGroupSize" class="text-gray-900"></p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm font-medium text-gray-600">Dietary Restrictions</label>
+                                            <p id="profileDietary" class="text-gray-900"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Member Since -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                        <span class="material-icons text-xl mr-2">calendar_today</span>Member Info
+                                    </h3>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-600">Member Since</label>
+                                        <p id="profileMemberSince" class="text-gray-900"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Edit Form -->
+                <div id="profileEditForm" style="display: none;">
+                    <div class="apple-card p-8 max-w-3xl mx-auto">
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Edit Profile</h2>
+                            <button id="cancelEditProfileBtn" class="text-gray-400 hover:text-gray-600 p-1">
+                                <span class="material-icons text-xl">close</span>
+                            </button>
+                        </div>
+
+                        <form id="updateProfileForm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- Personal Information -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                        <span class="material-icons text-xl mr-2">person</span>Personal Information
+                                    </h3>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="editFirstName" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                            <input type="text" id="editFirstName" required maxlength="100" class="w-full form-input">
+                                        </div>
+                                        <div>
+                                            <label for="editLastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                                            <input type="text" id="editLastName" required maxlength="100" class="w-full form-input">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="editBio" class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                        <textarea id="editBio" rows="3" maxlength="1000" class="w-full form-input form-textarea" placeholder="Tell other campers about yourself..."></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label for="editPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                        <input type="tel" id="editPhone" maxlength="20" class="w-full form-input" placeholder="(555) 123-4567">
+                                    </div>
+                                </div>
+
+                                <!-- Camping Preferences -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                        <span class="material-icons text-xl mr-2">outdoor_grill</span>Camping Preferences
+                                    </h3>
+
+                                    <div>
+                                        <label for="editCamperType" class="block text-sm font-medium text-gray-700 mb-1">Camper Type</label>
+                                        <select id="editCamperType" class="w-full form-input">
+                                            <option value="">Select your camping style</option>
+                                            <option value="tent">Tent Camping</option>
+                                            <option value="trailer">Travel Trailer</option>
+                                            <option value="rv">RV/Motorhome</option>
+                                            <option value="van">Van/Camper Van</option>
+                                            <option value="fifth_wheel">5th Wheel</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label for="editGroupSize" class="block text-sm font-medium text-gray-700 mb-1">People in Your Group</label>
+                                        <input type="number" id="editGroupSize" min="1" max="20" value="1" class="w-full form-input">
+                                    </div>
+
+                                    <div>
+                                        <label for="editDietary" class="block text-sm font-medium text-gray-700 mb-1">Dietary Restrictions</label>
+                                        <select id="editDietary" class="w-full form-input">
+                                            <option value="">No restrictions</option>
+                                            <option value="vegetarian">Vegetarian</option>
+                                            <option value="vegan">Vegan</option>
+                                            <option value="gluten_free">Gluten-Free</option>
+                                            <option value="dairy_free">Dairy-Free</option>
+                                            <option value="nut_allergy">Nut Allergy</option>
+                                            <option value="kosher">Kosher</option>
+                                            <option value="halal">Halal</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4 mt-8 pt-6 border-t">
+                                <button type="submit" class="apple-button text-white py-3 px-8 font-medium flex items-center">
+                                    <span class="material-icons text-sm mr-2">save</span>Save Changes
+                                </button>
+                                <button type="button" id="cancelEditProfileBtn2" class="bg-gray-200 text-gray-700 py-3 px-8 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Error/Success Messages -->
