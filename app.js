@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const tripsRoutes = require('./routes/trips');
 const statusRoutes = require('./routes/status');
 const profileRoutes = require('./routes/profile');
+const migrateRoutes = require('./routes/migrate');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/trips', tripsRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/migrate', migrateRoutes);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
