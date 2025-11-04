@@ -48,9 +48,9 @@ router.put('/', authenticateToken, [
   body('firstName').trim().isLength({ min: 1, max: 100 }).withMessage('First name required (1-100 chars)'),
   body('lastName').trim().isLength({ min: 1, max: 100 }).withMessage('Last name required (1-100 chars)'),
   body('bio').optional().trim().isLength({ max: 1000 }).withMessage('Bio too long (max 1000 chars)'),
-  body('camperType').optional().isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel']).withMessage('Invalid camper type'),
+  body('camperType').optional({ nullable: true, checkFalsy: true }).isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel']).withMessage('Invalid camper type'),
   body('groupSize').optional().isInt({ min: 1, max: 20 }).withMessage('Group size must be 1-20'),
-  body('dietaryRestrictions').optional().trim().isLength({ max: 50 }).withMessage('Dietary restrictions too long'),
+  body('dietaryRestrictions').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 50 }).withMessage('Dietary restrictions too long'),
   body('phone').optional().trim().isLength({ max: 20 }).withMessage('Phone number too long')
 ], async (req, res) => {
   try {
@@ -69,6 +69,17 @@ router.put('/', authenticateToken, [
       phone
     } = req.body;
 
+    // Convert empty strings to null for database constraints
+    const cleanedData = {
+      firstName: firstName?.trim(),
+      lastName: lastName?.trim(),
+      bio: bio?.trim() || null,
+      camperType: camperType?.trim() || null,
+      groupSize: groupSize || 1,
+      dietaryRestrictions: dietaryRestrictions?.trim() || null,
+      phone: phone?.trim() || null
+    };
+
     const result = await pool.query(`
       UPDATE users SET 
         first_name = $1,
@@ -83,8 +94,9 @@ router.put('/', authenticateToken, [
       RETURNING id, email, first_name, last_name, bio, camper_type, 
                 group_size, dietary_restrictions, phone
     `, [
-      firstName, lastName, bio, camperType, groupSize, 
-      dietaryRestrictions, phone, req.user.id
+      cleanedData.firstName, cleanedData.lastName, cleanedData.bio, 
+      cleanedData.camperType, cleanedData.groupSize, 
+      cleanedData.dietaryRestrictions, cleanedData.phone, req.user.id
     ]);
 
     res.json({

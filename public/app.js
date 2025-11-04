@@ -137,10 +137,30 @@ class CampingApp {
     async handleRegister(e) {
         e.preventDefault();
         
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
+        const firstName = document.getElementById('registerFirstName').value;
+        const lastName = document.getElementById('registerLastName').value;
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
+        
+        // Get optional profile fields
+        const bio = document.getElementById('registerBio').value.trim();
+        const camperType = document.getElementById('registerCamperType').value;
+        const groupSize = parseInt(document.getElementById('registerGroupSize').value) || 1;
+        const dietaryRestrictions = document.getElementById('registerDietary').value;
+        const phone = document.getElementById('registerPhone').value.trim();
+        
+        const registrationData = {
+            firstName,
+            lastName,
+            email,
+            password,
+            // Include profile fields if they have values
+            bio: bio || null,
+            camperType: camperType || null,
+            groupSize,
+            dietaryRestrictions: dietaryRestrictions || null,
+            phone: phone || null
+        };
         
         try {
             const response = await fetch('/api/auth/register', {
@@ -149,7 +169,7 @@ class CampingApp {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({ firstName, lastName, email, password })
+                body: JSON.stringify(registrationData)
             });
 
             const data = await response.json();
@@ -252,6 +272,12 @@ class CampingApp {
 
     // Dashboard Navigation Methods
     showMyTripsView() {
+        // Hide profile container
+        const profileContainer = document.getElementById('simpleProfileContainer');
+        if (profileContainer) profileContainer.style.display = 'none';
+        
+        // Show dashboard
+        document.getElementById('dashboardContainer').style.display = 'block';
         document.getElementById('myTripsContainer').classList.remove('hidden');
         document.getElementById('allTripsContainer').classList.add('hidden');
         document.getElementById('createTripSection').classList.add('hidden');
@@ -378,50 +404,98 @@ class CampingApp {
     }
     
     displayProfile(user, isOwnProfile) {
-        // Hide other sections
+        // Create a simple profile display that works
+        const profileHTML = `
+            <div style="max-width: 800px; margin: 0 auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h1 style="font-size: 28px; font-weight: bold; color: #333;">${user.first_name} ${user.last_name}</h1>
+                    <div>
+                        ${isOwnProfile ? '<button onclick="app.showEditProfile()" style="background: #3b82f6; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; margin-right: 10px;">Edit Profile</button>' : ''}
+                        <button onclick="app.showMyTripsView()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">Back to Dashboard</button>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Personal Information</h3>
+                        <div style="space-y: 10px;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Name</label>
+                                <p style="font-weight: 500; color: #111827;">${user.first_name} ${user.last_name}</p>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Bio</label>
+                                <p style="color: #111827;">${user.bio || 'No bio provided'}</p>
+                            </div>
+                            ${isOwnProfile ? `
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Phone</label>
+                                <p style="color: #111827;">${user.phone || 'Not provided'}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Camping Style</h3>
+                        <div style="space-y: 10px;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Camper Type</label>
+                                <p style="color: #111827;">${this.getCamperTypeDisplay(user.camper_type)}</p>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Group Size</label>
+                                <p style="color: #111827;">${user.group_size ? `${user.group_size} ${user.group_size === 1 ? 'person' : 'people'}` : 'Not specified'}</p>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Dietary Restrictions</label>
+                                <p style="color: #111827;">${this.getDietaryDisplay(user.dietary_restrictions)}</p>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Member Since</label>
+                                <p style="color: #111827;">${new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Hide dashboard and show profile
         document.getElementById('dashboardContainer').style.display = 'none';
         document.getElementById('authContainer').style.display = 'none';
-        document.getElementById('profileContainer').style.display = 'block';
-        document.getElementById('profileView').style.display = 'block';
-        document.getElementById('profileEditForm').style.display = 'none';
         
-        // Set profile title
-        document.getElementById('profileTitle').textContent = `${user.first_name} ${user.last_name}`;
-        
-        // Show/hide edit button
-        const editBtn = document.getElementById('editProfileBtn');
-        if (isOwnProfile) {
-            editBtn.classList.remove('hidden');
-        } else {
-            editBtn.classList.add('hidden');
+        // Create or update profile container
+        let profileContainer = document.getElementById('simpleProfileContainer');
+        if (!profileContainer) {
+            profileContainer = document.createElement('div');
+            profileContainer.id = 'simpleProfileContainer';
+            profileContainer.style.cssText = 'padding: 20px; background: #f9fafb; min-height: 100vh;';
+            document.body.appendChild(profileContainer);
         }
         
-        // Fill profile data
-        document.getElementById('profileName').textContent = `${user.first_name} ${user.last_name}`;
-        document.getElementById('profileBio').textContent = user.bio || 'No bio provided';
+        profileContainer.innerHTML = profileHTML;
+        profileContainer.style.display = 'block';
         
-        // Handle phone display
-        const phoneSection = document.getElementById('profilePhoneSection');
-        if (isOwnProfile) {
-            phoneSection.style.display = 'block';
-            document.getElementById('profilePhone').textContent = user.phone || 'Not provided';
-        } else {
-            phoneSection.style.display = 'none';
-        }
+        // Event handlers are now inline in the HTML
         
-        // Camper type with nice formatting
-        const camperTypeMap = {
+        this.currentProfileUser = user;
+        this.isOwnProfile = isOwnProfile;
+    }
+    
+    getCamperTypeDisplay(type) {
+        const map = {
             tent: 'Tent Camping',
-            trailer: 'Travel Trailer',
+            trailer: 'Travel Trailer', 
             rv: 'RV/Motorhome',
             van: 'Van/Camper Van',
             fifth_wheel: '5th Wheel'
         };
-        document.getElementById('profileCamperType').textContent = user.camper_type ? camperTypeMap[user.camper_type] : 'Not specified';
-        document.getElementById('profileGroupSize').textContent = user.group_size ? `${user.group_size} ${user.group_size === 1 ? 'person' : 'people'}` : 'Not specified';
-        
-        // Dietary restrictions with nice formatting
-        const dietaryMap = {
+        return type ? map[type] : 'Not specified';
+    }
+    
+    getDietaryDisplay(dietary) {
+        const map = {
             vegetarian: 'Vegetarian',
             vegan: 'Vegan',
             gluten_free: 'Gluten-Free',
@@ -431,32 +505,103 @@ class CampingApp {
             halal: 'Halal',
             other: 'Other'
         };
-        document.getElementById('profileDietary').textContent = user.dietary_restrictions ? dietaryMap[user.dietary_restrictions] : 'None';
-        
-        // Member since
-        const memberSince = new Date(user.created_at).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long' 
-        });
-        document.getElementById('profileMemberSince').textContent = memberSince;
-        
-        this.currentProfileUser = user;
-        this.isOwnProfile = isOwnProfile;
+        return dietary ? map[dietary] : 'None';
     }
     
     showEditProfile() {
-        document.getElementById('profileView').style.display = 'none';
-        document.getElementById('profileEditForm').style.display = 'block';
-        
-        // Fill edit form with current data
         const user = this.currentProfileUser;
-        document.getElementById('editFirstName').value = user.first_name || '';
-        document.getElementById('editLastName').value = user.last_name || '';
-        document.getElementById('editBio').value = user.bio || '';
-        document.getElementById('editPhone').value = user.phone || '';
-        document.getElementById('editCamperType').value = user.camper_type || '';
-        document.getElementById('editGroupSize').value = user.group_size || 1;
-        document.getElementById('editDietary').value = user.dietary_restrictions || '';
+        
+        const editHTML = `
+            <div style="max-width: 800px; margin: 0 auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h1 style="font-size: 28px; font-weight: bold; color: #333;">Edit Profile</h1>
+                    <button onclick="app.displayProfile(app.currentProfileUser, app.isOwnProfile)" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                </div>
+                
+                <form onsubmit="app.handleUpdateProfile(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Personal Information</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">First Name</label>
+                            <input type="text" name="firstName" value="${user.first_name || ''}" required
+                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Last Name</label>
+                            <input type="text" name="lastName" value="${user.last_name || ''}" required
+                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Bio</label>
+                            <textarea name="bio" rows="3" placeholder="Tell others about your camping experience..."
+                                      style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; resize: vertical;">${user.bio || ''}</textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Phone</label>
+                            <input type="tel" name="phone" value="${user.phone || ''}" placeholder="(555) 123-4567"
+                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Camping Preferences</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Camper Type</label>
+                            <select name="camperType" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                <option value="">Select camper type...</option>
+                                <option value="tent" ${user.camper_type === 'tent' ? 'selected' : ''}>Tent Camping</option>
+                                <option value="trailer" ${user.camper_type === 'trailer' ? 'selected' : ''}>Travel Trailer</option>
+                                <option value="rv" ${user.camper_type === 'rv' ? 'selected' : ''}>RV/Motorhome</option>
+                                <option value="van" ${user.camper_type === 'van' ? 'selected' : ''}>Van/Camper Van</option>
+                                <option value="fifth_wheel" ${user.camper_type === 'fifth_wheel' ? 'selected' : ''}>5th Wheel</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Group Size</label>
+                            <input type="number" name="groupSize" value="${user.group_size || 1}" min="1" max="20"
+                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Dietary Restrictions</label>
+                            <select name="dietaryRestrictions" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                <option value="">None</option>
+                                <option value="vegetarian" ${user.dietary_restrictions === 'vegetarian' ? 'selected' : ''}>Vegetarian</option>
+                                <option value="vegan" ${user.dietary_restrictions === 'vegan' ? 'selected' : ''}>Vegan</option>
+                                <option value="gluten_free" ${user.dietary_restrictions === 'gluten_free' ? 'selected' : ''}>Gluten-Free</option>
+                                <option value="dairy_free" ${user.dietary_restrictions === 'dairy_free' ? 'selected' : ''}>Dairy-Free</option>
+                                <option value="nut_allergy" ${user.dietary_restrictions === 'nut_allergy' ? 'selected' : ''}>Nut Allergy</option>
+                                <option value="kosher" ${user.dietary_restrictions === 'kosher' ? 'selected' : ''}>Kosher</option>
+                                <option value="halal" ${user.dietary_restrictions === 'halal' ? 'selected' : ''}>Halal</option>
+                                <option value="other" ${user.dietary_restrictions === 'other' ? 'selected' : ''}>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <button type="submit" id="saveProfileBtn" 
+                                    style="background: #10b981; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; margin-right: 10px;">
+                                Save Changes
+                            </button>
+                            <button type="button" onclick="app.displayProfile(app.currentProfileUser, app.isOwnProfile)" 
+                                    style="background: #6b7280; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        const profileContainer = document.getElementById('simpleProfileContainer');
+        profileContainer.innerHTML = editHTML;
+        
+        // Form submission handler is now inline
     }
     
     showProfileView() {
@@ -467,15 +612,32 @@ class CampingApp {
     async handleUpdateProfile(e) {
         e.preventDefault();
         
-        const formData = {
-            firstName: document.getElementById('editFirstName').value,
-            lastName: document.getElementById('editLastName').value,
-            bio: document.getElementById('editBio').value,
-            camperType: document.getElementById('editCamperType').value,
-            groupSize: parseInt(document.getElementById('editGroupSize').value),
-            dietaryRestrictions: document.getElementById('editDietary').value,
-            phone: document.getElementById('editPhone').value
+        // Get form data using FormData API - more reliable
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        const profileData = {
+            firstName: (formData.get('firstName') || '').trim(),
+            lastName: (formData.get('lastName') || '').trim(),
+            bio: (formData.get('bio') || '').trim(),
+            camperType: formData.get('camperType') || '',
+            groupSize: parseInt(formData.get('groupSize')) || 1,
+            dietaryRestrictions: formData.get('dietaryRestrictions') || '',
+            phone: (formData.get('phone') || '').trim()
         };
+        
+        console.log('Profile data to send:', profileData);
+        
+        // Simple validation
+        if (!profileData.firstName) {
+            this.showMessage('First name is required', 'error');
+            return;
+        }
+        
+        if (!profileData.lastName) {
+            this.showMessage('Last name is required', 'error');
+            return;
+        }
         
         try {
             const response = await fetch('/api/profile', {
@@ -484,10 +646,11 @@ class CampingApp {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify(formData)
+                body: JSON.stringify(profileData)
             });
             
             const data = await response.json();
+            console.log('Server response:', data);
             
             if (response.ok) {
                 this.showMessage('Profile updated successfully!', 'success');
@@ -499,6 +662,7 @@ class CampingApp {
                 // Refresh profile display
                 this.displayProfile(data.user, true);
             } else {
+                console.error('Server error:', data);
                 if (data.errors) {
                     const errorMessages = data.errors.map(err => err.msg).join(', ');
                     this.showMessage(errorMessages, 'error');
@@ -507,7 +671,7 @@ class CampingApp {
                 }
             }
         } catch (error) {
-            console.error('Error updating profile:', error);
+            console.error('Network error:', error);
             this.showMessage('Network error. Please try again.', 'error');
         }
     }

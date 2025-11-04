@@ -122,12 +122,66 @@
                         <input type="email" id="registerEmail" required
                                class="w-full form-input">
                     </div>
-                    <div class="mb-6">
+                    <div class="mb-4">
                         <label for="registerPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
                         <input type="password" id="registerPassword" required minlength="6"
                                class="w-full form-input">
                         <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
                     </div>
+                    
+                    <!-- Optional Profile Information -->
+                    <div class="border-t pt-4 mb-4">
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Camping Preferences (Optional)</h3>
+                        <p class="text-sm text-gray-600 mb-4">Help others find you for compatible camping trips</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="registerCamperType" class="block text-sm font-medium text-gray-700 mb-2">Camper Type</label>
+                                <select id="registerCamperType" class="w-full form-input">
+                                    <option value="">Select camper type...</option>
+                                    <option value="tent">Tent Camping</option>
+                                    <option value="trailer">Travel Trailer</option>
+                                    <option value="rv">RV/Motorhome</option>
+                                    <option value="van">Van/Camper Van</option>
+                                    <option value="fifth_wheel">5th Wheel</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="registerGroupSize" class="block text-sm font-medium text-gray-700 mb-2">Group Size</label>
+                                <input type="number" id="registerGroupSize" min="1" max="20" value="1" 
+                                       class="w-full form-input">
+                            </div>
+                            
+                            <div>
+                                <label for="registerDietary" class="block text-sm font-medium text-gray-700 mb-2">Dietary Restrictions</label>
+                                <select id="registerDietary" class="w-full form-input">
+                                    <option value="">None</option>
+                                    <option value="vegetarian">Vegetarian</option>
+                                    <option value="vegan">Vegan</option>
+                                    <option value="gluten_free">Gluten-Free</option>
+                                    <option value="dairy_free">Dairy-Free</option>
+                                    <option value="nut_allergy">Nut Allergy</option>
+                                    <option value="kosher">Kosher</option>
+                                    <option value="halal">Halal</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="registerPhone" class="block text-sm font-medium text-gray-700 mb-2">Phone (Optional)</label>
+                                <input type="tel" id="registerPhone" placeholder="(555) 123-4567"
+                                       class="w-full form-input">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label for="registerBio" class="block text-sm font-medium text-gray-700 mb-2">Bio (Optional)</label>
+                            <textarea id="registerBio" rows="2" placeholder="Tell others about your camping experience..."
+                                      class="w-full form-input resize-none"></textarea>
+                        </div>
+                    </div>
+                    
                     <button type="submit" 
                             class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
                         Create Account

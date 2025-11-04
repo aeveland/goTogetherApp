@@ -12,7 +12,13 @@ router.post('/register', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   body('firstName').trim().isLength({ min: 1 }).withMessage('First name is required'),
-  body('lastName').trim().isLength({ min: 1 }).withMessage('Last name is required')
+  body('lastName').trim().isLength({ min: 1 }).withMessage('Last name is required'),
+  // Optional profile fields
+  body('bio').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 1000 }).withMessage('Bio too long'),
+  body('camperType').optional({ nullable: true, checkFalsy: true }).isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel']).withMessage('Invalid camper type'),
+  body('groupSize').optional().isInt({ min: 1, max: 20 }).withMessage('Group size must be 1-20'),
+  body('dietaryRestrictions').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 50 }).withMessage('Dietary restrictions too long'),
+  body('phone').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 20 }).withMessage('Phone number too long')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -20,7 +26,10 @@ router.post('/register', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, firstName, lastName } = req.body;
+    const { 
+      email, password, firstName, lastName,
+      bio, camperType, groupSize, dietaryRestrictions, phone 
+    } = req.body;
 
     // Check if user already exists
     const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
@@ -32,11 +41,29 @@ router.post('/register', [
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Create user
-    const result = await pool.query(
-      'INSERT INTO users (email, password_hash, first_name, last_name) VALUES ($1, $2, $3, $4) RETURNING id, email, first_name, last_name',
-      [email, passwordHash, firstName, lastName]
-    );
+    // Clean profile data (convert empty strings to null)
+    const cleanedProfileData = {
+      bio: bio?.trim() || null,
+      camperType: camperType?.trim() || null,
+      groupSize: groupSize || 1,
+      dietaryRestrictions: dietaryRestrictions?.trim() || null,
+      phone: phone?.trim() || null
+    };
+
+    // Create user with profile fields
+    const result = await pool.query(`
+      INSERT INTO users (
+        email, password_hash, first_name, last_name,
+        bio, camper_type, group_size, dietary_restrictions, phone
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+      RETURNING id, email, first_name, last_name, bio, camper_type, 
+                group_size, dietary_restrictions, phone
+    `, [
+      email, passwordHash, firstName, lastName,
+      cleanedProfileData.bio, cleanedProfileData.camperType, 
+      cleanedProfileData.groupSize, cleanedProfileData.dietaryRestrictions, 
+      cleanedProfileData.phone
+    ]);
 
     const user = result.rows[0];
 
@@ -50,8 +77,8 @@ router.post('/register', [
     // Set HTTP-only cookie
     res.cookie('authToken', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: false, // Set to false for development
+      sameSite: 'lax', // Changed from 'strict' to 'lax'
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -111,8 +138,8 @@ router.post('/login', [
     // Set HTTP-only cookie
     res.cookie('authToken', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: false, // Set to false for development
+      sameSite: 'lax', // Changed from 'strict' to 'lax'
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 

@@ -11,7 +11,7 @@ const profileRoutes = require('./routes/profile');
 const migrateRoutes = require('./routes/migrate');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
