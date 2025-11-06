@@ -223,4 +223,71 @@ router.post('/add-home-address', async (req, res) => {
   }
 });
 
+// Geocode existing trips for weather integration
+router.post('/geocode-trips', async (req, res) => {
+  try {
+    console.log('Starting trip geocoding migration...');
+    
+    // Get trips without coordinates
+    const tripsResult = await pool.query(`
+      SELECT id, location FROM camping_trips 
+      WHERE latitude IS NULL OR longitude IS NULL
+    `);
+    
+    let updated = 0;
+    let failed = 0;
+    
+    for (const trip of tripsResult.rows) {
+      try {
+        // Use Nominatim geocoding service (free) with proper headers
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trip.location)}&limit=1`, {
+          headers: {
+            'User-Agent': 'GoTogether-App/1.0 (camping-app)'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          
+          await pool.query(`
+            UPDATE camping_trips 
+            SET latitude = $1, longitude = $2 
+            WHERE id = $3
+          `, [lat, lon, trip.id]);
+          
+          updated++;
+          console.log(`Geocoded trip ${trip.id}: ${trip.location} -> ${lat}, ${lon}`);
+        } else {
+          failed++;
+          console.log(`Failed to geocode trip ${trip.id}: ${trip.location}`);
+        }
+        
+        // Rate limiting - wait 1 second between requests
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+      } catch (error) {
+        failed++;
+        console.error(`Error geocoding trip ${trip.id}:`, error.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Geocoding completed: ${updated} updated, ${failed} failed`,
+      details: { updated, failed, total: tripsResult.rows.length }
+    });
+    
+  } catch (error) {
+    console.error('Migration failed:', error);
+    res.status(500).json({ success: false, error: 'Migration failed', details: error.message });
+  }
+});
+
 module.exports = router;

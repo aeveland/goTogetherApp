@@ -131,7 +131,9 @@ router.post('/', authenticateToken, [
       throw new Error('Private trips require a trip code');
     }
     return true;
-  })
+  }),
+  body('latitude').optional().isFloat({ min: -90, max: 90 }).withMessage('Invalid latitude'),
+  body('longitude').optional().isFloat({ min: -180, max: 180 }).withMessage('Invalid longitude')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -147,7 +149,9 @@ router.post('/', authenticateToken, [
       endDate,
       tripType,
       isPublic,
-      tripCode
+      tripCode,
+      latitude,
+      longitude
     } = req.body;
 
     // Validate dates
@@ -168,12 +172,12 @@ router.post('/', authenticateToken, [
     const result = await pool.query(`
       INSERT INTO camping_trips (
         title, description, location, start_date, end_date,
-        trip_type, organizer_id, is_public, trip_code
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        trip_type, organizer_id, is_public, trip_code, latitude, longitude
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `, [
       title, description, location, startDate, endDate,
-      tripType, req.user.id, isPublic, tripCode
+      tripType, req.user.id, isPublic, tripCode, latitude, longitude
     ]);
 
     // Automatically add organizer as participant

@@ -590,109 +590,106 @@ class CampingApp {
         const current = weatherData.current;
         const currentTemp = Math.round(current.temp);
         const feelsLike = Math.round(current.feels_like);
+        const humidity = current.humidity;
+        const windSpeed = Math.round(current.wind_speed);
+        const windDirection = this.getWindDirection(current.wind_deg);
+        const uvIndex = Math.round(current.uvi);
         
         // 7-day forecast
-        const daily = weatherData.daily.slice(1, 8); // Skip today, show next 7 days
+        const daily = weatherData.daily.slice(0, 7);
         
-        // Weather alerts
-        const alerts = weatherData.weather_alerts || [];
-        
-        // Packing suggestions
-        const packingSuggestions = weatherData.packing_suggestions || [];
-
-        let alertsHtml = '';
-        if (alerts.length > 0) {
-            alertsHtml = `
-                <div class="mb-4 p-3 rounded-lg" style="background: #FFF3E0; border: 1px solid #FF9500;">
-                    <div class="flex items-center mb-2">
-                        <span class="material-icons mr-2 text-orange-600" style="font-size: 16px;">warning</span>
-                        <span class="ios-footnote font-medium text-orange-800">Weather Alerts</span>
-                    </div>
-                    <div class="space-y-1">
-                        ${alerts.map(alert => `
-                            <div class="flex items-center text-sm text-orange-700">
-                                <span class="material-icons mr-2" style="font-size: 14px;">${alert.icon}</span>
-                                <span>${alert.day}: ${alert.message}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        let packingHtml = '';
-        if (packingSuggestions.length > 0) {
-            packingHtml = `
-                <div class="mb-4 p-3 rounded-lg" style="background: var(--ios-blue-light, #E3F2FD); border: 1px solid var(--ios-blue, #007AFF);">
-                    <div class="flex items-center mb-2">
-                        <span class="material-icons mr-2 text-blue-600" style="font-size: 16px;">backpack</span>
-                        <span class="ios-footnote font-medium text-blue-800">Packing Suggestions</span>
-                    </div>
-                    <div class="space-y-1">
-                        ${packingSuggestions.slice(0, 3).map(suggestion => `
-                            <div class="flex items-center text-sm text-blue-700">
-                                <span class="material-icons mr-2" style="font-size: 14px;">${suggestion.icon}</span>
-                                <span><strong>${suggestion.item}:</strong> ${suggestion.reason}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Historical comparison
-        let historicalHtml = '';
-        if (weatherData.historical && weatherData.historical.data && weatherData.historical.data.length > 0) {
-            const historicalTemp = Math.round(weatherData.historical.data[0].temp);
-            const tempDiff = currentTemp - historicalTemp;
-            if (Math.abs(tempDiff) > 5) {
-                historicalHtml = `
-                    <div class="mb-4 p-2 rounded text-center text-sm" style="background: var(--ios-gray-6);">
-                        <span class="material-icons mr-1" style="font-size: 14px;">history</span>
-                        Last year: ${historicalTemp}°F (${tempDiff > 0 ? '+' : ''}${Math.round(tempDiff)}°F difference)
-                    </div>
-                `;
-            }
-        }
-
         container.innerHTML = `
-            ${alertsHtml}
-            ${packingHtml}
-            
             <!-- Current Weather -->
-            <div class="mb-4 p-4 rounded-lg text-center" style="background: var(--ios-gray-6);">
-                <div class="flex items-center justify-center mb-2">
-                    <span class="material-icons mr-2 text-2xl">${this.getWeatherIcon(current.weather[0].main)}</span>
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px; border-radius: 12px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="display: flex; align-items: center;">
+                    <span class="material-icons" style="font-size: 48px; margin-right: 20px;">${this.getWeatherIcon(current.weather[0].main)}</span>
                     <div>
-                        <div class="ios-title-2">${currentTemp}°F</div>
-                        <div class="ios-footnote text-gray-600">Feels like ${feelsLike}°F</div>
+                        <div style="font-size: 36px; font-weight: 300; line-height: 1;">${currentTemp}°F</div>
+                        <div style="font-size: 14px; opacity: 0.9; margin-top: 4px;">Feels like ${feelsLike}°F</div>
+                        <div style="font-size: 14px; opacity: 0.8; margin-top: 2px; text-transform: capitalize;">${current.weather[0].description}</div>
                     </div>
                 </div>
-                <div class="ios-callout">${current.weather[0].description}</div>
-                ${historicalHtml}
+                <div style="text-align: right; font-size: 14px; opacity: 0.9;">
+                    <div style="margin-bottom: 4px;">Now</div>
+                    <div>${new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                </div>
+            </div>
+
+            <!-- Weather Details -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
+                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
+                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">air</span>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Wind</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">${windSpeed} mph ${windDirection}</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
+                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">water_drop</span>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Humidity</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">${humidity}%</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
+                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">wb_sunny</span>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">UV Index</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">${uvIndex} ${this.getUVLevel(uvIndex)}</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
+                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">visibility</span>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Visibility</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">10 km</div>
+                </div>
             </div>
 
             <!-- 7-Day Forecast -->
-            <div class="grid grid-cols-7 gap-2">
-                ${daily.map(day => {
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 32px;">
+                ${daily.map((day, index) => {
                     const date = new Date(day.dt * 1000);
-                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                    const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+                    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     const high = Math.round(day.temp.max);
                     const low = Math.round(day.temp.min);
                     const rainChance = Math.round(day.pop * 100);
                     
                     return `
-                        <div class="text-center p-2 rounded" style="background: var(--ios-gray-6);">
-                            <div class="ios-caption font-medium mb-1">${dayName}</div>
-                            <span class="material-icons text-lg mb-1">${this.getWeatherIcon(day.weather[0].main)}</span>
-                            <div class="ios-caption">
-                                <div class="font-medium">${high}°</div>
-                                <div class="text-gray-500">${low}°</div>
-                                ${rainChance > 20 ? `<div class="text-blue-600">${rainChance}%</div>` : ''}
-                            </div>
+                        <div style="text-align: center; padding: 16px 8px; background: white; border: 1px solid #E5E5EA; border-radius: 8px;">
+                            <div style="font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">${dayName}</div>
+                            <div style="font-size: 11px; color: #666; margin-bottom: 8px;">${monthDay}</div>
+                            <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(day.weather[0].main)}</span>
+                            <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 2px;">${high}°</div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${low}°</div>
+                            ${rainChance > 10 ? `<div style="font-size: 11px; color: #007AFF;">💧${rainChance}%</div>` : ''}
                         </div>
                     `;
                 }).join('')}
+            </div>
+            
+            <!-- Camping Conditions -->
+            <div style="background: #F0F9FF; border: 1px solid #0EA5E9; border-radius: 12px; padding: 24px;">
+                <h4 style="font-size: 18px; font-weight: 600; color: #0F172A; margin: 0 0 20px 0; display: flex; align-items: center;">
+                    <span class="material-icons" style="font-size: 24px; color: #0EA5E9; margin-right: 12px;">outdoor_grill</span>
+                    Camping Conditions
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div style="display: flex; align-items: center;">
+                        <span class="material-icons" style="font-size: 20px; color: #0EA5E9; margin-right: 12px;">nights_stay</span>
+                        <span style="font-size: 16px; color: #334155;">Night low: ${Math.round(daily[0].temp.min)}°F</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="material-icons" style="font-size: 20px; color: #0EA5E9; margin-right: 12px;">wb_twilight</span>
+                        <span style="font-size: 16px; color: #334155;">Morning: ${Math.round(daily[0].temp.max)}°F</span>
+                    </div>
+                    ${windSpeed > 15 ? `
+                    <div style="display: flex; align-items: center;">
+                        <span class="material-icons" style="font-size: 20px; color: #F59E0B; margin-right: 12px;">warning</span>
+                        <span style="font-size: 16px; color: #334155;">Windy conditions - secure gear</span>
+                    </div>
+                    ` : ''}
+                    ${daily[0].pop > 0.3 ? `
+                    <div style="display: flex; align-items: center;">
+                        <span class="material-icons" style="font-size: 20px; color: #3B82F6; margin-right: 12px;">umbrella</span>
+                        <span style="font-size: 16px; color: #334155;">Rain likely - waterproof setup</span>
+                    </div>
+                    ` : ''}
+                </div>
             </div>
         `;
 
@@ -718,6 +715,103 @@ class CampingApp {
             'Haze': 'foggy'
         };
         return iconMap[weatherMain] || 'wb_cloudy';
+    }
+
+    getWindDirection(degrees) {
+        if (!degrees) return '';
+        const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+        const index = Math.round(degrees / 22.5) % 16;
+        return directions[index];
+    }
+
+    getUVLevel(uvIndex) {
+        if (uvIndex <= 2) return 'Low';
+        if (uvIndex <= 5) return 'Moderate';
+        if (uvIndex <= 7) return 'High';
+        if (uvIndex <= 10) return 'Very High';
+        return 'Extreme';
+    }
+
+    // Collapsible sections management with persistent state
+    initializeCollapsibleSections(tripId) {
+        // Get saved states from localStorage
+        const savedStates = JSON.parse(localStorage.getItem('sectionStates') || '{}');
+        
+        // Initialize map section (if it exists)
+        const mapToggle = document.getElementById(`toggleTripDetails-${tripId}`);
+        const mapContent = document.getElementById(`tripDetailsContent-${tripId}`);
+        const mapChevron = document.querySelector(`.map-chevron-${tripId}`);
+        
+        if (mapToggle && mapContent && mapChevron) {
+            // Default to open, but respect saved state
+            const isMapOpen = savedStates[`map-${tripId}`] !== false;
+            this.setCollapsibleState(mapContent, mapChevron, isMapOpen);
+            
+            mapToggle.addEventListener('click', () => {
+                const isCurrentlyOpen = !mapContent.classList.contains('collapsed');
+                const newState = !isCurrentlyOpen;
+                this.setCollapsibleState(mapContent, mapChevron, newState);
+                this.saveCollapsibleState(`map-${tripId}`, newState);
+            });
+        }
+    }
+
+    setCollapsibleState(content, chevron, isOpen) {
+        if (isOpen) {
+            content.classList.remove('collapsed');
+            content.style.display = 'block';
+            chevron.style.transform = 'rotate(0deg)';
+            chevron.textContent = 'expand_less';
+        } else {
+            content.classList.add('collapsed');
+            content.style.display = 'none';
+            chevron.style.transform = 'rotate(180deg)';
+            chevron.textContent = 'expand_more';
+        }
+    }
+
+    saveCollapsibleState(key, isOpen) {
+        const savedStates = JSON.parse(localStorage.getItem('sectionStates') || '{}');
+        savedStates[key] = isOpen;
+        localStorage.setItem('sectionStates', JSON.stringify(savedStates));
+    }
+
+    async geocodeLocation(location) {
+        try {
+            // Use a free geocoding service (Nominatim - OpenStreetMap)
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`, {
+                headers: {
+                    'User-Agent': 'GoTogether-App/1.0 (camping-app)'
+                }
+            });
+            
+            if (!response.ok) {
+                console.error(`Geocoding HTTP error: ${response.status}`);
+                return null;
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lon: parseFloat(data[0].lon)
+                };
+            }
+            return null;
+        } catch (error) {
+            console.error('Geocoding error:', error);
+            return null;
+        }
+    }
+
+    createClickableUsername(name, userId) {
+        if (!name || !userId) return name || 'Unknown User';
+        
+        return `<button onclick="app.showUserProfile(${userId})" 
+                        class="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium transition-colors">
+                    ${name}
+                </button>`;
     }
 
     getCategoryIcon(category) {
@@ -854,11 +948,36 @@ class CampingApp {
                 </div>
                 
                 <div class="form-group">
-                    <label class="flex items-center gap-3">
-                        <input type="checkbox" id="modalIsPublic" name="isPublic" 
-                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <span>Make this trip public (others can find and join)</span>
-                    </label>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; margin-bottom: 4px;">Make this trip public</div>
+                            <div style="font-size: 14px; color: #666;">Others can find and join this trip</div>
+                        </div>
+                        <div id="publicSwitch" onclick="togglePublicTrip()" style="
+                            width: 51px; 
+                            height: 31px; 
+                            background: #E5E5EA; 
+                            border-radius: 16px; 
+                            position: relative; 
+                            cursor: pointer; 
+                            transition: background-color 0.3s ease;
+                            flex-shrink: 0;
+                            margin-left: 16px;
+                        ">
+                            <div style="
+                                width: 27px; 
+                                height: 27px; 
+                                background: white; 
+                                border-radius: 50%; 
+                                position: absolute; 
+                                top: 2px; 
+                                left: 2px; 
+                                transition: transform 0.3s ease; 
+                                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                            "></div>
+                        </div>
+                        <input type="checkbox" id="modalIsPublic" name="isPublic" style="display: none;">
+                    </div>
                 </div>
                 
                 <div id="modalTripCodeSection" class="form-group">
@@ -926,9 +1045,11 @@ class CampingApp {
             this.handleModalCreateTrip(e);
         });
         
-        // Focus first input
+        // Focus first input and initialize Places autocomplete
         setTimeout(() => {
             document.getElementById('modalTripTitle').focus();
+            // Initialize Places autocomplete for the modal
+            this.initPlacesAutocomplete();
         }, 100);
     }
 
@@ -938,16 +1059,36 @@ class CampingApp {
         const formData = new FormData(e.target);
         const isPublic = formData.has('isPublic');
         const tripCode = isPublic ? null : document.getElementById('modalGeneratedTripCode').textContent;
+        const location = formData.get('location');
+        
+        // Get coordinates from Google Places if available, otherwise geocode
+        const locationInput = document.getElementById('modalTripLocation');
+        let coordinates = null;
+        
+        if (locationInput.dataset.lat && locationInput.dataset.lng) {
+            // Use coordinates from Google Places
+            coordinates = {
+                lat: parseFloat(locationInput.dataset.lat),
+                lon: parseFloat(locationInput.dataset.lng)
+            };
+            console.log('Using Google Places coordinates:', coordinates);
+        } else {
+            // Fallback to geocoding
+            coordinates = await this.geocodeLocation(location);
+            console.log('Using geocoded coordinates:', coordinates);
+        }
         
         const tripData = {
             title: formData.get('title'),
-            location: formData.get('location'),
+            location: location,
             startDate: formData.get('startDate'),
             endDate: formData.get('endDate'),
             tripType: formData.get('tripType'),
             description: formData.get('description'),
             isPublic: isPublic,
-            tripCode: tripCode
+            tripCode: tripCode,
+            latitude: coordinates ? coordinates.lat : null,
+            longitude: coordinates ? coordinates.lon : null
         };
 
         try {
@@ -1777,64 +1918,92 @@ class CampingApp {
     }
     
     displayProfile(user, isOwnProfile) {
-        // Create a simple profile display that works
+        // Build profile sections with smart field visibility
+        const personalFields = this.buildProfileSection([
+            { key: 'bio', label: 'Bio', value: user.bio, icon: 'person' },
+            { key: 'phone', label: 'Phone', value: user.phone, icon: 'phone', privateOnly: true },
+            { key: 'address', label: 'Home Address', value: this.getAddressDisplay(user, true), icon: 'home', privateOnly: true, isHTML: true }
+        ], isOwnProfile);
+
+        const campingFields = this.buildProfileSection([
+            { key: 'camper_type', label: 'Camper Type', value: this.getCamperTypeDisplay(user.camper_type), icon: 'outdoor_grill' },
+            { key: 'group_size', label: 'Group Size', value: user.group_size ? `${user.group_size} ${user.group_size === 1 ? 'person' : 'people'}` : null, icon: 'group' },
+            { key: 'dietary', label: 'Dietary Restrictions', value: this.getDietaryDisplay(user.dietary_restrictions), icon: 'restaurant' }
+        ], isOwnProfile);
+
         const profileHTML = `
-            <div style="max-width: 800px; margin: 0 auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h1 style="font-size: 28px; font-weight: bold; color: #333;">${user.first_name} ${user.last_name}</h1>
-                    <div>
-                        ${isOwnProfile ? '<button onclick="app.showEditProfile()" style="background: #3b82f6; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; margin-right: 10px;">Edit Profile</button>' : ''}
-                        <button onclick="app.showMyTripsView()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">Back to Dashboard</button>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                    <div>
-                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Personal Information</h3>
-                        <div style="space-y: 10px;">
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Name</label>
-                                <p style="font-weight: 500; color: #111827;">${user.first_name} ${user.last_name}</p>
+            <div class="max-w-4xl mx-auto p-6" style="background: var(--ios-grouped-background); min-height: 100vh;">
+                <!-- Header -->
+                <div class="ios-card mb-6">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-16 h-16 rounded-full flex items-center justify-center mr-4" style="background: var(--ios-blue);">
+                                    <span class="material-icons text-white text-2xl">person</span>
+                                </div>
+                                <div>
+                                    <h1 class="ios-title-1 mb-1">${user.first_name} ${user.last_name}</h1>
+                                    <p class="ios-footnote text-gray-500">Member since ${new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</p>
+                                </div>
                             </div>
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Bio</label>
-                                <p style="color: #111827;">${user.bio || 'No bio provided'}</p>
-                            </div>
-                            ${isOwnProfile ? `
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Phone</label>
-                                <p style="color: #111827;">${user.phone || 'Not provided'}</p>
-                            </div>
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Home Address</label>
-                                ${this.getAddressDisplay(user)}
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Camping Style</h3>
-                        <div style="space-y: 10px;">
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Camper Type</label>
-                                <p style="color: #111827;">${this.getCamperTypeDisplay(user.camper_type)}</p>
-                            </div>
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Group Size</label>
-                                <p style="color: #111827;">${user.group_size ? `${user.group_size} ${user.group_size === 1 ? 'person' : 'people'}` : 'Not specified'}</p>
-                            </div>
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Dietary Restrictions</label>
-                                <p style="color: #111827;">${this.getDietaryDisplay(user.dietary_restrictions)}</p>
-                            </div>
-                            <div style="margin-bottom: 10px;">
-                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Member Since</label>
-                                <p style="color: #111827;">${new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</p>
+                            <div class="flex gap-2">
+                                ${isOwnProfile ? `
+                                <button onclick="app.showEditProfile()" class="ios-button-primary ios-button-compact">
+                                    <span class="material-icons mr-1" style="font-size: 14px;">edit</span>Edit
+                                </button>
+                                ` : ''}
+                                <button onclick="app.showMyTripsView()" class="ios-button-secondary ios-button-compact">
+                                    <span class="material-icons mr-1" style="font-size: 14px;">arrow_back</span>Back
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Personal Information -->
+                    ${personalFields ? `
+                    <div class="ios-card">
+                        <div class="p-6">
+                            <h3 class="ios-title-3 mb-4 flex items-center">
+                                <span class="material-icons mr-3 text-blue-600" style="font-size: 20px;">person</span>
+                                Personal Information
+                            </h3>
+                            ${personalFields}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Camping Preferences -->
+                    ${campingFields ? `
+                    <div class="ios-card">
+                        <div class="p-6">
+                            <h3 class="ios-title-3 mb-4 flex items-center">
+                                <span class="material-icons mr-3 text-green-600" style="font-size: 20px;">outdoor_grill</span>
+                                Camping Preferences
+                            </h3>
+                            ${campingFields}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+
+                ${!personalFields && !campingFields ? `
+                <div class="ios-card">
+                    <div class="p-8 text-center">
+                        <span class="material-icons text-6xl text-gray-300 mb-4">person_outline</span>
+                        <h3 class="ios-title-3 text-gray-500 mb-2">Profile Not Complete</h3>
+                        <p class="ios-body text-gray-400 mb-4">
+                            ${isOwnProfile ? 'Add some information about yourself to help other campers get to know you.' : 'This user hasn\'t added profile information yet.'}
+                        </p>
+                        ${isOwnProfile ? `
+                        <button onclick="app.showEditProfile()" class="ios-button-primary">
+                            <span class="material-icons mr-2">edit</span>Complete Profile
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+                ` : ''}
             </div>
         `;
         
@@ -1859,6 +2028,30 @@ class CampingApp {
         this.currentProfileUser = user;
         this.isOwnProfile = isOwnProfile;
     }
+
+    buildProfileSection(fields, isOwnProfile) {
+        const visibleFields = fields.filter(field => {
+            // Skip private fields if not own profile
+            if (field.privateOnly && !isOwnProfile) return false;
+            // Skip fields with no value
+            if (!field.value || field.value === 'Not specified' || field.value === 'None specified' || field.value === 'No bio provided') return false;
+            return true;
+        });
+
+        if (visibleFields.length === 0) return null;
+
+        return visibleFields.map(field => `
+            <div class="flex items-start py-3 border-b border-gray-100 last:border-b-0">
+                <span class="material-icons mr-3 mt-1 text-gray-400" style="font-size: 18px;">${field.icon}</span>
+                <div class="flex-1">
+                    <div class="ios-footnote text-gray-500 mb-1">${field.label}</div>
+                    <div class="ios-body text-gray-900">
+                        ${field.isHTML ? field.value : `<span>${field.value}</span>`}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
     
     getCamperTypeDisplay(type) {
         const map = {
@@ -1876,9 +2069,9 @@ class CampingApp {
         return dietary;
     }
 
-    getAddressDisplay(user) {
+    getAddressDisplay(user, compact = false) {
         if (!user.home_address && !user.home_city) {
-            return '<p style="color: #111827;">Not provided</p>';
+            return compact ? null : '<p style="color: #111827;">Not provided</p>';
         }
 
         const addressParts = [];
@@ -1893,7 +2086,11 @@ class CampingApp {
             addressParts.push(user.home_country);
         }
 
-        const fullAddress = addressParts.join('<br>');
+        if (addressParts.length === 0) {
+            return compact ? null : '<p style="color: #111827;">Not provided</p>';
+        }
+
+        const fullAddress = addressParts.join(compact ? ', ' : '<br>');
         
         // Create "Open in Maps" link if we have coordinates or a full address
         let mapsLink = '';
@@ -1902,6 +2099,21 @@ class CampingApp {
         } else if (addressParts.length > 0) {
             const searchAddress = addressParts.join(', ').replace(/<br>/g, ', ');
             mapsLink = `https://maps.apple.com/?q=${encodeURIComponent(searchAddress)}`;
+        }
+
+        if (compact) {
+            return `
+                <div>
+                    <div class="mb-2">${fullAddress}</div>
+                    ${mapsLink ? `
+                        <a href="${mapsLink}" target="_blank" 
+                           class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
+                            <span class="material-icons mr-1" style="font-size: 14px;">map</span>
+                            Open in Maps
+                        </a>
+                    ` : ''}
+                </div>
+            `;
         }
 
         return `
@@ -2404,7 +2616,7 @@ class CampingApp {
                         </div>
                         <div class="flex items-center">
                             <span class="material-icons text-base mr-2 text-gray-400">person</span>
-                            <span>Organized by ${trip.organizer_name}</span>
+                            <span>Organized by ${this.createClickableUsername(trip.organizer_name, trip.organizer_id)}</span>
                         </div>
                     </div>
                 </div>
@@ -2674,15 +2886,15 @@ class CampingApp {
             <!-- Trip Details (Collapsible) -->
             <div class="ios-card mb-6">
                 <div class="p-6">
-                    <button id="toggleTripDetails" class="w-full flex items-center justify-between text-left ios-callout font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                    <button id="toggleTripDetails-${trip.id}" class="w-full flex items-center justify-between text-left ios-callout font-medium text-gray-700 hover:text-gray-900 transition-colors">
                         <span class="flex items-center">
                             <span class="material-icons mr-3" style="font-size: 20px;">info</span>
                             Trip Details & Map
                         </span>
-                        <span class="material-icons transition-transform" id="detailsChevron">expand_more</span>
+                        <span class="material-icons transition-transform map-chevron-${trip.id}" style="font-size: 20px; transition: transform 0.2s ease;">expand_less</span>
                     </button>
                     
-                    <div id="tripDetailsContent" class="hidden mt-6">
+                    <div id="tripDetailsContent-${trip.id}" class="map-section mt-6">
                         ${trip.description ? `
                             <div class="mb-6">
                                 <h4 class="ios-callout font-medium text-gray-800 mb-2">Description</h4>
@@ -2789,6 +3001,7 @@ class CampingApp {
         }
 
         // Load tasks, shopping items, and weather for this trip
+        this.initializeCollapsibleSections(trip.id);
         this.loadTripTasks(trip.id);
         this.loadTripShopping(trip.id);
         this.loadTripWeather(trip.id);
@@ -3479,7 +3692,7 @@ class CampingApp {
             participantsDiv.innerHTML = participants.map(p => `
                 <div class="flex items-center">
                     <span class="material-icons text-base mr-2 text-gray-400">account_circle</span>
-                    <span>${p.name}</span>
+                    <span>${this.createClickableUsername(p.name, p.user_id)}</span>
                     <span class="text-xs text-gray-400 ml-2">joined ${new Date(p.joined_at).toLocaleDateString()}</span>
                 </div>
             `).join('');
@@ -3541,9 +3754,115 @@ class CampingApp {
         }
     }
 
+    initPlacesAutocomplete() {
+        if (!window.google || !window.google.maps || !window.google.maps.places) {
+            console.log('Google Places API not available - using fallback geocoding');
+            this.initFallbackAddressLookup();
+            return;
+        }
+
+        console.log('Initializing Google Places autocomplete');
+        
+        // Initialize autocomplete for trip location inputs
+        const locationInputs = [
+            'modalTripLocation',  // Modal form
+            'tripLocation'        // Main form (if exists)
+        ];
+
+        locationInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input && !input.autocomplete) {
+                try {
+                    const autocomplete = new google.maps.places.Autocomplete(input, {
+                        types: ['establishment', 'geocode'],
+                        componentRestrictions: { country: ['us', 'ca'] },
+                        fields: ['place_id', 'geometry', 'name', 'formatted_address']
+                    });
+
+                    autocomplete.addListener('place_changed', () => {
+                        const place = autocomplete.getPlace();
+                        if (place.geometry) {
+                            console.log('Place selected:', place.name, place.geometry.location.lat(), place.geometry.location.lng());
+                            // Store coordinates for weather integration
+                            input.dataset.lat = place.geometry.location.lat();
+                            input.dataset.lng = place.geometry.location.lng();
+                        }
+                    });
+
+                    input.autocomplete = autocomplete;
+                } catch (error) {
+                    console.error('Error initializing Places autocomplete:', error);
+                    this.initFallbackAddressLookup();
+                }
+            }
+        });
+    }
+
+    initFallbackAddressLookup() {
+        console.log('Initializing fallback address lookup');
+        // Add helpful placeholder text for manual entry
+        const locationInputs = ['modalTripLocation', 'tripLocation'];
+        
+        locationInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.placeholder = 'Enter camping location (e.g., Yosemite National Park, CA)';
+                // Clear any stored coordinates since we'll geocode on submit
+                delete input.dataset.lat;
+                delete input.dataset.lng;
+            }
+        });
+    }
 }
+
+// Google Places API initialization callback
+window.initGooglePlaces = function() {
+    console.log('Google Places API loaded');
+    if (window.app) {
+        window.app.initPlacesAutocomplete();
+    }
+};
 
 // Global app instance for onclick handlers
 let app;
 
-// App initialization moved to HTML for Google Maps integration
+// iOS toggle switch function
+window.togglePublicTrip = function() {
+    const checkbox = document.getElementById('modalIsPublic');
+    const toggleSwitch = document.getElementById('publicSwitch');
+    const thumb = toggleSwitch.querySelector('div');
+    
+    // Toggle the hidden checkbox
+    checkbox.checked = !checkbox.checked;
+    
+    // Update visual state of the switch
+    if (checkbox.checked) {
+        toggleSwitch.style.background = '#34C759'; // iOS green
+        thumb.style.transform = 'translateX(20px)';
+    } else {
+        toggleSwitch.style.background = '#E5E5EA'; // iOS gray
+        thumb.style.transform = 'translateX(0px)';
+    }
+    
+    // Trigger the existing public/private toggle logic
+    if (window.app) {
+        const tripCodeSection = document.getElementById('modalTripCodeSection');
+        if (checkbox.checked) {
+            tripCodeSection.style.display = 'none';
+        } else {
+            tripCodeSection.style.display = 'block';
+            window.app.generateTripCode('modalGeneratedTripCode');
+        }
+    }
+};
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new CampingApp();
+    app = window.app; // For onclick handlers
+    
+    // Initialize Places API if already loaded
+    if (window.google && window.google.maps && window.google.maps.places) {
+        window.app.initPlacesAutocomplete();
+    }
+});
