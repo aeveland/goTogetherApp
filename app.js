@@ -12,6 +12,7 @@ const profileRoutes = require('./routes/profile');
 const migrateRoutes = require('./routes/migrate');
 const tasksRoutes = require('./routes/tasks');
 const shoppingRoutes = require('./routes/shopping');
+const fixRoutes = require('./routes/fix');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +30,7 @@ app.use('/api/tasks', tasksRoutes);
 app.use('/api/shopping', shoppingRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/migrate', migrateRoutes);
+app.use('/api/fix', fixRoutes);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
