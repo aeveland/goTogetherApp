@@ -11,28 +11,258 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
+        /* iOS Native Design System */
+        :root {
+            /* iOS Color Palette */
+            --ios-blue: #007AFF;
+            --ios-blue-light: #5AC8FA;
+            --ios-blue-dark: #0051D5;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-orange: #FF9500;
+            --ios-yellow: #FFCC00;
+            --ios-purple: #AF52DE;
+            --ios-pink: #FF2D92;
+            --ios-indigo: #5856D6;
+            
+            /* iOS Grays */
+            --ios-gray: #8E8E93;
+            --ios-gray-2: #AEAEB2;
+            --ios-gray-3: #C7C7CC;
+            --ios-gray-4: #D1D1D6;
+            --ios-gray-5: #E5E5EA;
+            --ios-gray-6: #F2F2F7;
+            
+            /* iOS System Colors */
+            --ios-background: #F2F2F7;
+            --ios-secondary-background: #FFFFFF;
+            --ios-tertiary-background: #FFFFFF;
+            --ios-grouped-background: #F2F2F7;
+            --ios-secondary-grouped-background: #FFFFFF;
+            
+            /* iOS Text Colors */
+            --ios-label: #000000;
+            --ios-secondary-label: #3C3C43;
+            --ios-tertiary-label: #3C3C43;
+            --ios-quaternary-label: #3C3C43;
+            
+            /* iOS Shadows */
+            --ios-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --ios-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --ios-shadow-3: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --ios-shadow-4: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+
         body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            background: var(--ios-grouped-background);
+            color: var(--ios-label);
+            line-height: 1.47;
+            font-size: 17px; /* iOS body text size */
         }
-        .apple-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        /* iOS Button Styles */
+        .ios-button-primary {
+            background: var(--ios-blue);
+            color: white;
             border: none;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            min-height: 44px; /* iOS recommended touch target */
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px 20px;
+            min-height: 44px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: var(--ios-shadow-1);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
-        .apple-button:hover {
+        .ios-button-primary:hover {
+            background: var(--ios-blue-dark);
             transform: translateY(-1px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: var(--ios-shadow-2);
         }
-        .apple-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .ios-button-primary:active {
+            transform: translateY(0);
+            box-shadow: var(--ios-shadow-1);
         }
+
+        .ios-button-secondary {
+            background: var(--ios-gray-6);
+            color: var(--ios-blue);
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px 20px;
+            min-height: 44px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-button-secondary:hover {
+            background: var(--ios-gray-5);
+        }
+
+        .ios-button-destructive {
+            background: var(--ios-red);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px 20px;
+            min-height: 44px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: var(--ios-shadow-1);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* iOS Card Styles */
+        .ios-card {
+            background: var(--ios-secondary-grouped-background);
+            border-radius: 16px;
+            box-shadow: var(--ios-shadow-1);
+            border: 0.5px solid var(--ios-gray-4);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .ios-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--ios-shadow-3);
+        }
+
+        .ios-card-large {
+            background: var(--ios-secondary-grouped-background);
+            border-radius: 20px;
+            box-shadow: var(--ios-shadow-2);
+            border: 0.5px solid var(--ios-gray-4);
+            overflow: hidden;
+            padding: 24px;
+        }
+
+        /* iOS List Styles */
+        .ios-list {
+            background: var(--ios-secondary-grouped-background);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--ios-shadow-1);
+            border: 0.5px solid var(--ios-gray-4);
+        }
+
+        .ios-list-item {
+            padding: 16px 20px;
+            border-bottom: 0.5px solid var(--ios-gray-5);
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+        .ios-list-item:last-child {
+            border-bottom: none;
+        }
+        .ios-list-item:hover {
+            background: var(--ios-gray-6);
+        }
+        .ios-list-item:active {
+            background: var(--ios-gray-5);
+        }
+
+        /* iOS Form Controls */
+        .ios-input {
+            background: var(--ios-secondary-grouped-background);
+            border: 1px solid var(--ios-gray-4);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 17px;
+            color: var(--ios-label);
+            transition: all 0.2s ease;
+            min-height: 44px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .ios-input:focus {
+            outline: none;
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .ios-select {
+            background: var(--ios-secondary-grouped-background);
+            border: 1px solid var(--ios-gray-4);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 17px;
+            color: var(--ios-label);
+            min-height: 44px;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+
+        /* iOS Typography */
+        .ios-title-1 {
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--ios-label);
+            letter-spacing: -0.5px;
+        }
+        .ios-title-2 {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.25;
+            color: var(--ios-label);
+            letter-spacing: -0.3px;
+        }
+        .ios-title-3 {
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--ios-label);
+            letter-spacing: -0.2px;
+        }
+        .ios-headline {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.35;
+            color: var(--ios-label);
+        }
+        .ios-body {
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.47;
+            color: var(--ios-label);
+        }
+        .ios-callout {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--ios-label);
+        }
+        .ios-subhead {
+            font-size: 15px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--ios-secondary-label);
+        }
+        .ios-footnote {
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.38;
+            color: var(--ios-secondary-label);
+        }
+        .ios-caption {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.33;
+            color: var(--ios-tertiary-label);
+        }
+
         .hidden { display: none !important; }
         
         /* Custom textarea styling */
@@ -43,52 +273,54 @@
             resize: vertical;
         }
 
-        /* Mobile optimizations */
+        /* iOS Mobile Optimizations */
         @media (max-width: 768px) {
             .container { 
-                padding-left: 0.75rem; 
-                padding-right: 0.75rem; 
-            }
-            .apple-card { 
-                margin: 0.25rem; 
-                padding: 1rem !important;
+                padding-left: 16px; 
+                padding-right: 16px; 
             }
             
-            /* Touch-friendly buttons */
-            button, .button {
-                min-height: 44px;
-                min-width: 44px;
-                padding: 12px 16px;
-                touch-action: manipulation; /* Improves touch responsiveness */
+            /* iOS-style cards on mobile */
+            .ios-card { 
+                margin: 8px 0; 
+                border-radius: 12px;
+            }
+            .ios-card-large {
+                margin: 8px 0;
+                padding: 20px;
+                border-radius: 16px;
             }
             
-            /* Better text sizing on mobile */
-            .text-4xl { font-size: 2rem; }
-            .text-3xl { font-size: 1.75rem; }
-            .text-xl { font-size: 1.25rem; }
+            /* iOS Typography scaling */
+            .ios-title-1 { font-size: 28px; }
+            .ios-title-2 { font-size: 24px; }
+            .ios-title-3 { font-size: 20px; }
             
-            /* Improved spacing */
-            .mb-10 { margin-bottom: 2rem; }
-            .mb-8 { margin-bottom: 1.5rem; }
-            .mb-6 { margin-bottom: 1rem; }
-            .py-8 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+            /* iOS spacing adjustments */
+            .mb-10 { margin-bottom: 32px; }
+            .mb-8 { margin-bottom: 24px; }
+            .mb-6 { margin-bottom: 16px; }
             
-            /* Form improvements */
-            input, select, textarea {
-                font-size: 16px; /* Prevents zoom on iOS */
-                min-height: 44px;
-                -webkit-appearance: none; /* Remove iOS styling */
+            /* iOS form improvements */
+            .ios-input, .ios-select {
+                font-size: 17px; /* Prevents zoom on iOS */
                 border-radius: 8px;
             }
             
-            /* Card spacing */
-            .space-y-3 > * + * { margin-top: 0.5rem; }
-            .gap-6 { gap: 1rem; }
-            .gap-4 { gap: 0.75rem; }
+            /* iOS button adjustments */
+            .ios-button-primary, .ios-button-secondary, .ios-button-destructive {
+                border-radius: 8px;
+                font-size: 16px;
+            }
             
-            /* Mobile-specific improvements */
+            /* iOS spacing */
+            .space-y-3 > * + * { margin-top: 8px; }
+            .gap-6 { gap: 16px; }
+            .gap-4 { gap: 12px; }
+            
+            /* iOS layout */
             .max-w-6xl { max-width: 100%; }
-            .px-4 { padding-left: 0.75rem; padding-right: 0.75rem; }
+            .px-4 { padding-left: 16px; padding-right: 16px; }
         }
 
         /* Text truncation utilities */
@@ -134,35 +366,34 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="max-w-7xl mx-auto flex justify-between items-center mb-8 sm:mb-12 px-4">
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-6" style="max-width: 1200px;">
+        <!-- iOS Header -->
+        <div class="flex justify-between items-center mb-6 px-4">
             <div class="min-w-0 flex-1">
-                <h1 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-1 tracking-tight flex items-center">
-                    <span class="material-icons text-2xl sm:text-4xl mr-2 sm:mr-3 text-green-600">nature</span>
+                <h1 class="ios-title-1 flex items-center">
+                    <span class="material-icons mr-3" style="font-size: 32px; color: var(--ios-green);">nature</span>
                     <span class="truncate">GoTogether</span>
                 </h1>
-                <p class="text-sm sm:text-base text-gray-600 font-medium truncate">Discover and join amazing camping adventures!</p>
+                <p class="ios-subhead truncate mt-1">Discover and join amazing camping adventures!</p>
             </div>
-            <div id="headerUserSection" class="hidden flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <button id="headerUserProfileBtn" class="flex items-center gap-1 sm:gap-2 text-gray-700 hover:text-gray-900 font-medium transition-colors">
-                    <span class="material-icons text-xl sm:text-2xl">account_circle</span>
+            <div id="headerUserSection" class="hidden flex items-center gap-3 flex-shrink-0">
+                <button id="headerUserProfileBtn" class="ios-button-secondary flex items-center gap-2">
+                    <span class="material-icons" style="font-size: 20px;">account_circle</span>
                     <span id="headerUserName" class="hidden sm:inline truncate max-w-24"></span>
                 </button>
-                <button id="headerLogoutBtn" 
-                        class="bg-gray-900 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium">
-                    <span class="material-icons text-sm mr-1 sm:mr-2">logout</span>
+                <button id="headerLogoutBtn" class="ios-button-destructive">
+                    <span class="material-icons mr-2" style="font-size: 16px;">logout</span>
                     <span class="hidden sm:inline">Sign Out</span>
                 </button>
             </div>
         </div>
 
-        <!-- Auth Container -->
-        <div id="authContainer" class="max-w-md mx-auto apple-card p-8">
+        <!-- iOS Auth Container -->
+        <div id="authContainer" class="max-w-md mx-auto ios-card-large">
             <!-- Login Form -->
             <div id="loginForm">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Sign In</h2>
+                <h2 class="ios-title-2 mb-6 text-center">Sign In</h2>
                 <form id="loginFormElement">
                     <div class="mb-4">
                         <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -279,35 +510,35 @@
 
         </div>
 
-        <!-- Dashboard Container -->
-        <div id="dashboardContainer" class="max-w-6xl mx-auto apple-card p-8 hidden">
+        <!-- iOS Dashboard Container -->
+        <div id="dashboardContainer" class="max-w-6xl mx-auto ios-card-large hidden">
             <!-- Dashboard (shown after login) -->
             <div id="dashboard">
-                <!-- Dashboard Title -->
-                <div id="dashboardTitle" class="mb-10">
-                    <h2 class="text-3xl font-bold text-gray-900 tracking-tight">My Camping Dashboard</h2>
-                    <p class="text-gray-600 font-medium mt-1">Your upcoming adventures</p>
+                <!-- iOS Dashboard Title -->
+                <div id="dashboardTitle" class="mb-8">
+                    <h2 class="ios-title-1">My Camping Dashboard</h2>
+                    <p class="ios-subhead mt-2">Your upcoming adventures</p>
                 </div>
 
-                <!-- Main Action Buttons -->
-                <div id="mainActionButtons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+                <!-- iOS Main Action Buttons -->
+                <div id="mainActionButtons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                     <button id="createTripBtn" 
-                            class="apple-button text-white py-6 sm:py-8 px-4 sm:px-6 text-center group">
-                        <span class="material-icons text-2xl sm:text-3xl mb-2 sm:mb-3 block">add_circle</span>
-                        <div class="font-semibold text-base sm:text-lg mb-1">Create Trip</div>
-                        <div class="text-xs sm:text-sm opacity-90">Organize a new adventure</div>
+                            class="ios-button-primary text-center py-8 px-6 group">
+                        <span class="material-icons block mb-3" style="font-size: 32px;">add_circle</span>
+                        <div class="ios-headline mb-1">Create Trip</div>
+                        <div class="ios-footnote opacity-80">Organize a new adventure</div>
                     </button>
                     <button id="joinTripBtn" 
-                            class="apple-button text-white py-6 sm:py-8 px-4 sm:px-6 text-center group">
-                        <span class="material-icons text-2xl sm:text-3xl mb-2 sm:mb-3 block">search</span>
-                        <div class="font-semibold text-base sm:text-lg mb-1">Join Trip</div>
-                        <div class="text-xs sm:text-sm opacity-90">Find trips to join</div>
+                            class="ios-button-primary text-center py-8 px-6 group">
+                        <span class="material-icons block mb-3" style="font-size: 32px;">search</span>
+                        <div class="ios-headline mb-1">Join Trip</div>
+                        <div class="ios-footnote opacity-80">Find trips to join</div>
                     </button>
                     <button id="browseTripsBtn" 
-                            class="apple-button text-white py-6 sm:py-8 px-4 sm:px-6 text-center group sm:col-span-2 lg:col-span-1">
-                        <span class="material-icons text-2xl sm:text-3xl mb-2 sm:mb-3 block">public</span>
-                        <div class="font-semibold text-base sm:text-lg mb-1">Browse Public</div>
-                        <div class="text-xs sm:text-sm opacity-90">Explore all trips</div>
+                            class="ios-button-primary text-center py-8 px-6 group sm:col-span-2 lg:col-span-1">
+                        <span class="material-icons block mb-3" style="font-size: 32px;">public</span>
+                        <div class="ios-headline mb-1">Browse Public</div>
+                        <div class="ios-footnote opacity-80">Explore all trips</div>
                     </button>
                 </div>
 

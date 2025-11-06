@@ -995,13 +995,13 @@ class CampingApp {
         }, 100);
 
         return `
-            <div class="apple-card hover:shadow-lg transition-all cursor-pointer border border-gray-100 trip-card" 
+            <div class="ios-card cursor-pointer trip-card" 
                  data-trip-id="${trip.id}">
-                <div class="p-4 sm:p-6">
-                    <div class="flex justify-between items-start mb-3 sm:mb-4">
-                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 truncate-2 flex-1 mr-2">${trip.title}</h4>
-                        <div class="flex gap-1 flex-shrink-0">
-                            <span class="px-2 sm:px-3 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]} font-medium">
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="ios-headline truncate-2 flex-1 mr-3">${trip.title}</h4>
+                        <div class="flex gap-2 flex-shrink-0">
+                            <span class="px-3 py-1 text-xs rounded-full font-medium" style="background: var(--ios-gray-6); color: var(--ios-secondary-label);">
                                 ${trip.difficulty_level}
                             </span>
                         </div>
@@ -1010,42 +1010,42 @@ class CampingApp {
                     <!-- Mini Map -->
                     <div id="${mapId}" style="height: 100px; width: 100%; border-radius: 8px; margin-bottom: 12px; background: #f3f4f6;" class="sm:h-[120px] sm:mb-4"></div>
                     
-                    <div class="space-y-2 sm:space-y-3 text-sm text-gray-600 mb-3 sm:mb-4">
+                    <div class="space-y-3 mb-4">
                         <div class="flex items-center min-w-0">
-                            <span class="material-icons text-base mr-2 sm:mr-3 text-gray-400 flex-shrink-0">place</span>
-                            <span class="font-medium truncate">${trip.location}</span>
+                            <span class="material-icons mr-3 flex-shrink-0" style="font-size: 18px; color: var(--ios-gray);">place</span>
+                            <span class="ios-callout truncate">${trip.location}</span>
                         </div>
                         <div class="flex items-center">
-                            <span class="material-icons text-base mr-2 sm:mr-3 text-gray-400 flex-shrink-0">event</span>
-                            <span class="font-medium text-xs sm:text-sm">${startDate}</span>
+                            <span class="material-icons mr-3 flex-shrink-0" style="font-size: 18px; color: var(--ios-gray);">event</span>
+                            <span class="ios-callout">${startDate}</span>
                         </div>
                         <div class="flex items-center">
-                            <span class="material-icons text-base mr-2 sm:mr-3 text-gray-400 flex-shrink-0">group</span>
-                            <span class="font-medium">${trip.current_participants}/${trip.max_participants} going</span>
+                            <span class="material-icons mr-3 flex-shrink-0" style="font-size: 18px; color: var(--ios-gray);">group</span>
+                            <span class="ios-callout">${trip.current_participants}/${trip.max_participants} going</span>
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <div class="flex items-center text-xs text-gray-500 min-w-0">
-                            <span class="material-icons text-sm mr-1 flex-shrink-0">${typeIcons[trip.trip_type]}</span>
-                            <span class="font-medium truncate">${trip.trip_type.replace('_', ' ')}</span>
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div class="flex items-center min-w-0">
+                            <span class="material-icons mr-2 flex-shrink-0" style="font-size: 16px; color: var(--ios-blue);">${typeIcons[trip.trip_type]}</span>
+                            <span class="ios-footnote truncate">${trip.trip_type.replace('_', ' ')}</span>
                         </div>
                         
                         ${isOrganizer ? `
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
-                                <span class="material-icons text-xs mr-1">star</span><span class="hidden sm:inline">Organizer</span><span class="sm:hidden">Org</span>
+                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-blue); color: white;">
+                                <span class="material-icons mr-1" style="font-size: 12px;">star</span><span class="hidden sm:inline">Organizer</span><span class="sm:hidden">Org</span>
                             </span>
                         ` : isParticipant ? `
-                            <span class="text-xs bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
-                                <span class="material-icons text-xs mr-1">check_circle</span><span class="hidden sm:inline">Joined</span><span class="sm:hidden">✓</span>
+                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-green); color: white;">
+                                <span class="material-icons mr-1" style="font-size: 12px;">check_circle</span><span class="hidden sm:inline">Joined</span><span class="sm:hidden">✓</span>
                             </span>
                         ` : canJoin ? `
-                            <span class="text-xs bg-gray-100 text-gray-600 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
-                                <span class="material-icons text-xs mr-1">add_circle</span><span class="hidden sm:inline">Available</span><span class="sm:hidden">Open</span>
+                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-gray-6); color: var(--ios-blue);">
+                                <span class="material-icons mr-1" style="font-size: 12px;">add_circle</span><span class="hidden sm:inline">Available</span><span class="sm:hidden">Open</span>
                             </span>
                         ` : `
-                            <span class="text-xs bg-red-100 text-red-800 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
-                                <span class="material-icons text-xs mr-1">cancel</span><span class="hidden sm:inline">Full</span><span class="sm:hidden">Full</span>
+                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-red); color: white;">
+                                <span class="material-icons mr-1" style="font-size: 12px;">cancel</span><span class="hidden sm:inline">Full</span><span class="sm:hidden">Full</span>
                             </span>
                         `}
                     </div>
