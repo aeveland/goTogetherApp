@@ -13,6 +13,7 @@ const migrateRoutes = require('./routes/migrate');
 const tasksRoutes = require('./routes/tasks');
 const shoppingRoutes = require('./routes/shopping');
 const fixRoutes = require('./routes/fix');
+const testRoutes = require('./routes/test');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +37,7 @@ app.use('/api/shopping', shoppingRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/migrate', migrateRoutes);
 app.use('/api/fix', fixRoutes);
+app.use('/api/test-system', testRoutes);
 
 // Static files AFTER API routes
 app.use(express.static(path.join(__dirname, 'public')));
