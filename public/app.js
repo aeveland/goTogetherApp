@@ -1000,11 +1000,13 @@ class CampingApp {
                 <div class="p-5">
                     <div class="flex justify-between items-start mb-4">
                         <h4 class="ios-headline truncate-2 flex-1 mr-3">${trip.title}</h4>
-                        <div class="flex gap-2 flex-shrink-0">
-                            <span class="px-3 py-1 text-xs rounded-full font-medium" style="background: var(--ios-gray-6); color: var(--ios-secondary-label);">
-                                ${trip.difficulty_level}
-                            </span>
-                        </div>
+                        ${trip.difficulty_level ? `
+                            <div class="flex gap-2 flex-shrink-0">
+                                <span class="px-3 py-1 text-xs rounded-full font-medium" style="background: var(--ios-gray-6); color: var(--ios-secondary-label);">
+                                    ${trip.difficulty_level}
+                                </span>
+                            </div>
+                        ` : ''}
                     </div>
                     
                     <!-- Mini Map -->
@@ -1032,20 +1034,20 @@ class CampingApp {
                         </div>
                         
                         ${isOrganizer ? `
-                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-blue); color: white;">
+                            <span class="px-2 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-blue); color: white;">
                                 <span class="material-icons mr-1" style="font-size: 12px;">star</span><span class="hidden sm:inline">Organizer</span><span class="sm:hidden">Org</span>
                             </span>
                         ` : isParticipant ? `
-                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-green); color: white;">
+                            <span class="px-2 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-green); color: white;">
                                 <span class="material-icons mr-1" style="font-size: 12px;">check_circle</span><span class="hidden sm:inline">Joined</span><span class="sm:hidden">✓</span>
                             </span>
                         ` : canJoin ? `
-                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-gray-6); color: var(--ios-blue);">
+                            <span class="px-2 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: white; color: var(--ios-blue); border: 1px solid var(--ios-blue);">
                                 <span class="material-icons mr-1" style="font-size: 12px;">add_circle</span><span class="hidden sm:inline">Available</span><span class="sm:hidden">Open</span>
                             </span>
                         ` : `
-                            <span class="px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-red); color: white;">
-                                <span class="material-icons mr-1" style="font-size: 12px;">cancel</span><span class="hidden sm:inline">Full</span><span class="sm:hidden">Full</span>
+                            <span class="px-2 py-1 rounded-full font-medium flex items-center flex-shrink-0 ios-footnote" style="background: var(--ios-red); color: white;">
+                                <span class="material-icons mr-1" style="font-size: 12px;">cancel</span><span class="sm:hidden">Full</span>
                             </span>
                         `}
                     </div>
@@ -1078,9 +1080,11 @@ class CampingApp {
                 <div class="flex justify-between items-start mb-4">
                     <h4 class="text-xl font-semibold text-gray-800">${trip.title}</h4>
                     <div class="flex gap-2">
-                        <span class="px-2 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]}">
-                            ${trip.difficulty_level}
-                        </span>
+                        ${trip.difficulty_level ? `
+                            <span class="px-2 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]}">
+                                ${trip.difficulty_level}
+                            </span>
+                        ` : ''}
                         <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                             <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
                             ${trip.trip_type.replace('_', ' ')}
@@ -1278,9 +1282,11 @@ class CampingApp {
                             <p class="text-gray-600">Organized by ${trip.organizer_name}</p>
                         </div>
                         <div class="flex gap-2">
-                            <span class="px-3 py-1 text-sm rounded-full bg-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-100 text-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-800">
-                                ${trip.difficulty_level}
-                            </span>
+                            ${trip.difficulty_level ? `
+                                <span class="px-3 py-1 text-sm rounded-full bg-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-100 text-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-800">
+                                    ${trip.difficulty_level}
+                                </span>
+                            ` : ''}
                             <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 flex items-center">
                                 <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
                                 ${trip.trip_type.replace('_', ' ')}
@@ -1313,7 +1319,7 @@ class CampingApp {
                             </div>
                             <div>
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center"><span class="material-icons text-base mr-2">nature</span>Trip Type</h3>
-                                <p class="text-gray-600">${trip.trip_type.replace('_', ' ')} • ${trip.difficulty_level}</p>
+                                <p class="text-gray-600">${trip.trip_type.replace('_', ' ')}${trip.difficulty_level ? ` • ${trip.difficulty_level}` : ''}</p>
                             </div>
                         </div>
                     </div>
