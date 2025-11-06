@@ -340,4 +340,56 @@ router.post('/fix-coordinates', async (req, res) => {
   }
 });
 
+// Simple GET route for browser access to fix coordinates
+router.get('/fix-coordinates-now', async (req, res) => {
+  try {
+    console.log('Starting coordinates migration via GET...');
+    
+    // Add latitude and longitude columns if they don't exist
+    await pool.query(`
+      DO $$ 
+      BEGIN
+          -- Add latitude column
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name = 'camping_trips' AND column_name = 'latitude') THEN
+              ALTER TABLE camping_trips ADD COLUMN latitude DECIMAL(10, 8);
+              RAISE NOTICE 'Added latitude column';
+          ELSE
+              RAISE NOTICE 'Latitude column already exists';
+          END IF;
+          
+          -- Add longitude column  
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name = 'camping_trips' AND column_name = 'longitude') THEN
+              ALTER TABLE camping_trips ADD COLUMN longitude DECIMAL(11, 8);
+              RAISE NOTICE 'Added longitude column';
+          ELSE
+              RAISE NOTICE 'Longitude column already exists';
+          END IF;
+      END $$;
+    `);
+
+    // Add index for location-based queries
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_camping_trips_location ON camping_trips(latitude, longitude);
+    `);
+    
+    console.log('Coordinates migration completed successfully');
+    res.send(`
+      <h1>✅ Database Fix Completed!</h1>
+      <p>Successfully added latitude and longitude columns to camping_trips table.</p>
+      <p>Trip creation should now work properly.</p>
+      <a href="https://gotogether-m2g9.onrender.com">← Back to GoTogether</a>
+    `);
+    
+  } catch (error) {
+    console.error('Coordinates migration error:', error);
+    res.status(500).send(`
+      <h1>❌ Database Fix Failed</h1>
+      <p>Error: ${error.message}</p>
+      <p>Check server logs for details.</p>
+    `);
+  }
+});
+
 module.exports = router;
