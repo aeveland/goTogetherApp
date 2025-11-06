@@ -288,6 +288,14 @@ class CampingApp {
         document.getElementById('registerFormElement').reset();
     }
 
+    // Utility method to scroll to top smoothly
+    scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
     // Map functionality
     async geocodeLocation(location) {
         try {
@@ -493,6 +501,9 @@ class CampingApp {
         
         joinSection.classList.remove('hidden');
         
+        // Scroll to top to show the form
+        this.scrollToTop();
+        
         // Add event listeners
         document.getElementById('backFromJoinBtn').addEventListener('click', () => {
             joinSection.classList.add('hidden');
@@ -513,6 +524,9 @@ class CampingApp {
         document.getElementById('createTripSection').classList.remove('hidden');
         document.getElementById('myTripsContainer').classList.add('hidden');
         document.getElementById('allTripsContainer').classList.add('hidden');
+        
+        // Scroll to top to show the form
+        this.scrollToTop();
     }
 
     hideCreateTripSection() {
@@ -983,55 +997,55 @@ class CampingApp {
         return `
             <div class="apple-card hover:shadow-lg transition-all cursor-pointer border border-gray-100 trip-card" 
                  data-trip-id="${trip.id}">
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <h4 class="text-lg font-semibold text-gray-900 line-clamp-1">${trip.title}</h4>
-                        <div class="flex gap-1">
-                            <span class="px-3 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]} font-medium">
+                <div class="p-4 sm:p-6">
+                    <div class="flex justify-between items-start mb-3 sm:mb-4">
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 truncate-2 flex-1 mr-2">${trip.title}</h4>
+                        <div class="flex gap-1 flex-shrink-0">
+                            <span class="px-2 sm:px-3 py-1 text-xs rounded-full ${difficultyColors[trip.difficulty_level]} font-medium">
                                 ${trip.difficulty_level}
                             </span>
                         </div>
                     </div>
                     
                     <!-- Mini Map -->
-                    <div id="${mapId}" style="height: 120px; width: 100%; border-radius: 8px; margin-bottom: 16px; background: #f3f4f6;"></div>
+                    <div id="${mapId}" style="height: 100px; width: 100%; border-radius: 8px; margin-bottom: 12px; background: #f3f4f6;" class="sm:h-[120px] sm:mb-4"></div>
                     
-                    <div class="space-y-3 text-sm text-gray-600 mb-4">
-                        <div class="flex items-center">
-                            <span class="material-icons text-base mr-3 text-gray-400">place</span>
-                            <span class="truncate font-medium">${trip.location}</span>
+                    <div class="space-y-2 sm:space-y-3 text-sm text-gray-600 mb-3 sm:mb-4">
+                        <div class="flex items-center min-w-0">
+                            <span class="material-icons text-base mr-2 sm:mr-3 text-gray-400 flex-shrink-0">place</span>
+                            <span class="font-medium truncate">${trip.location}</span>
                         </div>
                         <div class="flex items-center">
-                            <span class="material-icons text-base mr-3 text-gray-400">event</span>
-                            <span class="font-medium">${startDate}</span>
+                            <span class="material-icons text-base mr-2 sm:mr-3 text-gray-400 flex-shrink-0">event</span>
+                            <span class="font-medium text-xs sm:text-sm">${startDate}</span>
                         </div>
                         <div class="flex items-center">
-                            <span class="material-icons text-base mr-3 text-gray-400">group</span>
+                            <span class="material-icons text-base mr-2 sm:mr-3 text-gray-400 flex-shrink-0">group</span>
                             <span class="font-medium">${trip.current_participants}/${trip.max_participants} going</span>
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center text-xs text-gray-500">
-                            <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
-                            <span class="font-medium">${trip.trip_type.replace('_', ' ')}</span>
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center text-xs text-gray-500 min-w-0">
+                            <span class="material-icons text-sm mr-1 flex-shrink-0">${typeIcons[trip.trip_type]}</span>
+                            <span class="font-medium truncate">${trip.trip_type.replace('_', ' ')}</span>
                         </div>
                         
                         ${isOrganizer ? `
-                            <span class="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
-                                <span class="material-icons text-xs mr-1">star</span>Organizer
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
+                                <span class="material-icons text-xs mr-1">star</span><span class="hidden sm:inline">Organizer</span><span class="sm:hidden">Org</span>
                             </span>
                         ` : isParticipant ? `
-                            <span class="text-xs bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
-                                <span class="material-icons text-xs mr-1">check_circle</span>Joined
+                            <span class="text-xs bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
+                                <span class="material-icons text-xs mr-1">check_circle</span><span class="hidden sm:inline">Joined</span><span class="sm:hidden">✓</span>
                             </span>
                         ` : canJoin ? `
-                            <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-medium">
-                                <span class="material-icons text-xs mr-1">add_circle</span>Available
+                            <span class="text-xs bg-gray-100 text-gray-600 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
+                                <span class="material-icons text-xs mr-1">add_circle</span><span class="hidden sm:inline">Available</span><span class="sm:hidden">Open</span>
                             </span>
                         ` : `
-                            <span class="text-xs bg-red-100 text-red-800 px-3 py-1 rounded-full font-medium">
-                                <span class="material-icons text-xs mr-1">cancel</span>Full
+                            <span class="text-xs bg-red-100 text-red-800 px-2 sm:px-3 py-1 rounded-full font-medium flex items-center flex-shrink-0">
+                                <span class="material-icons text-xs mr-1">cancel</span><span class="hidden sm:inline">Full</span><span class="sm:hidden">Full</span>
                             </span>
                         `}
                     </div>
@@ -1199,6 +1213,9 @@ class CampingApp {
             if (response.ok) {
                 const data = await response.json();
                 this.renderTripDetailsPage(data.trip);
+                
+                // Scroll to top to show the trip details
+                this.scrollToTop();
             } else {
                 this.showMessage('Failed to load trip details', 'error');
             }
@@ -1413,6 +1430,9 @@ class CampingApp {
             if (response.ok) {
                 const data = await response.json();
                 this.renderEditTripForm(data.trip);
+                
+                // Scroll to top to show the form
+                this.scrollToTop();
             } else {
                 this.showMessage('Failed to load trip for editing', 'error');
             }
@@ -1696,51 +1716,52 @@ class CampingApp {
         }
 
         return `
-            <div class="bg-white border border-gray-200 rounded-xl p-4 ${task.is_completed ? 'opacity-75' : ''} ${isOverdue ? 'border-red-200 bg-red-50' : ''}">
+            <div class="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 ${task.is_completed ? 'opacity-75' : ''} ${isOverdue ? 'border-red-200 bg-red-50' : ''}">
                 <div class="flex items-start justify-between">
-                    <div class="flex items-start space-x-3 flex-1">
+                    <div class="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
                         <button id="completeTask-${task.id}" 
-                                class="mt-1 w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center hover:border-green-500 transition-colors ${task.is_completed ? 'bg-green-500 border-green-500' : ''}">
+                                class="mt-1 w-6 h-6 sm:w-5 sm:h-5 rounded border-2 border-gray-300 flex items-center justify-center hover:border-green-500 transition-colors flex-shrink-0 ${task.is_completed ? 'bg-green-500 border-green-500' : ''}">
                             ${task.is_completed ? '<span class="material-icons text-white text-sm">check</span>' : ''}
                         </button>
-                        <div class="flex-1">
-                            <h4 class="font-medium text-gray-900 ${task.is_completed ? 'line-through text-gray-500' : ''}">${task.title}</h4>
-                            ${task.description ? `<p class="text-sm text-gray-600 mt-1 ${task.is_completed ? 'line-through' : ''}">${task.description}</p>` : ''}
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-sm sm:text-base text-gray-900 ${task.is_completed ? 'line-through text-gray-500' : ''} truncate-2">${task.title}</h4>
+                            ${task.description ? `<p class="text-xs sm:text-sm text-gray-600 mt-1 ${task.is_completed ? 'line-through' : ''} truncate-2">${task.description}</p>` : ''}
                             
-                            <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                                <div class="flex items-center">
+                            <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-500">
+                                <div class="flex items-center flex-shrink-0">
                                     <span class="material-icons text-sm mr-1">person</span>
-                                    ${assignmentText}
+                                    <span class="truncate">${assignmentText}</span>
                                 </div>
                                 ${task.has_due_date && dueDate ? `
-                                    <div class="flex items-center ${isOverdue ? 'text-red-600 font-medium' : ''}">
+                                    <div class="flex items-center flex-shrink-0 ${isOverdue ? 'text-red-600 font-medium' : ''}">
                                         <span class="material-icons text-sm mr-1">schedule</span>
-                                        ${dueDate} ${dueTime ? `at ${dueTime}` : ''}
-                                        ${isOverdue ? ' (Overdue)' : ''}
+                                        <span class="hidden sm:inline">${dueDate} ${dueTime ? `at ${dueTime}` : ''}</span>
+                                        <span class="sm:hidden">${dueDate.split('/').slice(0,2).join('/')}</span>
+                                        ${isOverdue ? '<span class="hidden sm:inline"> (Overdue)</span><span class="sm:hidden text-red-600">!</span>' : ''}
                                     </div>
                                 ` : ''}
-                                <div class="flex items-center">
+                                <div class="flex items-center flex-shrink-0 hidden sm:flex">
                                     <span class="material-icons text-sm mr-1">person_add</span>
-                                    ${task.created_by_name}
+                                    <span class="truncate">${task.created_by_name}</span>
                                 </div>
                                 ${task.is_completed && task.completed_by_name ? `
-                                    <div class="flex items-center text-green-600">
+                                    <div class="flex items-center text-green-600 flex-shrink-0 hidden sm:flex">
                                         <span class="material-icons text-sm mr-1">check_circle</span>
-                                        Completed by ${task.completed_by_name}
+                                        <span class="truncate">Completed by ${task.completed_by_name}</span>
                                     </div>
                                 ` : ''}
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-2 ml-4">
+                    <div class="flex items-center space-x-1 sm:space-x-2 ml-2 sm:ml-4 flex-shrink-0">
                         <button id="editTask-${task.id}" 
-                                class="text-gray-400 hover:text-blue-600 transition-colors">
-                            <span class="material-icons text-sm">edit</span>
+                                class="text-gray-400 hover:text-blue-600 transition-colors p-2 sm:p-1">
+                            <span class="material-icons text-base sm:text-sm">edit</span>
                         </button>
                         <button id="deleteTask-${task.id}" 
-                                class="text-gray-400 hover:text-red-600 transition-colors">
-                            <span class="material-icons text-sm">delete</span>
+                                class="text-gray-400 hover:text-red-600 transition-colors p-2 sm:p-1">
+                            <span class="material-icons text-base sm:text-sm">delete</span>
                         </button>
                     </div>
                 </div>
@@ -1800,6 +1821,9 @@ class CampingApp {
             if (response.ok) {
                 const data = await response.json();
                 this.renderTaskForm(tripId, null, data.trip);
+                
+                // Scroll to top to show the form
+                this.scrollToTop();
             } else {
                 this.showMessage('Failed to load trip details', 'error');
             }
@@ -2051,6 +2075,9 @@ class CampingApp {
             if (response.ok) {
                 const data = await response.json();
                 this.renderTaskForm(task.trip_id, task, data.trip);
+                
+                // Scroll to top to show the form
+                this.scrollToTop();
             } else {
                 this.showMessage('Failed to load trip details', 'error');
             }
