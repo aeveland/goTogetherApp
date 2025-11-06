@@ -7,6 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         .apple-button {
@@ -59,7 +62,9 @@
         <!-- Header -->
         <div class="max-w-7xl mx-auto flex justify-between items-center mb-12 px-4">
             <div>
-                <h1 class="text-4xl font-bold text-gray-900 mb-1 tracking-tight">🏕️ GoTogether</h1>
+                <h1 class="text-4xl font-bold text-gray-900 mb-1 tracking-tight flex items-center">
+                    <span class="material-icons text-4xl mr-3 text-green-600">nature</span>GoTogether
+                </h1>
                 <p class="text-gray-600 font-medium">Discover and join amazing camping adventures!</p>
             </div>
             <div id="headerUserSection" class="hidden flex items-center gap-3">
@@ -200,13 +205,13 @@
             <!-- Dashboard (shown after login) -->
             <div id="dashboard">
                 <!-- Dashboard Title -->
-                <div class="mb-10">
+                <div id="dashboardTitle" class="mb-10">
                     <h2 class="text-3xl font-bold text-gray-900 tracking-tight">My Camping Dashboard</h2>
                     <p class="text-gray-600 font-medium mt-1">Your upcoming adventures</p>
                 </div>
 
                 <!-- Main Action Buttons -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div id="mainActionButtons" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <button id="createTripBtn" 
                             class="apple-button text-white py-8 px-6 text-center group">
                         <span class="material-icons text-3xl mb-3 block">add_circle</span>
@@ -540,5 +545,126 @@
 
 
     <script src="app.js"></script>
+    <script>
+        // Initialize the app and make it globally available
+        window.app = new CampingApp();
+        app = window.app; // Also assign to global app variable
+        
+        // Simple address lookup using OpenStreetMap
+        function initAddressLookup() {
+            const locationInput = document.getElementById('tripLocation');
+            if (!locationInput) return;
+            
+            let suggestionsList = null;
+            let debounceTimer = null;
+            
+            // Create suggestions dropdown
+            function createSuggestionsList() {
+                if (suggestionsList) return;
+                
+                suggestionsList = document.createElement('div');
+                suggestionsList.style.cssText = `
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    background: white;
+                    border: 1px solid #d1d5db;
+                    border-top: none;
+                    border-radius: 0 0 6px 6px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    z-index: 1000;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    display: none;
+                `;
+                
+                // Make parent container relative
+                locationInput.parentElement.style.position = 'relative';
+                locationInput.parentElement.appendChild(suggestionsList);
+            }
+            
+            // Search for addresses
+            async function searchAddresses(query) {
+                if (query.length < 3) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=us,ca&addressdetails=1`);
+                    const results = await response.json();
+                    
+                    displaySuggestions(results);
+                } catch (error) {
+                    console.log('Address lookup error:', error);
+                }
+            }
+            
+            // Display suggestions
+            function displaySuggestions(results) {
+                if (!results || results.length === 0) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
+                
+                suggestionsList.innerHTML = '';
+                
+                results.forEach(result => {
+                    const item = document.createElement('div');
+                    item.style.cssText = `
+                        padding: 10px;
+                        cursor: pointer;
+                        border-bottom: 1px solid #f3f4f6;
+                        font-size: 14px;
+                    `;
+                    item.textContent = result.display_name;
+                    
+                    item.addEventListener('mouseenter', () => {
+                        item.style.backgroundColor = '#f3f4f6';
+                    });
+                    
+                    item.addEventListener('mouseleave', () => {
+                        item.style.backgroundColor = 'white';
+                    });
+                    
+                    item.addEventListener('click', () => {
+                        locationInput.value = result.display_name;
+                        suggestionsList.style.display = 'none';
+                    });
+                    
+                    suggestionsList.appendChild(item);
+                });
+                
+                suggestionsList.style.display = 'block';
+            }
+            
+            // Set up event listeners
+            createSuggestionsList();
+            
+            locationInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    searchAddresses(e.target.value);
+                }, 300);
+            });
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!locationInput.contains(e.target) && !suggestionsList.contains(e.target)) {
+                    suggestionsList.style.display = 'none';
+                }
+            });
+            
+            console.log('Address lookup initialized');
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAddressLookup);
+        } else {
+            initAddressLookup();
+        }
+    </script>
 </body>
 </html>

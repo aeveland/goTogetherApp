@@ -283,4 +283,117 @@ router.delete('/:id/leave', authenticateToken, [
   }
 });
 
+// Update trip (only organizer can update)
+router.put('/:id', [
+  authenticateToken,
+  param('id').isInt().withMessage('Trip ID must be a valid integer'),
+  body('title').trim().isLength({ min: 1, max: 200 }).withMessage('Title must be between 1 and 200 characters'),
+  body('tripType').isIn(['car_camping', 'backpacking', 'rv_camping', 'glamping']).withMessage('Invalid trip type'),
+  body('location').trim().isLength({ min: 1, max: 500 }).withMessage('Location must be between 1 and 500 characters'),
+  body('startDate').isISO8601().withMessage('Start date must be a valid date'),
+  body('endDate').isISO8601().withMessage('End date must be a valid date'),
+  body('maxParticipants').isInt({ min: 1, max: 50 }).withMessage('Max participants must be between 1 and 50'),
+  body('visibility').isIn(['public', 'private']).withMessage('Visibility must be public or private'),
+  body('description').optional().trim().isLength({ max: 2000 }).withMessage('Description must be less than 2000 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const tripId = req.params.id;
+    const userId = req.user.id;
+    const {
+      title,
+      tripType,
+      location,
+      startDate,
+      endDate,
+      maxParticipants,
+      visibility,
+      description
+    } = req.body;
+
+    // Validate dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start >= end) {
+      return res.status(400).json({ error: 'End date must be after start date' });
+    }
+
+    // Check if user is the organizer of this trip
+    const tripCheck = await pool.query(
+      'SELECT organizer_id FROM camping_trips WHERE id = $1 AND is_active = true',
+      [tripId]
+    );
+
+    if (tripCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Trip not found' });
+    }
+
+    if (tripCheck.rows[0].organizer_id !== userId) {
+      return res.status(403).json({ error: 'Only the trip organizer can edit this trip' });
+    }
+
+    // Check if reducing max participants would kick out existing participants
+    const participantCount = await pool.query(
+      'SELECT COUNT(*) as count FROM trip_participants WHERE trip_id = $1 AND status = $2',
+      [tripId, 'confirmed']
+    );
+
+    const currentParticipants = parseInt(participantCount.rows[0].count);
+    if (maxParticipants < currentParticipants) {
+      return res.status(400).json({ 
+        error: `Cannot reduce max participants to ${maxParticipants}. There are already ${currentParticipants} confirmed participants.` 
+      });
+    }
+
+    // Convert visibility to is_public boolean
+    const isPublic = visibility === 'public';
+
+    // Update the trip
+    const result = await pool.query(`
+      UPDATE camping_trips 
+      SET 
+        title = $1,
+        trip_type = $2,
+        location = $3,
+        start_date = $4,
+        end_date = $5,
+        max_participants = $6,
+        is_public = $7,
+        description = $8,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $9 AND organizer_id = $10
+      RETURNING *
+    `, [
+      title,
+      tripType,
+      location,
+      startDate,
+      endDate,
+      maxParticipants,
+      isPublic,
+      description || null,
+      tripId,
+      userId
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Trip not found or access denied' });
+    }
+
+    res.json({ 
+      message: 'Trip updated successfully',
+      trip: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error updating trip:', error);
+    res.status(500).json({ error: 'Failed to update trip' });
+  }
+});
+
 module.exports = router;
