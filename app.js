@@ -20,8 +20,13 @@ const PORT = process.env.PORT || 3000;
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
+// Simple test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
+});
+
+// API routes BEFORE static files
 app.use('/api/auth', authRoutes);
 app.use('/api/trips', tripsRoutes);
 app.use('/api/status', statusRoutes);
@@ -31,6 +36,9 @@ app.use('/api/shopping', shoppingRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/migrate', migrateRoutes);
 app.use('/api/fix', fixRoutes);
+
+// Static files AFTER API routes
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
