@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS camping_trips (
     organizer_id INTEGER REFERENCES users(id),
     is_public BOOLEAN DEFAULT true,
     trip_code VARCHAR(10) UNIQUE,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT true

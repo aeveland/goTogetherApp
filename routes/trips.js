@@ -168,7 +168,7 @@ router.post('/', authenticateToken, [
       return res.status(400).json({ error: 'End date must be after start date' });
     }
 
-    // Create trip
+    // Create trip (handle missing latitude/longitude gracefully)
     const result = await pool.query(`
       INSERT INTO camping_trips (
         title, description, location, start_date, end_date,
@@ -177,7 +177,7 @@ router.post('/', authenticateToken, [
       RETURNING *
     `, [
       title, description, location, startDate, endDate,
-      tripType, req.user.id, isPublic, tripCode, latitude, longitude
+      tripType, req.user.id, isPublic, tripCode, latitude || null, longitude || null
     ]);
 
     // Automatically add organizer as participant
