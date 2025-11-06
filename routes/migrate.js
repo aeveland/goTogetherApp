@@ -103,4 +103,124 @@ router.get('/check-profile-fields', async (req, res) => {
   }
 });
 
+// Migration to add shopping list tables
+router.post('/add-shopping-tables', async (req, res) => {
+  try {
+    console.log('Starting shopping tables migration...');
+    
+    // Create shopping categories table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS shopping_categories (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) UNIQUE NOT NULL,
+        icon VARCHAR(50),
+        color VARCHAR(20),
+        sort_order INTEGER DEFAULT 0,
+        is_default BOOLEAN DEFAULT FALSE
+      )
+    `);
+    
+    // Create shopping items table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS trip_shopping_items (
+        id SERIAL PRIMARY KEY,
+        trip_id INTEGER NOT NULL REFERENCES camping_trips(id) ON DELETE CASCADE,
+        item_name VARCHAR(255) NOT NULL,
+        description TEXT,
+        category VARCHAR(100) DEFAULT 'General',
+        quantity INTEGER DEFAULT 1,
+        estimated_cost DECIMAL(10,2),
+        assigned_to VARCHAR(50) DEFAULT 'anyone',
+        is_purchased BOOLEAN DEFAULT FALSE,
+        purchased_by INTEGER REFERENCES users(id),
+        purchased_at TIMESTAMP,
+        created_by INTEGER NOT NULL REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_by INTEGER REFERENCES users(id),
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        amazon_asin VARCHAR(20),
+        amazon_url TEXT,
+        amazon_price DECIMAL(10,2),
+        amazon_image_url TEXT,
+        priority VARCHAR(20) DEFAULT 'medium',
+        notes TEXT,
+        CONSTRAINT valid_priority CHECK (priority IN ('high', 'medium', 'low')),
+        CONSTRAINT valid_assignment CHECK (
+          assigned_to IN ('everyone', 'anyone') OR 
+          assigned_to ~ '^[0-9]+$'
+        )
+      )
+    `);
+    
+    // Insert default categories
+    await pool.query(`
+      INSERT INTO shopping_categories (name, icon, color, sort_order, is_default) VALUES
+      ('Food & Drinks', 'restaurant', '#FF6B35', 1, true),
+      ('Camping Gear', 'outdoor_grill', '#4ECDC4', 2, true),
+      ('Safety & First Aid', 'medical_services', '#FF3B30', 3, true),
+      ('Personal Items', 'person', '#007AFF', 4, true),
+      ('Entertainment', 'sports_esports', '#AF52DE', 5, true),
+      ('Supplies & Tools', 'build', '#FF9500', 6, true),
+      ('Transportation', 'directions_car', '#34C759', 7, true),
+      ('General', 'shopping_cart', '#8E8E93', 8, true)
+      ON CONFLICT (name) DO NOTHING
+    `);
+    
+    // Create indexes
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_shopping_items_trip_id ON trip_shopping_items(trip_id);
+      CREATE INDEX IF NOT EXISTS idx_shopping_items_category ON trip_shopping_items(category);
+      CREATE INDEX IF NOT EXISTS idx_shopping_items_assigned_to ON trip_shopping_items(assigned_to);
+      CREATE INDEX IF NOT EXISTS idx_shopping_items_purchased ON trip_shopping_items(is_purchased);
+    `);
+    
+    console.log('Shopping tables migration completed successfully');
+    res.json({ 
+      success: true, 
+      message: 'Shopping tables created successfully' 
+    });
+    
+  } catch (error) {
+    console.error('Shopping migration error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Migration failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Migration to add home address fields to users table
+router.post('/add-home-address', async (req, res) => {
+  try {
+    console.log('Starting home address migration...');
+    
+    // Add home address columns to users table
+    await pool.query(`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS home_address TEXT,
+      ADD COLUMN IF NOT EXISTS home_city VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS home_state VARCHAR(50),
+      ADD COLUMN IF NOT EXISTS home_zip VARCHAR(20),
+      ADD COLUMN IF NOT EXISTS home_country VARCHAR(50) DEFAULT 'United States',
+      ADD COLUMN IF NOT EXISTS home_latitude DECIMAL(10, 8),
+      ADD COLUMN IF NOT EXISTS home_longitude DECIMAL(11, 8)
+    `);
+    
+    console.log('Home address migration completed successfully');
+    res.json({ 
+      success: true, 
+      message: 'Home address fields added successfully' 
+    });
+    
+  } catch (error) {
+    console.error('Home address migration error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Migration failed', 
+      details: error.message 
+    });
+  }
+});
+
 module.exports = router;

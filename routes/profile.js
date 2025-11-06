@@ -13,7 +13,9 @@ router.get('/:userId', authenticateToken, async (req, res) => {
     const result = await pool.query(`
       SELECT 
         id, email, first_name, last_name, bio, camper_type, 
-        group_size, dietary_restrictions, phone, created_at
+        group_size, dietary_restrictions, phone, created_at,
+        home_address, home_city, home_state, home_zip, home_country,
+        home_latitude, home_longitude
       FROM users 
       WHERE id = $1 AND is_active = true
     `, [userId]);
@@ -51,7 +53,14 @@ router.put('/', authenticateToken, [
   body('camperType').optional({ nullable: true, checkFalsy: true }).isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel']).withMessage('Invalid camper type'),
   body('groupSize').optional().isInt({ min: 1, max: 20 }).withMessage('Group size must be 1-20'),
   body('dietaryRestrictions').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 50 }).withMessage('Dietary restrictions too long'),
-  body('phone').optional().trim().isLength({ max: 20 }).withMessage('Phone number too long')
+  body('phone').optional().trim().isLength({ max: 20 }).withMessage('Phone number too long'),
+  body('homeAddress').optional().trim().isLength({ max: 500 }).withMessage('Address too long'),
+  body('homeCity').optional().trim().isLength({ max: 100 }).withMessage('City too long'),
+  body('homeState').optional().trim().isLength({ max: 50 }).withMessage('State too long'),
+  body('homeZip').optional().trim().isLength({ max: 20 }).withMessage('ZIP code too long'),
+  body('homeCountry').optional().trim().isLength({ max: 50 }).withMessage('Country too long'),
+  body('homeLatitude').optional().isFloat({ min: -90, max: 90 }).withMessage('Invalid latitude'),
+  body('homeLongitude').optional().isFloat({ min: -180, max: 180 }).withMessage('Invalid longitude')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -66,7 +75,14 @@ router.put('/', authenticateToken, [
       camperType,
       groupSize,
       dietaryRestrictions,
-      phone
+      phone,
+      homeAddress,
+      homeCity,
+      homeState,
+      homeZip,
+      homeCountry,
+      homeLatitude,
+      homeLongitude
     } = req.body;
 
     // Convert empty strings to null for database constraints
@@ -77,7 +93,14 @@ router.put('/', authenticateToken, [
       camperType: camperType?.trim() || null,
       groupSize: groupSize || 1,
       dietaryRestrictions: dietaryRestrictions?.trim() || null,
-      phone: phone?.trim() || null
+      phone: phone?.trim() || null,
+      homeAddress: homeAddress?.trim() || null,
+      homeCity: homeCity?.trim() || null,
+      homeState: homeState?.trim() || null,
+      homeZip: homeZip?.trim() || null,
+      homeCountry: homeCountry?.trim() || null,
+      homeLatitude: homeLatitude || null,
+      homeLongitude: homeLongitude || null
     };
 
     const result = await pool.query(`
@@ -89,14 +112,26 @@ router.put('/', authenticateToken, [
         group_size = $5,
         dietary_restrictions = $6,
         phone = $7,
+        home_address = $8,
+        home_city = $9,
+        home_state = $10,
+        home_zip = $11,
+        home_country = $12,
+        home_latitude = $13,
+        home_longitude = $14,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $8
+      WHERE id = $15
       RETURNING id, email, first_name, last_name, bio, camper_type, 
-                group_size, dietary_restrictions, phone
+                group_size, dietary_restrictions, phone, home_address,
+                home_city, home_state, home_zip, home_country,
+                home_latitude, home_longitude
     `, [
       cleanedData.firstName, cleanedData.lastName, cleanedData.bio, 
       cleanedData.camperType, cleanedData.groupSize, 
-      cleanedData.dietaryRestrictions, cleanedData.phone, req.user.id
+      cleanedData.dietaryRestrictions, cleanedData.phone,
+      cleanedData.homeAddress, cleanedData.homeCity, cleanedData.homeState,
+      cleanedData.homeZip, cleanedData.homeCountry, cleanedData.homeLatitude,
+      cleanedData.homeLongitude, req.user.id
     ]);
 
     res.json({

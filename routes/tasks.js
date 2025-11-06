@@ -304,4 +304,39 @@ router.delete('/:taskId', authenticateToken, async (req, res) => {
   }
 });
 
+// Get tasks assigned to current user across all trips
+router.get('/my-tasks', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const result = await pool.query(`
+      SELECT 
+        tt.*,
+        ct.title as trip_title,
+        ct.start_date as trip_start_date
+      FROM trip_tasks tt
+      JOIN camping_trips ct ON tt.trip_id = ct.id
+      LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
+      WHERE (
+        -- Tasks assigned to everyone
+        tt.assigned_to = 'everyone'
+        -- Tasks assigned to anyone (user is participant)
+        OR (tt.assigned_to = 'anyone' AND (ct.organizer_id = $1 OR tp.user_id = $1))
+        -- Tasks assigned specifically to this user
+        OR tt.assigned_to = $1::text
+      )
+      AND (ct.organizer_id = $1 OR tp.user_id = $1)
+      ORDER BY 
+        CASE WHEN tt.due_date IS NULL THEN 1 ELSE 0 END,
+        tt.due_date ASC,
+        tt.created_at DESC
+    `, [userId]);
+    
+    res.json({ tasks: result.rows });
+  } catch (error) {
+    console.error('Error getting user tasks:', error);
+    res.status(500).json({ error: 'Failed to get tasks' });
+  }
+});
+
 module.exports = router;

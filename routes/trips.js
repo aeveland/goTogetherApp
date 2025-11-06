@@ -121,7 +121,17 @@ router.post('/', authenticateToken, [
   body('endDate').isISO8601().withMessage('Invalid end date'),
   body('tripType').isIn(['car_camping', 'backpacking', 'rv_camping', 'glamping']).withMessage('Invalid trip type'),
   body('isPublic').isBoolean().withMessage('isPublic must be boolean'),
-  body('tripCode').optional().trim().isLength({ min: 6, max: 10 }).withMessage('Trip code must be 6-10 characters')
+  body('tripCode').optional().trim().custom((value, { req }) => {
+    // Only validate trip code if it's provided or if the trip is private
+    if (value && (value.length < 6 || value.length > 10)) {
+      throw new Error('Trip code must be 6-10 characters');
+    }
+    // For private trips, trip code is required
+    if (!req.body.isPublic && !value) {
+      throw new Error('Private trips require a trip code');
+    }
+    return true;
+  })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -393,6 +403,59 @@ router.put('/:id', [
   } catch (error) {
     console.error('Error updating trip:', error);
     res.status(500).json({ error: 'Failed to update trip' });
+  }
+});
+
+// Get user's trip statistics
+router.get('/my-stats', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get total trips user is involved in
+    const totalTripsResult = await pool.query(`
+      SELECT COUNT(DISTINCT ct.id) as count
+      FROM camping_trips ct
+      LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
+      WHERE ct.organizer_id = $1 OR tp.user_id = $1
+    `, [userId]);
+    
+    // Get trips organized by user
+    const organizedTripsResult = await pool.query(`
+      SELECT COUNT(*) as count
+      FROM camping_trips
+      WHERE organizer_id = $1
+    `, [userId]);
+    
+    // Get trips joined by user (not organized)
+    const joinedTripsResult = await pool.query(`
+      SELECT COUNT(DISTINCT ct.id) as count
+      FROM camping_trips ct
+      JOIN trip_participants tp ON ct.id = tp.trip_id
+      WHERE tp.user_id = $1 AND ct.organizer_id != $1
+    `, [userId]);
+    
+    // Get completed tasks by user
+    const completedTasksResult = await pool.query(`
+      SELECT COUNT(*) as count
+      FROM trip_tasks tt
+      JOIN camping_trips ct ON tt.trip_id = ct.id
+      LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
+      WHERE tt.is_completed = true 
+      AND tt.completed_by = $1
+      AND (ct.organizer_id = $1 OR tp.user_id = $1)
+    `, [userId]);
+    
+    const stats = {
+      totalTrips: parseInt(totalTripsResult.rows[0].count),
+      organizedTrips: parseInt(organizedTripsResult.rows[0].count),
+      joinedTrips: parseInt(joinedTripsResult.rows[0].count),
+      completedTasks: parseInt(completedTasksResult.rows[0].count)
+    };
+    
+    res.json(stats);
+  } catch (error) {
+    console.error('Error getting trip statistics:', error);
+    res.status(500).json({ error: 'Failed to get statistics' });
   }
 });
 

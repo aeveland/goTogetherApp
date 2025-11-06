@@ -4,6 +4,27 @@ class CampingApp {
         this.registerForm = document.getElementById('registerForm');
         this.dashboard = document.getElementById('dashboard');
         this.messageContainer = document.getElementById('messageContainer');
+        
+        // Modal system
+        this.modalOverlay = document.getElementById('modalOverlay');
+        this.modalTitle = document.getElementById('modalTitle');
+        this.modalBody = document.getElementById('modalBody');
+        this.modalClose = document.getElementById('modalClose');
+        
+        // Modal event listeners
+        this.modalClose.addEventListener('click', () => this.closeModal());
+        this.modalOverlay.addEventListener('click', (e) => {
+            if (e.target === this.modalOverlay) {
+                this.closeModal();
+            }
+        });
+        
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.modalOverlay.classList.contains('show')) {
+                this.closeModal();
+            }
+        });
         this.currentUser = null;
         this.trips = [];
         
@@ -32,7 +53,7 @@ class CampingApp {
         document.getElementById('updateProfileForm').addEventListener('submit', (e) => this.handleUpdateProfile(e));
         
         // Main action buttons
-        document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripSection());
+        document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripModal());
         document.getElementById('joinTripBtn').addEventListener('click', () => this.showJoinTripsView());
         document.getElementById('browseTripsBtn').addEventListener('click', () => this.showBrowseTripsView());
         document.getElementById('backToMyTripsBtn').addEventListener('click', () => this.showMyTripsView());
@@ -83,6 +104,7 @@ class CampingApp {
     }
 
     showDashboard(user) {
+        this.currentUser = user;
         document.getElementById('authContainer').classList.add('hidden');
         document.getElementById('dashboardContainer').classList.remove('hidden');
         
@@ -93,33 +115,1199 @@ class CampingApp {
             detailsSection.style.display = 'none';
         }
         
-        // Show dashboard title and main action buttons on dashboard load
-        const dashboardTitle = document.getElementById('dashboardTitle');
-        if (dashboardTitle) {
-            dashboardTitle.style.display = 'block';
-        }
-        
-        const mainActionButtons = document.getElementById('mainActionButtons');
-        if (mainActionButtons) {
-            mainActionButtons.style.display = 'grid';
-        }
-        
         // Show user info in header
         document.getElementById('headerUserSection').classList.remove('hidden');
         document.getElementById('headerUserName').textContent = `${user.firstName} ${user.lastName}`;
         
-        this.currentUser = user;
-        
-        // Load user's trips when dashboard is shown
-        this.loadMyTrips();
+        // Load dashboard data
+        this.loadDashboardData();
     }
 
-    showAuthForms() {
-        document.getElementById('dashboardContainer').classList.add('hidden');
-        document.getElementById('authContainer').classList.remove('hidden');
-        document.getElementById('headerUserSection').classList.add('hidden');
-        this.loginForm.classList.remove('hidden');
-        this.registerForm.classList.add('hidden');
+    async loadDashboardData() {
+        try {
+            // Load all user's trips and tasks in parallel
+            await Promise.all([
+                this.loadMyTrips(),
+                this.loadDashboardTasks(),
+                this.loadDashboardShopping(),
+                this.loadTripStatistics()
+            ]);
+            
+            // Update dashboard sections
+            this.updateDashboardUpcomingTrips();
+            this.updateRecentActivity();
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            this.showMessage('Failed to load dashboard data', 'error');
+        }
+    }
+
+    async loadDashboardTasks() {
+        try {
+            // Get tasks assigned to current user across all trips
+            const response = await fetch('/api/tasks/my-tasks', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.userTasks = data.tasks || [];
+                this.renderDashboardTasks();
+            } else {
+                console.error('Failed to load user tasks');
+            }
+        } catch (error) {
+            console.error('Error loading user tasks:', error);
+        }
+    }
+
+    renderDashboardTasks() {
+        const container = document.getElementById('dashboardTasks');
+        const taskCount = document.getElementById('taskCount');
+        
+        if (!this.userTasks || this.userTasks.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <span class="material-icons text-4xl mb-2 opacity-50">task_alt</span>
+                    <p class="ios-callout">No tasks assigned yet</p>
+                </div>
+            `;
+            taskCount.textContent = '0';
+            return;
+        }
+
+        // Show pending tasks only
+        const pendingTasks = this.userTasks.filter(task => !task.is_completed);
+        taskCount.textContent = pendingTasks.length;
+
+        if (pendingTasks.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <span class="material-icons text-4xl mb-2 opacity-50" style="color: var(--ios-green);">check_circle</span>
+                    <p class="ios-callout">All tasks completed! 🎉</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Show up to 5 most urgent tasks
+        const tasksToShow = pendingTasks.slice(0, 5);
+        
+        container.innerHTML = tasksToShow.map(task => {
+            const isOverdue = task.due_date && new Date(task.due_date) < new Date();
+            const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : null;
+            
+            return `
+                <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--ios-gray-6);">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="ios-callout font-medium truncate">${task.title}</h4>
+                        <p class="ios-footnote text-gray-600 truncate">${task.trip_title}</p>
+                        ${dueDate ? `
+                            <p class="ios-caption ${isOverdue ? 'text-red-600' : 'text-gray-500'}">
+                                ${isOverdue ? '⚠️ Overdue: ' : 'Due: '}${dueDate}
+                            </p>
+                        ` : ''}
+                    </div>
+                    <button onclick="app.toggleTaskCompletion(${task.id}, ${task.trip_id})" 
+                            class="ml-3 p-2 rounded-full hover:bg-gray-200 transition-colors">
+                        <span class="material-icons text-gray-400">radio_button_unchecked</span>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        if (pendingTasks.length > 5) {
+            container.innerHTML += `
+                <div class="text-center pt-3">
+                    <button class="ios-footnote text-blue-600 hover:text-blue-800">
+                        View ${pendingTasks.length - 5} more tasks
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    async loadTripStatistics() {
+        try {
+            const response = await fetch('/api/trips/my-stats', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const stats = await response.json();
+                this.updateTripStatistics(stats);
+            }
+        } catch (error) {
+            console.error('Error loading trip statistics:', error);
+        }
+    }
+
+    updateTripStatistics(stats = {}) {
+        document.getElementById('totalTrips').textContent = stats.totalTrips || this.myTrips?.length || 0;
+        document.getElementById('organizedTrips').textContent = stats.organizedTrips || 0;
+        document.getElementById('joinedTrips').textContent = stats.joinedTrips || 0;
+        document.getElementById('completedTasks').textContent = stats.completedTasks || 0;
+    }
+
+    updateDashboardUpcomingTrips() {
+        const container = document.getElementById('dashboardUpcomingTrips');
+        
+        if (!this.myTrips || this.myTrips.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <span class="material-icons text-4xl mb-2 opacity-50">terrain</span>
+                    <p class="ios-callout">No upcoming trips</p>
+                    <button onclick="document.getElementById('createTripBtn').click()" 
+                            class="ios-button-primary mt-4 mx-auto">
+                        <span class="material-icons mr-2" style="font-size: 16px;">add_circle</span>Create Your First Trip
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        // Show next 3 upcoming trips
+        const upcomingTrips = this.myTrips
+            .filter(trip => new Date(trip.start_date) >= new Date())
+            .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+            .slice(0, 3);
+
+        if (upcomingTrips.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <span class="material-icons text-4xl mb-2 opacity-50">event_available</span>
+                    <p class="ios-callout">No upcoming trips scheduled</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = upcomingTrips.map(trip => {
+            const startDate = new Date(trip.start_date);
+            const daysUntil = Math.ceil((startDate - new Date()) / (1000 * 60 * 60 * 24));
+            const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
+            
+            return `
+                <div class="flex items-center justify-between p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                     onclick="app.showTripDetails(${trip.id})" style="border: 1px solid var(--ios-gray-5);">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="ios-callout font-medium truncate">${trip.title}</h4>
+                        <p class="ios-footnote text-gray-600 truncate">${trip.location}</p>
+                        <p class="ios-caption text-gray-500">
+                            ${daysUntil === 0 ? 'Today!' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 ml-3">
+                        ${isOrganizer ? `
+                            <span class="px-2 py-1 rounded-full text-xs font-medium" style="background: var(--ios-blue); color: white;">
+                                Organizer
+                            </span>
+                        ` : ''}
+                        <span class="material-icons text-gray-400">chevron_right</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    updateRecentActivity() {
+        const container = document.getElementById('recentActivity');
+        
+        // For now, show placeholder activity
+        // This can be enhanced with real activity tracking later
+        const activities = [
+            { type: 'trip_created', message: 'Created a new trip', time: '2 hours ago', icon: 'add_circle' },
+            { type: 'task_completed', message: 'Completed "Pack sleeping bags"', time: '1 day ago', icon: 'check_circle' },
+            { type: 'trip_joined', message: 'Joined "Mountain Adventure"', time: '3 days ago', icon: 'group_add' }
+        ];
+
+        if (activities.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-gray-500">
+                    <span class="material-icons text-3xl mb-2 opacity-50">timeline</span>
+                    <p class="ios-footnote">No recent activity</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = activities.map(activity => `
+            <div class="flex items-center gap-3 p-2">
+                <span class="material-icons text-gray-400" style="font-size: 20px;">${activity.icon}</span>
+                <div class="flex-1 min-w-0">
+                    <p class="ios-footnote truncate">${activity.message}</p>
+                    <p class="ios-caption text-gray-500">${activity.time}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async loadDashboardShopping() {
+        try {
+            // Get shopping assignments for current user across all trips
+            const response = await fetch('/api/shopping/my-assignments', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.userShoppingAssignments = data.assignments || [];
+                this.userDietaryInfo = data.dietary_info || [];
+                this.renderDashboardShopping();
+            } else {
+                console.error('Failed to load shopping assignments');
+            }
+        } catch (error) {
+            console.error('Error loading shopping assignments:', error);
+        }
+    }
+
+    renderDashboardShopping() {
+        const container = document.getElementById('dashboardShopping');
+        const shoppingCount = document.getElementById('shoppingCount');
+        
+        if (!this.userShoppingAssignments || this.userShoppingAssignments.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <span class="material-icons text-4xl mb-2 opacity-50">shopping_basket</span>
+                    <p class="ios-callout">No shopping assignments yet</p>
+                </div>
+            `;
+            shoppingCount.textContent = '0';
+            return;
+        }
+
+        shoppingCount.textContent = this.userShoppingAssignments.length;
+
+        // Show up to 5 most urgent shopping items
+        const itemsToShow = this.userShoppingAssignments.slice(0, 5);
+        
+        container.innerHTML = itemsToShow.map(item => {
+            const priorityColor = {
+                'high': 'var(--ios-red)',
+                'medium': 'var(--ios-orange)', 
+                'low': 'var(--ios-gray-2)'
+            }[item.priority] || 'var(--ios-gray-2)';
+            
+            return `
+                <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--ios-gray-6);">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h4 class="ios-callout font-medium truncate">${item.item_name}</h4>
+                            <span class="w-2 h-2 rounded-full" style="background: ${priorityColor};" title="${item.priority} priority"></span>
+                        </div>
+                        <p class="ios-footnote text-gray-600 truncate">${item.trip_title}</p>
+                        ${item.quantity > 1 ? `<p class="ios-caption text-gray-500">Qty: ${item.quantity}</p>` : ''}
+                        ${item.estimated_cost ? `<p class="ios-caption text-gray-500">~$${item.estimated_cost}</p>` : ''}
+                    </div>
+                    <button onclick="app.toggleShoppingItemPurchased(${item.id})" 
+                            class="ml-3 p-2 rounded-full hover:bg-gray-200 transition-colors">
+                        <span class="material-icons text-gray-400">radio_button_unchecked</span>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        if (this.userShoppingAssignments.length > 5) {
+            container.innerHTML += `
+                <div class="text-center pt-3">
+                    <button class="ios-footnote text-blue-600 hover:text-blue-800">
+                        View ${this.userShoppingAssignments.length - 5} more items
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    async loadTripShopping(tripId) {
+        try {
+            const response = await fetch(`/api/shopping/trip/${tripId}`, {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.renderTripShopping(tripId, data.items || [], data.dietary_restrictions || []);
+            } else {
+                console.error('Failed to load shopping items');
+            }
+        } catch (error) {
+            console.error('Error loading shopping items:', error);
+        }
+    }
+
+    renderTripShopping(tripId, items, dietaryRestrictions = []) {
+        const container = document.getElementById(`shoppingList-${tripId}`);
+        const countBadge = document.getElementById(`tripShoppingCount-${tripId}`);
+        
+        // Update count badge
+        if (countBadge) {
+            countBadge.textContent = items ? items.length : 0;
+        }
+        
+        // Create dietary restrictions summary
+        let dietaryInfo = '';
+        if (dietaryRestrictions && dietaryRestrictions.length > 0) {
+            const restrictionsList = dietaryRestrictions.map(person => 
+                `<span class="inline-block px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800 mr-1 mb-1">
+                    ${person.first_name}: ${person.dietary_restrictions}
+                </span>`
+            ).join('');
+            
+            dietaryInfo = `
+                <div class="mb-4 p-3 rounded-lg" style="background: var(--ios-orange-light, #FFF3E0); border: 1px solid var(--ios-orange, #FF9500);">
+                    <div class="flex items-center mb-2">
+                        <span class="material-icons mr-2 text-orange-600" style="font-size: 18px;">restaurant_menu</span>
+                        <span class="ios-footnote font-medium text-orange-800">Dietary Restrictions to Consider</span>
+                    </div>
+                    <div class="flex flex-wrap">
+                        ${restrictionsList}
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (!items || items.length === 0) {
+            container.innerHTML = `
+                ${dietaryInfo}
+                <div class="text-center py-6 text-gray-500">
+                    <span class="material-icons text-3xl mb-2 opacity-50">shopping_cart</span>
+                    <p class="ios-callout">No shopping items yet</p>
+                    <p class="ios-footnote">Add items to start planning your group shopping</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Group items by category
+        const itemsByCategory = items.reduce((acc, item) => {
+            const category = item.category || 'General';
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(item);
+            return acc;
+        }, {});
+
+        let html = '';
+        
+        Object.entries(itemsByCategory).forEach(([category, categoryItems]) => {
+            const categoryIcon = this.getCategoryIcon(category);
+            const categoryColor = this.getCategoryColor(category);
+            
+            html += `
+                <div class="mb-4">
+                    <h4 class="ios-callout font-medium text-gray-700 mb-3 flex items-center">
+                        <span class="material-icons mr-2" style="font-size: 18px; color: ${categoryColor};">${categoryIcon}</span>
+                        ${category}
+                    </h4>
+                    <div class="space-y-2">
+            `;
+            
+            categoryItems.forEach(item => {
+                const isCompleted = item.is_purchased;
+                const priorityColor = {
+                    'high': 'var(--ios-red)',
+                    'medium': 'var(--ios-orange)', 
+                    'low': 'var(--ios-gray-2)'
+                }[item.priority] || 'var(--ios-gray-2)';
+                
+                html += `
+                    <div class="flex items-center justify-between p-3 rounded-lg ${isCompleted ? 'opacity-60' : ''}" 
+                         style="background: var(--ios-gray-6); border-left: 3px solid ${priorityColor};">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h5 class="ios-callout font-medium ${isCompleted ? 'line-through' : ''}">${item.item_name}</h5>
+                                ${item.quantity > 1 ? `<span class="ios-caption text-gray-500">×${item.quantity}</span>` : ''}
+                            </div>
+                            ${item.description ? `<p class="ios-footnote text-gray-600 truncate">${item.description}</p>` : ''}
+                            <div class="flex items-center gap-4 mt-1">
+                                ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
+                                ${item.assigned_to !== 'anyone' ? `<span class="ios-caption text-blue-600">${this.getAssignmentText(item.assigned_to)}</span>` : ''}
+                                ${isCompleted ? `<span class="ios-caption text-green-600">✓ Purchased by ${item.purchaser_first_name || 'someone'}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 ml-3">
+                            <button onclick="app.toggleShoppingItemPurchased(${item.id})" 
+                                    class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                                <span class="material-icons ${isCompleted ? 'text-green-600' : 'text-gray-400'}">
+                                    ${isCompleted ? 'check_circle' : 'radio_button_unchecked'}
+                                </span>
+                            </button>
+                            <button onclick="app.editShoppingItem(${item.id})" 
+                                    class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                                <span class="material-icons text-gray-400">edit</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = dietaryInfo + html;
+    }
+
+    async loadTripWeather(tripId) {
+        try {
+            const response = await fetch(`/api/weather/trip/${tripId}/forecast`, {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.renderTripWeather(tripId, data);
+            } else {
+                console.error('Failed to load weather forecast');
+                this.renderWeatherError(tripId);
+            }
+        } catch (error) {
+            console.error('Error loading weather forecast:', error);
+            this.renderWeatherError(tripId);
+        }
+    }
+
+    renderWeatherError(tripId) {
+        const container = document.getElementById(`weatherForecast-${tripId}`);
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-gray-500">
+                    <span class="material-icons text-2xl mb-2 opacity-50">cloud_off</span>
+                    <p class="ios-footnote">Weather forecast unavailable</p>
+                    <p class="ios-caption text-gray-400">Check your internet connection</p>
+                </div>
+            `;
+        }
+    }
+
+    renderTripWeather(tripId, weatherData) {
+        const container = document.getElementById(`weatherForecast-${tripId}`);
+        if (!container) return;
+
+        // Current weather
+        const current = weatherData.current;
+        const currentTemp = Math.round(current.temp);
+        const feelsLike = Math.round(current.feels_like);
+        
+        // 7-day forecast
+        const daily = weatherData.daily.slice(1, 8); // Skip today, show next 7 days
+        
+        // Weather alerts
+        const alerts = weatherData.weather_alerts || [];
+        
+        // Packing suggestions
+        const packingSuggestions = weatherData.packing_suggestions || [];
+
+        let alertsHtml = '';
+        if (alerts.length > 0) {
+            alertsHtml = `
+                <div class="mb-4 p-3 rounded-lg" style="background: #FFF3E0; border: 1px solid #FF9500;">
+                    <div class="flex items-center mb-2">
+                        <span class="material-icons mr-2 text-orange-600" style="font-size: 16px;">warning</span>
+                        <span class="ios-footnote font-medium text-orange-800">Weather Alerts</span>
+                    </div>
+                    <div class="space-y-1">
+                        ${alerts.map(alert => `
+                            <div class="flex items-center text-sm text-orange-700">
+                                <span class="material-icons mr-2" style="font-size: 14px;">${alert.icon}</span>
+                                <span>${alert.day}: ${alert.message}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        let packingHtml = '';
+        if (packingSuggestions.length > 0) {
+            packingHtml = `
+                <div class="mb-4 p-3 rounded-lg" style="background: var(--ios-blue-light, #E3F2FD); border: 1px solid var(--ios-blue, #007AFF);">
+                    <div class="flex items-center mb-2">
+                        <span class="material-icons mr-2 text-blue-600" style="font-size: 16px;">backpack</span>
+                        <span class="ios-footnote font-medium text-blue-800">Packing Suggestions</span>
+                    </div>
+                    <div class="space-y-1">
+                        ${packingSuggestions.slice(0, 3).map(suggestion => `
+                            <div class="flex items-center text-sm text-blue-700">
+                                <span class="material-icons mr-2" style="font-size: 14px;">${suggestion.icon}</span>
+                                <span><strong>${suggestion.item}:</strong> ${suggestion.reason}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Historical comparison
+        let historicalHtml = '';
+        if (weatherData.historical && weatherData.historical.data && weatherData.historical.data.length > 0) {
+            const historicalTemp = Math.round(weatherData.historical.data[0].temp);
+            const tempDiff = currentTemp - historicalTemp;
+            if (Math.abs(tempDiff) > 5) {
+                historicalHtml = `
+                    <div class="mb-4 p-2 rounded text-center text-sm" style="background: var(--ios-gray-6);">
+                        <span class="material-icons mr-1" style="font-size: 14px;">history</span>
+                        Last year: ${historicalTemp}°F (${tempDiff > 0 ? '+' : ''}${Math.round(tempDiff)}°F difference)
+                    </div>
+                `;
+            }
+        }
+
+        container.innerHTML = `
+            ${alertsHtml}
+            ${packingHtml}
+            
+            <!-- Current Weather -->
+            <div class="mb-4 p-4 rounded-lg text-center" style="background: var(--ios-gray-6);">
+                <div class="flex items-center justify-center mb-2">
+                    <span class="material-icons mr-2 text-2xl">${this.getWeatherIcon(current.weather[0].main)}</span>
+                    <div>
+                        <div class="ios-title-2">${currentTemp}°F</div>
+                        <div class="ios-footnote text-gray-600">Feels like ${feelsLike}°F</div>
+                    </div>
+                </div>
+                <div class="ios-callout">${current.weather[0].description}</div>
+                ${historicalHtml}
+            </div>
+
+            <!-- 7-Day Forecast -->
+            <div class="grid grid-cols-7 gap-2">
+                ${daily.map(day => {
+                    const date = new Date(day.dt * 1000);
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                    const high = Math.round(day.temp.max);
+                    const low = Math.round(day.temp.min);
+                    const rainChance = Math.round(day.pop * 100);
+                    
+                    return `
+                        <div class="text-center p-2 rounded" style="background: var(--ios-gray-6);">
+                            <div class="ios-caption font-medium mb-1">${dayName}</div>
+                            <span class="material-icons text-lg mb-1">${this.getWeatherIcon(day.weather[0].main)}</span>
+                            <div class="ios-caption">
+                                <div class="font-medium">${high}°</div>
+                                <div class="text-gray-500">${low}°</div>
+                                ${rainChance > 20 ? `<div class="text-blue-600">${rainChance}%</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+        // Add refresh button event listener
+        const refreshBtn = document.getElementById(`refreshWeatherBtn-${tripId}`);
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.loadTripWeather(tripId);
+            });
+        }
+    }
+
+    getWeatherIcon(weatherMain) {
+        const iconMap = {
+            'Clear': 'wb_sunny',
+            'Clouds': 'cloud',
+            'Rain': 'umbrella',
+            'Drizzle': 'grain',
+            'Thunderstorm': 'flash_on',
+            'Snow': 'ac_unit',
+            'Mist': 'foggy',
+            'Fog': 'foggy',
+            'Haze': 'foggy'
+        };
+        return iconMap[weatherMain] || 'wb_cloudy';
+    }
+
+    getCategoryIcon(category) {
+        const icons = {
+            'Food & Drinks': 'restaurant',
+            'Camping Gear': 'outdoor_grill',
+            'Safety & First Aid': 'medical_services',
+            'Personal Items': 'person',
+            'Entertainment': 'sports_esports',
+            'Supplies & Tools': 'build',
+            'Transportation': 'directions_car',
+            'General': 'shopping_cart'
+        };
+        return icons[category] || 'shopping_cart';
+    }
+
+    getCategoryColor(category) {
+        const colors = {
+            'Food & Drinks': '#FF6B35',
+            'Camping Gear': '#4ECDC4',
+            'Safety & First Aid': '#FF3B30',
+            'Personal Items': '#007AFF',
+            'Entertainment': '#AF52DE',
+            'Supplies & Tools': '#FF9500',
+            'Transportation': '#34C759',
+            'General': '#8E8E93'
+        };
+        return colors[category] || '#8E8E93';
+    }
+
+    getAssignmentText(assignedTo) {
+        if (assignedTo === 'everyone') return 'Everyone';
+        if (assignedTo === 'anyone') return 'Anyone';
+        // For specific user assignments, we'd need to look up the user name
+        return 'Assigned';
+    }
+
+    async toggleShoppingItemPurchased(itemId) {
+        try {
+            const response = await fetch(`/api/shopping/${itemId}/purchase`, {
+                method: 'PATCH',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                // Reload shopping data
+                this.loadDashboardShopping();
+                // If we're on a trip details page, reload that too
+                const currentTripId = this.getCurrentTripId();
+                if (currentTripId) {
+                    this.loadTripShopping(currentTripId);
+                }
+            } else {
+                this.showMessage('Failed to update shopping item', 'error');
+            }
+        } catch (error) {
+            console.error('Error toggling shopping item:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
+    }
+
+    getCurrentTripId() {
+        // Helper to get current trip ID if we're viewing trip details
+        const tripDetailsSection = document.getElementById('tripDetailsSection');
+        if (tripDetailsSection && !tripDetailsSection.classList.contains('hidden')) {
+            const addShoppingBtn = document.querySelector('[id^="addShoppingItemBtn-"]');
+            if (addShoppingBtn) {
+                return addShoppingBtn.dataset.tripId;
+            }
+        }
+        return null;
+    }
+
+    // Modal System Functions
+    showModal(title, content) {
+        this.modalTitle.textContent = title;
+        this.modalBody.innerHTML = content;
+        this.modalOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    closeModal() {
+        this.modalOverlay.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scrolling
+        
+        // Clear modal content after animation
+        setTimeout(() => {
+            this.modalBody.innerHTML = '';
+        }, 300);
+    }
+
+    showCreateTripModal() {
+        const modalContent = `
+            <form id="modalCreateTripForm" class="modal-form">
+                <div class="form-group">
+                    <label for="modalTripTitle">Trip Title *</label>
+                    <input type="text" id="modalTripTitle" name="title" required 
+                           placeholder="Enter trip title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="modalTripLocation">Location *</label>
+                    <input type="text" id="modalTripLocation" name="location" required 
+                           placeholder="Enter camping location (e.g., Yosemite National Park, CA)">
+                    <small class="text-gray-500">Include city and state for best results</small>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="modalStartDate">Start Date *</label>
+                        <input type="date" id="modalStartDate" name="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalEndDate">End Date *</label>
+                        <input type="date" id="modalEndDate" name="endDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modalTripType">Trip Type *</label>
+                    <select id="modalTripType" name="tripType" required>
+                        <option value="">Select trip type</option>
+                        <option value="car_camping">Car Camping</option>
+                        <option value="backpacking">Backpacking</option>
+                        <option value="rv_camping">RV Camping</option>
+                        <option value="glamping">Glamping</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modalDescription">Description</label>
+                    <textarea id="modalDescription" name="description" rows="3"
+                              placeholder="Describe the camping trip, what to expect, what to bring, etc."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" id="modalIsPublic" name="isPublic" 
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <span>Make this trip public (others can find and join)</span>
+                    </label>
+                </div>
+                
+                <div id="modalTripCodeSection" class="form-group">
+                    <label>Trip Code</label>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+                        <span class="material-icons text-gray-500">lock</span>
+                        <div class="flex-1">
+                            <div class="font-mono text-lg font-bold text-blue-600" id="modalGeneratedTripCode"></div>
+                            <small class="text-gray-500">Share this code with others to let them join your private trip</small>
+                        </div>
+                        <button type="button" id="modalRegenerateTripCode" class="ios-button-secondary ios-button-compact">
+                            <span class="material-icons mr-1" style="font-size: 14px;">refresh</span>New Code
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="ios-button-primary flex-1">
+                        <span class="material-icons mr-2" style="font-size: 16px;">add_circle</span>Create Trip
+                    </button>
+                    <button type="button" onclick="app.closeModal()" class="ios-button-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        `;
+        
+        this.showModal('Create New Trip', modalContent);
+        
+        // Set minimum dates to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        document.getElementById('modalStartDate').min = tomorrowStr;
+        document.getElementById('modalEndDate').min = tomorrowStr;
+        
+        // Generate initial trip code and set private by default
+        this.generateTripCode('modalGeneratedTripCode');
+        
+        // Handle public/private toggle
+        const isPublicCheckbox = document.getElementById('modalIsPublic');
+        const tripCodeSection = document.getElementById('modalTripCodeSection');
+        
+        // Trip is private by default, so show code section
+        tripCodeSection.style.display = 'block';
+        
+        isPublicCheckbox.addEventListener('change', () => {
+            if (isPublicCheckbox.checked) {
+                tripCodeSection.style.display = 'none';
+            } else {
+                tripCodeSection.style.display = 'block';
+                // Generate new code when switching to private
+                this.generateTripCode('modalGeneratedTripCode');
+            }
+        });
+        
+        // Handle regenerate code button
+        document.getElementById('modalRegenerateTripCode').addEventListener('click', () => {
+            this.generateTripCode('modalGeneratedTripCode');
+        });
+        
+        // Handle form submission
+        document.getElementById('modalCreateTripForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleModalCreateTrip(e);
+        });
+        
+        // Focus first input
+        setTimeout(() => {
+            document.getElementById('modalTripTitle').focus();
+        }, 100);
+    }
+
+    async handleModalCreateTrip(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const isPublic = formData.has('isPublic');
+        const tripCode = isPublic ? null : document.getElementById('modalGeneratedTripCode').textContent;
+        
+        const tripData = {
+            title: formData.get('title'),
+            location: formData.get('location'),
+            startDate: formData.get('startDate'),
+            endDate: formData.get('endDate'),
+            tripType: formData.get('tripType'),
+            description: formData.get('description'),
+            isPublic: isPublic,
+            tripCode: tripCode
+        };
+
+        try {
+            const response = await fetch('/api/trips', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(tripData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage('Camping trip created successfully!', 'success');
+                this.closeModal();
+                this.loadMyTrips(); // Refresh the user's trips list
+            } else {
+                if (data.errors) {
+                    const errorMessages = data.errors.map(err => err.msg).join(', ');
+                    this.showMessage(errorMessages, 'error');
+                } else {
+                    this.showMessage(data.error || 'Failed to create trip', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error creating trip:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
+    }
+
+    async showAddTaskModal(tripId) {
+        // First get trip participants for assignment dropdown
+        try {
+            const response = await fetch(`/api/trips/${tripId}`, {
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                this.showMessage('Failed to load trip details', 'error');
+                return;
+            }
+
+            const data = await response.json();
+            const trip = data.trip;
+            const participants = data.participants || [];
+
+            const modalContent = `
+                <form id="modalAddTaskForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="modalTaskTitle">Task Title *</label>
+                        <input type="text" id="modalTaskTitle" name="title" required 
+                               placeholder="Enter task title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalTaskDescription">Description</label>
+                        <textarea id="modalTaskDescription" name="description" rows="3"
+                                  placeholder="Describe what needs to be done"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalTaskAssignment">Assign To *</label>
+                        <select id="modalTaskAssignment" name="assignedTo" required>
+                            <option value="everyone">Everyone</option>
+                            <option value="anyone" selected>Anyone</option>
+                            ${participants.map(p => `
+                                <option value="${p.user_id}">${p.first_name} ${p.last_name}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="flex items-center gap-3">
+                            <input type="checkbox" id="modalHasDueDate" 
+                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <span>Set due date</span>
+                        </label>
+                    </div>
+                    
+                    <div id="modalDueDateSection" class="grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
+                        <div class="form-group">
+                            <label for="modalDueDate">Due Date</label>
+                            <input type="date" id="modalDueDate" name="dueDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalDueTime">Due Time</label>
+                            <input type="time" id="modalDueTime" name="dueTime">
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="ios-button-primary flex-1">
+                            <span class="material-icons mr-2" style="font-size: 16px;">add</span>Create Task
+                        </button>
+                        <button type="button" onclick="app.closeModal()" class="ios-button-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            `;
+            
+            this.showModal('Add New Task', modalContent);
+            
+            // Handle due date toggle
+            const hasDueDateCheckbox = document.getElementById('modalHasDueDate');
+            const dueDateSection = document.getElementById('modalDueDateSection');
+            
+            hasDueDateCheckbox.addEventListener('change', () => {
+                dueDateSection.style.display = hasDueDateCheckbox.checked ? 'grid' : 'none';
+            });
+            
+            // Handle form submission
+            document.getElementById('modalAddTaskForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleModalAddTask(e, tripId);
+            });
+            
+            // Focus first input
+            setTimeout(() => {
+                document.getElementById('modalTaskTitle').focus();
+            }, 100);
+            
+        } catch (error) {
+            console.error('Error loading trip for task form:', error);
+            this.showMessage('Network error loading trip', 'error');
+        }
+    }
+
+    async handleModalAddTask(e, tripId) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const hasDueDate = document.getElementById('modalHasDueDate').checked;
+        
+        const taskData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            assignedTo: formData.get('assignedTo'),
+            hasDueDate: hasDueDate
+        };
+        
+        if (hasDueDate) {
+            const dueDate = formData.get('dueDate');
+            const dueTime = formData.get('dueTime');
+            if (dueDate) {
+                taskData.dueDate = dueTime ? `${dueDate}T${dueTime}` : `${dueDate}T23:59`;
+            }
+        }
+
+        try {
+            const response = await fetch(`/api/tasks/trip/${tripId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(taskData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage('Task created successfully!', 'success');
+                this.closeModal();
+                this.loadTripTasks(tripId);
+                this.loadDashboardTasks(); // Refresh dashboard
+            } else {
+                if (data.errors) {
+                    const errorMessages = data.errors.map(err => err.msg).join(', ');
+                    this.showMessage(errorMessages, 'error');
+                } else {
+                    this.showMessage(data.error || 'Failed to create task', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error creating task:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
+    }
+
+    async showAddShoppingModal(tripId) {
+        // Get shopping categories and dietary restrictions
+        try {
+            const [categoriesResponse, shoppingResponse] = await Promise.all([
+                fetch('/api/shopping/categories', { credentials: 'include' }),
+                fetch(`/api/shopping/trip/${tripId}`, { credentials: 'include' })
+            ]);
+
+            let categories = [];
+            let dietaryRestrictions = [];
+            
+            if (categoriesResponse.ok) {
+                const data = await categoriesResponse.json();
+                categories = data.categories || [];
+            }
+            
+            if (shoppingResponse.ok) {
+                const data = await shoppingResponse.json();
+                dietaryRestrictions = data.dietary_restrictions || [];
+            }
+
+            // Create dietary restrictions info for modal
+            let dietaryInfo = '';
+            if (dietaryRestrictions && dietaryRestrictions.length > 0) {
+                const restrictionsList = dietaryRestrictions.map(person => 
+                    `<span class="inline-block px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800 mr-1 mb-1">
+                        ${person.first_name}: ${person.dietary_restrictions}
+                    </span>`
+                ).join('');
+                
+                dietaryInfo = `
+                    <div class="mb-4 p-3 rounded-lg" style="background: #FFF3E0; border: 1px solid #FF9500;">
+                        <div class="flex items-center mb-2">
+                            <span class="material-icons mr-2 text-orange-600" style="font-size: 16px;">restaurant_menu</span>
+                            <span class="text-sm font-medium text-orange-800">Consider Dietary Restrictions</span>
+                        </div>
+                        <div class="flex flex-wrap">
+                            ${restrictionsList}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const modalContent = `
+                ${dietaryInfo}
+                <form id="modalAddShoppingForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="modalItemName">Item Name *</label>
+                        <input type="text" id="modalItemName" name="itemName" required 
+                               placeholder="Enter item name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalItemDescription">Description</label>
+                        <textarea id="modalItemDescription" name="description" rows="2"
+                                  placeholder="Additional details about the item"></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="modalItemCategory">Category</label>
+                            <select id="modalItemCategory" name="category">
+                                ${categories.map(cat => `
+                                    <option value="${cat.name}">${cat.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="modalItemQuantity">Quantity</label>
+                            <input type="number" id="modalItemQuantity" name="quantity" 
+                                   min="1" value="1" placeholder="1">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="modalItemCost">Estimated Cost ($)</label>
+                            <input type="number" id="modalItemCost" name="estimatedCost" 
+                                   step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalItemPriority">Priority</label>
+                            <select id="modalItemPriority" name="priority">
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalItemAssignment">Assign To</label>
+                        <select id="modalItemAssignment" name="assignedTo">
+                            <option value="anyone" selected>Anyone can buy this</option>
+                            <option value="everyone">Everyone should buy this</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalItemNotes">Notes</label>
+                        <textarea id="modalItemNotes" name="notes" rows="2"
+                                  placeholder="Special instructions, brand preferences, etc."></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="ios-button-primary flex-1">
+                            <span class="material-icons mr-2" style="font-size: 16px;">add_shopping_cart</span>Add Item
+                        </button>
+                        <button type="button" onclick="app.closeModal()" class="ios-button-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            `;
+            
+            this.showModal('Add Shopping Item', modalContent);
+            
+            // Handle form submission
+            document.getElementById('modalAddShoppingForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleModalAddShopping(e, tripId);
+            });
+            
+            // Focus first input
+            setTimeout(() => {
+                document.getElementById('modalItemName').focus();
+            }, 100);
+            
+        } catch (error) {
+            console.error('Error loading categories for shopping form:', error);
+            this.showMessage('Network error loading categories', 'error');
+        }
+    }
+
+    async handleModalAddShopping(e, tripId) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const shoppingData = {
+            item_name: formData.get('itemName'),
+            description: formData.get('description'),
+            category: formData.get('category'),
+            quantity: parseInt(formData.get('quantity')) || 1,
+            estimated_cost: parseFloat(formData.get('estimatedCost')) || null,
+            priority: formData.get('priority'),
+            assigned_to: formData.get('assignedTo'),
+            notes: formData.get('notes')
+        };
+
+        try {
+            const response = await fetch(`/api/shopping/trip/${tripId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(shoppingData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage('Shopping item added successfully!', 'success');
+                this.closeModal();
+                this.loadTripShopping(tripId);
+                this.loadDashboardShopping(); // Refresh dashboard
+            } else {
+                if (data.errors) {
+                    const errorMessages = data.errors.map(err => err.msg).join(', ');
+                    this.showMessage(errorMessages, 'error');
+                } else {
+                    this.showMessage(data.error || 'Failed to add shopping item', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error adding shopping item:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
     }
 
     async handleLogin(e) {
@@ -247,40 +1435,70 @@ class CampingApp {
         }
     }
 
-    showMessage(message, type) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `p-4 rounded-md mb-4 ${
-            type === 'success' 
-                ? 'bg-green-100 border border-green-400 text-green-700' 
-                : 'bg-red-100 border border-red-400 text-red-700'
-        }`;
+    showMessage(message, type = 'info') {
+        this.showNotification(message, type);
+    }
+
+    showNotification(message, type = 'info', duration = 5000) {
+        const notificationContainer = document.getElementById('notificationContainer');
         
-        messageDiv.innerHTML = `
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <span class="material-icons text-base">${type === 'success' ? 'check_circle' : 'error'}</span>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium">${message}</p>
-                </div>
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        // Get appropriate icon
+        const icons = {
+            success: 'check_circle',
+            error: 'error',
+            info: 'info',
+            warning: 'warning'
+        };
+        
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="material-icons notification-icon">${icons[type] || icons.info}</span>
+                <div class="notification-text">${message}</div>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
         `;
         
-        this.messageContainer.innerHTML = '';
-        this.messageContainer.appendChild(messageDiv);
+        // Add to container
+        notificationContainer.appendChild(notification);
         
-        // Auto-remove success messages after 3 seconds
-        if (type === 'success') {
+        // Trigger animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // Auto-remove after duration
+        if (duration > 0) {
             setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.remove();
+                if (notification.parentNode) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 400);
                 }
-            }, 3000);
+            }, duration);
         }
+        
+        // Scroll to top to ensure visibility
+        this.scrollToTop();
     }
 
     clearMessages() {
-        this.messageContainer.innerHTML = '';
+        const notificationContainer = document.getElementById('notificationContainer');
+        if (notificationContainer) {
+            notificationContainer.innerHTML = '';
+        }
+        // Also clear legacy container
+        if (this.messageContainer) {
+            this.messageContainer.innerHTML = '';
+        }
     }
 
     clearForms() {
@@ -587,6 +1805,10 @@ class CampingApp {
                                 <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Phone</label>
                                 <p style="color: #111827;">${user.phone || 'Not provided'}</p>
                             </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="font-size: 14px; font-weight: 500; color: #6b7280;">Home Address</label>
+                                ${this.getAddressDisplay(user)}
+                            </div>
                             ` : ''}
                         </div>
                     </div>
@@ -650,17 +1872,50 @@ class CampingApp {
     }
     
     getDietaryDisplay(dietary) {
-        const map = {
-            vegetarian: 'Vegetarian',
-            vegan: 'Vegan',
-            gluten_free: 'Gluten-Free',
-            dairy_free: 'Dairy-Free',
-            nut_allergy: 'Nut Allergy',
-            kosher: 'Kosher',
-            halal: 'Halal',
-            other: 'Other'
-        };
-        return dietary ? map[dietary] : 'None';
+        if (!dietary) return 'None specified';
+        return dietary;
+    }
+
+    getAddressDisplay(user) {
+        if (!user.home_address && !user.home_city) {
+            return '<p style="color: #111827;">Not provided</p>';
+        }
+
+        const addressParts = [];
+        if (user.home_address) addressParts.push(user.home_address);
+        if (user.home_city) {
+            let cityLine = user.home_city;
+            if (user.home_state) cityLine += `, ${user.home_state}`;
+            if (user.home_zip) cityLine += ` ${user.home_zip}`;
+            addressParts.push(cityLine);
+        }
+        if (user.home_country && user.home_country !== 'United States') {
+            addressParts.push(user.home_country);
+        }
+
+        const fullAddress = addressParts.join('<br>');
+        
+        // Create "Open in Maps" link if we have coordinates or a full address
+        let mapsLink = '';
+        if (user.home_latitude && user.home_longitude) {
+            mapsLink = `https://maps.apple.com/?q=${user.home_latitude},${user.home_longitude}`;
+        } else if (addressParts.length > 0) {
+            const searchAddress = addressParts.join(', ').replace(/<br>/g, ', ');
+            mapsLink = `https://maps.apple.com/?q=${encodeURIComponent(searchAddress)}`;
+        }
+
+        return `
+            <div style="color: #111827;">
+                <p>${fullAddress}</p>
+                ${mapsLink ? `
+                    <a href="${mapsLink}" target="_blank" 
+                       style="display: inline-flex; align-items: center; margin-top: 8px; color: #3b82f6; text-decoration: none; font-size: 14px;">
+                        <span class="material-icons" style="font-size: 16px; margin-right: 4px;">map</span>
+                        Open in Maps
+                    </a>
+                ` : ''}
+            </div>
+        `;
     }
     
     showEditProfile() {
@@ -699,6 +1954,31 @@ class CampingApp {
                             <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Phone</label>
                             <input type="tel" name="phone" value="${user.phone || ''}" placeholder="(555) 123-4567"
                                    style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Home Address</label>
+                            <input type="text" id="homeAddressInput" name="homeAddress" value="${user.home_address || ''}" 
+                                   placeholder="123 Main Street"
+                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">City</label>
+                                <input type="text" name="homeCity" value="${user.home_city || ''}" placeholder="City"
+                                       style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">State</label>
+                                <input type="text" name="homeState" value="${user.home_state || ''}" placeholder="State"
+                                       style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">ZIP</label>
+                                <input type="text" name="homeZip" value="${user.home_zip || ''}" placeholder="12345"
+                                       style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
                         </div>
                     </div>
                     
@@ -778,7 +2058,12 @@ class CampingApp {
             camperType: formData.get('camperType') || '',
             groupSize: parseInt(formData.get('groupSize')) || 1,
             dietaryRestrictions: formData.get('dietaryRestrictions') || '',
-            phone: (formData.get('phone') || '').trim()
+            phone: (formData.get('phone') || '').trim(),
+            homeAddress: (formData.get('homeAddress') || '').trim(),
+            homeCity: (formData.get('homeCity') || '').trim(),
+            homeState: (formData.get('homeState') || '').trim(),
+            homeZip: (formData.get('homeZip') || '').trim(),
+            homeCountry: 'United States'
         };
         
         console.log('Profile data to send:', profileData);
@@ -852,14 +2137,17 @@ class CampingApp {
         }
     }
 
-    generateTripCode() {
+    generateTripCode(targetElementId = 'generatedTripCode') {
         // Generate a unique 6-character alphanumeric code
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code = '';
         for (let i = 0; i < 6; i++) {
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-        document.getElementById('generatedTripCode').textContent = code;
+        const element = document.getElementById(targetElementId);
+        if (element) {
+            element.textContent = code;
+        }
         return code;
     }
 
@@ -1271,126 +2559,185 @@ class CampingApp {
         
         detailsSection.classList.remove('hidden');
         detailsSection.innerHTML = `
-            <div class="mb-6">
-                <button id="backFromDetailsBtn" class="text-blue-600 hover:text-blue-800 font-medium mb-4">
-                    <span class="material-icons text-sm mr-2">arrow_back</span>Back to Trips
-                </button>
-                <div class="bg-white rounded-lg shadow-lg p-8">
+            <!-- Trip Header with Key Actions -->
+            <div class="ios-card mb-6">
+                <div class="p-6">
+                    <button id="backFromDetailsBtn" class="ios-button-secondary ios-button-compact mb-4">
+                        <span class="material-icons mr-2" style="font-size: 16px;">arrow_back</span>Back to Trips
+                    </button>
+                    
                     <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h2 class="text-3xl font-bold text-gray-800 mb-2">${trip.title}</h2>
-                            <p class="text-gray-600">Organized by ${trip.organizer_name}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            ${trip.difficulty_level ? `
-                                <span class="px-3 py-1 text-sm rounded-full bg-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-100 text-${trip.difficulty_level === 'easy' ? 'green' : trip.difficulty_level === 'moderate' ? 'yellow' : 'red'}-800">
-                                    ${trip.difficulty_level}
+                        <div class="flex-1 min-w-0">
+                            <h1 class="ios-title-1 mb-2">${trip.title}</h1>
+                            <p class="ios-callout text-gray-600 mb-3">${trip.location}</p>
+                            <div class="flex items-center gap-4 text-sm text-gray-500">
+                                <span class="flex items-center">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">event</span>
+                                    ${startDate} - ${endDate}
                                 </span>
-                            ` : ''}
+                                <span class="flex items-center">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">group</span>
+                                    ${trip.current_participants}/${trip.max_participants} joined
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 ml-4">
                             <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 flex items-center">
                                 <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
                                 ${trip.trip_type.replace('_', ' ')}
                             </span>
+                            ${isOrganizer ? `
+                                <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                        class="ios-button-secondary ios-button-compact">
+                                    <span class="material-icons mr-1" style="font-size: 14px;">edit</span>Edit
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
-
-                    <!-- Full Map -->
-                    <div class="mb-8">
-                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center"><span class="material-icons text-base mr-2">map</span>Location Map</h3>
-                        <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 8px; background: #f3f4f6;"></div>
+                    
+                    <!-- Quick Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
+                                class="ios-button-primary flex items-center justify-center py-4">
+                            <span class="material-icons mr-2" style="font-size: 20px;">add_task</span>
+                            <span class="font-medium">Add Task</span>
+                        </button>
+                        <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
+                                class="ios-button-primary flex items-center justify-center py-4" 
+                                style="background: var(--ios-purple);">
+                            <span class="material-icons mr-2" style="font-size: 20px;">add_shopping_cart</span>
+                            <span class="font-medium">Add Item</span>
+                        </button>
                     </div>
+                </div>
+            </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div class="space-y-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center"><span class="material-icons text-base mr-2">place</span>Location</h3>
-                                <p class="text-gray-600">${trip.location}</p>
-                                ${trip.campground ? `<p class="text-sm text-gray-500">${trip.campground}</p>` : ''}
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center"><span class="material-icons text-base mr-2">event</span>Dates</h3>
-                                <p class="text-gray-600">${startDate} - ${endDate}</p>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center"><span class="material-icons text-base mr-2">group</span>Participants</h3>
-                                <p class="text-gray-600">${trip.current_participants}/${trip.max_participants} joined</p>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center"><span class="material-icons text-base mr-2">nature</span>Trip Type</h3>
-                                <p class="text-gray-600">${trip.trip_type.replace('_', ' ')}${trip.difficulty_level ? ` • ${trip.difficulty_level}` : ''}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    ${trip.description ? `
-                        <div class="mb-8">
-                            <h3 class="font-semibold text-gray-800 mb-3 flex items-center"><span class="material-icons text-base mr-2">description</span>Description</h3>
-                            <p class="text-gray-600 leading-relaxed">${trip.description}</p>
-                        </div>
-                    ` : ''}
-
-                    ${trip.participants && trip.participants.length > 0 ? `
-                        <div class="mb-8">
-                            <h3 class="font-semibold text-gray-800 mb-4 flex items-center"><span class="material-icons text-base mr-2">people</span>Who's Going</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                ${trip.participants.map(p => `
-                                    <div class="flex items-center bg-gray-50 p-3 rounded-lg">
-                                        <span class="material-icons text-2xl text-gray-400 mr-3">account_circle</span>
-                                        <div>
-                                            <div class="font-medium text-gray-800">${p.name}</div>
-                                            <div class="text-sm text-gray-500">joined ${new Date(p.joined_at).toLocaleDateString()}</div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    <!-- Task List Section -->
-                    <div class="mb-8">
+            <!-- Tasks & Shopping Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Tasks Summary -->
+                <div class="ios-card">
+                    <div class="p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold text-gray-800 flex items-center">
-                                <span class="material-icons text-base mr-2">checklist</span>Trip Tasks
+                            <h3 class="ios-title-3 flex items-center">
+                                <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-blue);">checklist</span>
+                                Trip Tasks
                             </h3>
-                            <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
-                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 text-sm font-medium flex items-center">
-                                <span class="material-icons text-sm mr-1">add</span>Add Task
-                            </button>
+                            <span id="tripTaskCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
+                                  style="background: var(--ios-blue); color: white;">0</span>
                         </div>
                         <div id="tasksList-${trip.id}" class="space-y-3">
                             <!-- Tasks will be loaded here -->
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex gap-4 pt-6 border-t">
-                        ${canJoin ? `
-                            <button onclick="app.joinTrip(${trip.id})" 
-                                    class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
-                                <span class="material-icons text-sm mr-2">add</span>Join This Trip
-                            </button>
+                <!-- Shopping Summary -->
+                <div class="ios-card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="ios-title-3 flex items-center">
+                                <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-purple);">shopping_cart</span>
+                                Shopping List
+                            </h3>
+                            <span id="tripShoppingCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
+                                  style="background: var(--ios-purple); color: white;">0</span>
+                        </div>
+                        <div id="shoppingList-${trip.id}" class="space-y-3">
+                            <!-- Shopping items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Forecast -->
+            <div class="ios-card mb-6">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="ios-title-3 flex items-center">
+                            <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-blue);">wb_sunny</span>
+                            Weather Forecast
+                        </h3>
+                        <button id="refreshWeatherBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                class="ios-button-secondary ios-button-compact">
+                            <span class="material-icons mr-1" style="font-size: 14px;">refresh</span>Refresh
+                        </button>
+                    </div>
+                    <div id="weatherForecast-${trip.id}">
+                        <div class="text-center py-4 text-gray-500">
+                            <span class="material-icons text-2xl mb-2 opacity-50">cloud</span>
+                            <p class="ios-footnote">Loading weather forecast...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trip Details (Collapsible) -->
+            <div class="ios-card mb-6">
+                <div class="p-6">
+                    <button id="toggleTripDetails" class="w-full flex items-center justify-between text-left ios-callout font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                        <span class="flex items-center">
+                            <span class="material-icons mr-3" style="font-size: 20px;">info</span>
+                            Trip Details & Map
+                        </span>
+                        <span class="material-icons transition-transform" id="detailsChevron">expand_more</span>
+                    </button>
+                    
+                    <div id="tripDetailsContent" class="hidden mt-6">
+                        ${trip.description ? `
+                            <div class="mb-6">
+                                <h4 class="ios-callout font-medium text-gray-800 mb-2">Description</h4>
+                                <p class="ios-footnote text-gray-600 leading-relaxed">${trip.description}</p>
+                            </div>
                         ` : ''}
-                        ${isParticipant && !isOrganizer ? `
-                            <button onclick="app.leaveTrip(${trip.id})" 
-                                    class="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
-                                <span class="material-icons text-sm mr-2">remove</span>Leave Trip
-                            </button>
-                        ` : ''}
-                        ${isOrganizer ? `
-                            <div class="flex gap-3">
-                                <div class="bg-blue-100 text-blue-800 px-6 py-3 rounded-md">
-                                    <span class="material-icons text-sm mr-2">star</span>You organize this trip
+
+                        <!-- Location Map -->
+                        <div class="mb-6">
+                            <h4 class="ios-callout font-medium text-gray-800 mb-3">Location</h4>
+                            <div id="trip-detail-map" style="height: 250px; width: 100%; border-radius: 12px; background: var(--ios-gray-6);"></div>
+                        </div>
+
+                        ${trip.participants && trip.participants.length > 0 ? `
+                            <div class="mb-6">
+                                <h4 class="ios-callout font-medium text-gray-800 mb-3">Who's Going (${trip.participants.length})</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    ${trip.participants.map(p => `
+                                        <div class="flex items-center p-3 rounded-lg" style="background: var(--ios-gray-6);">
+                                            <span class="material-icons text-xl text-gray-400 mr-3">account_circle</span>
+                                            <div>
+                                                <div class="ios-footnote font-medium text-gray-800">${p.name}</div>
+                                                <div class="ios-caption text-gray-500">joined ${new Date(p.joined_at).toLocaleDateString()}</div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                                <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}"
-                                        class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
-                                    <span class="material-icons text-sm mr-2">edit</span>Edit Trip
-                                </button>
                             </div>
                         ` : ''}
                     </div>
                 </div>
             </div>
+
+            <!-- Trip Actions -->
+            ${canJoin || (isParticipant && !isOrganizer) ? `
+                <div class="ios-card">
+                    <div class="p-6">
+                        ${canJoin ? `
+                            <button onclick="app.joinTrip(${trip.id})" 
+                                    class="ios-button-primary w-full mb-3">
+                                <span class="material-icons mr-2" style="font-size: 16px;">add</span>Join This Trip
+                            </button>
+                            <p class="ios-caption text-gray-500 text-center">
+                                ${trip.current_participants}/${trip.max_participants} spots filled
+                            </p>
+                        ` : ''}
+                        ${isParticipant && !isOrganizer ? `
+                            <button onclick="app.leaveTrip(${trip.id})" 
+                                    class="ios-button-secondary w-full" style="border-color: var(--ios-red); color: var(--ios-red);">
+                                <span class="material-icons mr-2" style="font-size: 16px;">remove</span>Leave Trip
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            ` : ''}
         `;
         
         // Add back button event listener
@@ -1398,6 +2745,24 @@ class CampingApp {
             detailsSection.classList.add('hidden');
             this.showMyTripsView();
         });
+
+        // Add collapsible details functionality
+        const toggleButton = document.getElementById('toggleTripDetails');
+        const detailsContent = document.getElementById('tripDetailsContent');
+        const chevron = document.getElementById('detailsChevron');
+        
+        if (toggleButton && detailsContent && chevron) {
+            toggleButton.addEventListener('click', () => {
+                const isHidden = detailsContent.classList.contains('hidden');
+                if (isHidden) {
+                    detailsContent.classList.remove('hidden');
+                    chevron.style.transform = 'rotate(180deg)';
+                } else {
+                    detailsContent.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            });
+        }
 
         // Add edit trip button event listener if it exists
         const editBtn = document.getElementById(`editTripBtn-${trip.id}`);
@@ -1411,12 +2776,22 @@ class CampingApp {
         const addTaskBtn = document.getElementById(`addTaskBtn-${trip.id}`);
         if (addTaskBtn) {
             addTaskBtn.addEventListener('click', () => {
-                this.showAddTaskForm(trip.id);
+                this.showAddTaskModal(trip.id);
             });
         }
 
-        // Load tasks for this trip
+        // Add shopping item button event listener
+        const addShoppingBtn = document.getElementById(`addShoppingItemBtn-${trip.id}`);
+        if (addShoppingBtn) {
+            addShoppingBtn.addEventListener('click', () => {
+                this.showAddShoppingModal(trip.id);
+            });
+        }
+
+        // Load tasks, shopping items, and weather for this trip
         this.loadTripTasks(trip.id);
+        this.loadTripShopping(trip.id);
+        this.loadTripWeather(trip.id);
 
         // Initialize full map for trip location
         setTimeout(async () => {
@@ -1663,13 +3038,21 @@ class CampingApp {
 
     renderTasks(tripId, tasks) {
         const tasksList = document.getElementById(`tasksList-${tripId}`);
+        const countBadge = document.getElementById(`tripTaskCount-${tripId}`);
+        
         if (!tasksList) return;
+
+        // Update count badge
+        if (countBadge) {
+            countBadge.textContent = tasks ? tasks.length : 0;
+        }
 
         if (!tasks || tasks.length === 0) {
             tasksList.innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <span class="material-icons text-4xl mb-2 block">assignment</span>
-                    <p>No tasks yet. Add the first task to get organized!</p>
+                <div class="text-center py-6 text-gray-500">
+                    <span class="material-icons text-3xl mb-2 opacity-50">assignment</span>
+                    <p class="ios-callout">No tasks yet</p>
+                    <p class="ios-footnote">Add tasks to organize your trip</p>
                 </div>
             `;
             return;
