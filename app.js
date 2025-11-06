@@ -7,7 +7,6 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const tripsRoutes = require('./routes/trips');
 const weatherRoutes = require('./routes/weather');
-const chatRoutes = require('./routes/chat');
 const healthRoutes = require('./routes/health');
 const statusRoutes = require('./routes/status');
 const profileRoutes = require('./routes/profile');
@@ -30,7 +29,6 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/shopping', shoppingRoutes);
 app.use('/api/weather', weatherRoutes);
-app.use('/api/chat', chatRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/migrate', migrateRoutes);
 
