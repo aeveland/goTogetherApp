@@ -474,7 +474,7 @@ class CampingApp {
                             <div class="flex gap-3">
                                 <input type="text" id="tripCode" placeholder="Enter trip code (e.g., CAMP2024)"
                                        class="flex-1 form-input">
-                                <button id="joinByCodeBtn" class="apple-button text-white px-6 py-3 font-medium">
+                                <button id="joinByCodeBtn" class="ios-button-primary">
                                     Join
                                 </button>
                             </div>
@@ -1548,13 +1548,11 @@ class CampingApp {
                                       placeholder="Describe the camping trip, what to expect, what to bring, etc.">${trip.description || ''}</textarea>
                         </div>
 
-                        <div class="flex gap-4">
-                            <button type="submit"
-                                    class="apple-button text-white py-3 px-8 font-medium flex items-center">
-                                <span class="material-icons text-sm mr-2">save</span>Update Trip
+                        <div class="flex gap-3">
+                            <button type="submit" class="ios-button-primary flex-1">
+                                <span class="material-icons mr-2" style="font-size: 16px;">save</span>Update Trip
                             </button>
-                            <button type="button" id="cancelEditTripBtn"
-                                    class="bg-gray-200 text-gray-700 py-3 px-8 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium shadow-sm hover:shadow-md">
+                            <button type="button" id="cancelEditTripBtn" class="ios-button-secondary">
                                 Cancel
                             </button>
                         </div>
@@ -1950,13 +1948,11 @@ class CampingApp {
                             </div>
                         </div>
 
-                        <div class="flex gap-4">
-                            <button type="submit"
-                                    class="apple-button text-white py-3 px-8 font-medium flex items-center">
-                                <span class="material-icons text-sm mr-2">${isEdit ? 'save' : 'add'}</span>${isEdit ? 'Update Task' : 'Create Task'}
+                        <div class="flex gap-3">
+                            <button type="submit" class="ios-button-primary flex-1">
+                                <span class="material-icons mr-2" style="font-size: 16px;">${isEdit ? 'save' : 'add'}</span>${isEdit ? 'Update Task' : 'Create Task'}
                             </button>
-                            <button type="button" id="cancelTaskFormBtn"
-                                    class="bg-gray-200 text-gray-700 py-3 px-8 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium shadow-sm hover:shadow-md">
+                            <button type="button" id="cancelTaskFormBtn" class="ios-button-secondary">
                                 Cancel
                             </button>
                         </div>
