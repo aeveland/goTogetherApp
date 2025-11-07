@@ -3227,26 +3227,17 @@ class CampingApp {
                                       placeholder="Describe the camping trip, what to expect, what to bring, etc.">${trip.description || ''}</textarea>
                         </div>
 
-                        <div class="flex flex-col gap-3">
-                            <div class="flex gap-3">
-                                <button type="submit" class="ios-button-primary flex-1">
-                                    <span class="material-icons mr-2" style="font-size: 16px;">save</span>Update Trip
-                                </button>
-                                <button type="button" id="cancelEditTripBtn" class="ios-button-secondary">
-                                    Cancel
-                                </button>
-                            </div>
-                            
-                            <!-- Danger Zone -->
-                            <div class="mt-6 pt-6 border-t border-gray-200">
-                                <h3 class="text-sm font-medium text-gray-700 mb-3">Danger Zone</h3>
-                                <button type="button" id="deleteEditTripBtn" data-trip-id="${trip.id}"
-                                        class="w-full px-4 py-3 border border-red-300 text-red-700 bg-white rounded-xl hover:bg-red-50 hover:border-red-400 transition-all duration-200 flex items-center justify-center">
-                                    <span class="material-icons mr-2" style="font-size: 16px;">delete_forever</span>
-                                    Delete Trip Permanently
-                                </button>
-                                <p class="text-xs text-gray-500 mt-2">This action cannot be undone. All trip data will be permanently deleted.</p>
-                            </div>
+                        <div class="flex gap-3">
+                            <button type="submit" class="ios-button-primary flex-1">
+                                <span class="material-icons mr-2" style="font-size: 16px;">save</span>Update Trip
+                            </button>
+                            <button type="button" id="cancelEditTripBtn" class="ios-button-secondary flex-1">
+                                <span class="material-icons mr-2" style="font-size: 16px;">close</span>Cancel
+                            </button>
+                            <button type="button" id="deleteEditTripBtn" data-trip-id="${trip.id}"
+                                    class="flex-1 px-4 py-3 border border-red-300 text-red-700 bg-white rounded-xl hover:bg-red-50 hover:border-red-400 transition-all duration-200 flex items-center justify-center font-medium">
+                                <span class="material-icons mr-2" style="font-size: 16px;">delete</span>Delete
+                            </button>
                         </div>
                     </form>
                 </div>
