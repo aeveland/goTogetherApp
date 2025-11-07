@@ -43,7 +43,17 @@ app.use('/api/test-system', testRoutes);
 app.use('/api/weather-test', weatherTestRoutes);
 app.use('/api/fix-all', fixAllTablesRoutes);
 
-// Static files AFTER API routes
+// Landing page route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
+
+// Main app route
+app.get('/app', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req, res) => {
