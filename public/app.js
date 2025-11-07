@@ -5,10 +5,6 @@ class CampingApp {
         this.dashboard = document.getElementById('dashboard');
         this.messageContainer = document.getElementById('messageContainer');
         
-        // Initialize error handling system
-        this.errorHandler = new ErrorHandler();
-        this.resilientFetch = new ResilientFetch(this.errorHandler);
-        
         // Modal system
         this.modalOverlay = document.getElementById('modalOverlay');
         this.modalTitle = document.getElementById('modalTitle');
@@ -148,21 +144,24 @@ class CampingApp {
 
     async loadDashboardTasks() {
         try {
-            const data = await this.resilientFetch.fetch('/api/tasks/my-tasks', {}, {
-                feature: 'tasks',
-                critical: false
+            // Get tasks assigned to current user across all trips
+            const response = await fetch('/api/tasks/my-tasks', {
+                credentials: 'include'
             });
-            this.renderDashboardTasks(data.tasks || []);
-        } catch (error) {
-            // Error already handled by resilient fetch, show placeholder
-            const tasksList = document.getElementById('dashboardTasksList');
-            if (tasksList) {
-                tasksList.innerHTML = this.errorHandler.getTasksPlaceholder();
+
+            if (response.ok) {
+                const data = await response.json();
+                this.userTasks = data.tasks || [];
+                this.renderDashboardTasks();
+            } else {
+                console.error('Failed to load user tasks');
             }
+        } catch (error) {
+            console.error('Error loading user tasks:', error);
         }
     }
 
-    renderDashboardTasks(tasks) {
+    renderDashboardTasks() {
         const container = document.getElementById('dashboardTasks');
         const taskCount = document.getElementById('taskCount');
         
@@ -553,26 +552,23 @@ class CampingApp {
 
     async loadTripWeather(tripId) {
         try {
-            const data = await this.resilientFetch.fetch(`/api/weather/trip/${tripId}/forecast`, {}, {
-                feature: 'weather',
-                critical: false
+            const response = await fetch(`/api/weather/trip/${tripId}/forecast`, {
+                credentials: 'include'
             });
-            this.renderTripWeather(tripId, data);
-        } catch (error) {
-            // Error handled by resilient system, show appropriate placeholder
-            const container = document.getElementById(`weatherForecast-${tripId}`);
-            if (container) {
-                const result = await this.errorHandler.handleError(error, {
-                    feature: 'weather',
-                    critical: false
-                });
-                
-                if (result.placeholder) {
-                    container.innerHTML = result.placeholder;
-                } else {
-                    container.innerHTML = this.errorHandler.getWeatherPlaceholder();
-                }
+
+            if (response.ok) {
+                const data = await response.json();
+                this.renderTripWeather(tripId, data);
+            } else if (response.status === 400) {
+                // Expected error for trips without coordinates - don't log as error
+                this.renderWeatherError(tripId, 'coordinates');
+            } else {
+                console.error('Failed to load weather forecast:', response.status);
+                this.renderWeatherError(tripId);
             }
+        } catch (error) {
+            console.error('Error loading weather forecast:', error);
+            this.renderWeatherError(tripId);
         }
     }
 
