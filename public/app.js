@@ -1163,11 +1163,13 @@ class CampingApp {
                     </div>
                     
                     <div class="form-group">
-                        <label class="flex items-center gap-3">
-                            <input type="checkbox" id="modalHasDueDate" 
-                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                            <span>Set due date</span>
-                        </label>
+                        <div class="flex items-center gap-3">
+                            <label class="ios-switch">
+                                <input type="checkbox" id="modalHasDueDate">
+                                <span class="ios-switch-slider"></span>
+                            </label>
+                            <span style="font-size: 16px; color: #1D1D1F;">Set due date</span>
+                        </div>
                     </div>
                     
                     <div id="modalDueDateSection" class="grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
@@ -3524,9 +3526,11 @@ class CampingApp {
 
                         <div class="mb-6">
                             <div class="flex items-center mb-3">
-                                <input type="checkbox" id="hasDueDate" name="hasDueDate" ${(isEdit && task.has_due_date) ? 'checked' : ''}
-                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                <label for="hasDueDate" class="ml-2 text-sm font-medium text-gray-700">Set due date</label>
+                                <label class="ios-switch">
+                                    <input type="checkbox" id="hasDueDate" name="hasDueDate" ${(isEdit && task.has_due_date) ? 'checked' : ''}>
+                                    <span class="ios-switch-slider"></span>
+                                </label>
+                                <span style="margin-left: 12px; font-size: 16px; color: #1D1D1F;">Set due date</span>
                             </div>
                             <div id="dueDateSection" class="grid grid-cols-1 md:grid-cols-2 gap-4 ${(!isEdit || !task.has_due_date) ? 'hidden' : ''}">
                                 <div>
@@ -3813,6 +3817,43 @@ class CampingApp {
             }
         });
     }
+
+    // Helper method to create iOS switch
+    createIOSSwitch(id, checked = false, label = '') {
+        return `
+            <label class="ios-switch">
+                <input type="checkbox" id="${id}" ${checked ? 'checked' : ''}>
+                <span class="ios-switch-slider"></span>
+            </label>
+            ${label ? `<span style="margin-left: 12px; font-size: 16px; color: #1D1D1F;">${label}</span>` : ''}
+        `;
+    }
+
+    // Helper method to create mobile-optimized buttons
+    createMobileButton(text, type = 'primary', onclick = '', icon = '') {
+        const iconHtml = icon ? `<span class="material-icons" style="font-size: 18px;">${icon}</span>` : '';
+        return `
+            <button class="ios-button-${type}" onclick="${onclick}" type="button">
+                ${iconHtml}
+                ${text}
+            </button>
+        `;
+    }
+
+    // Helper method to make buttons mobile-friendly
+    optimizeButtonsForMobile() {
+        // Add mobile classes to existing buttons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            if (window.innerWidth <= 768) {
+                if (button.classList.contains('ios-button-primary') || 
+                    button.classList.contains('ios-button-secondary')) {
+                    button.style.width = '100%';
+                    button.style.marginBottom = '12px';
+                }
+            }
+        });
+    }
 }
 
 // Google Places API initialization callback
@@ -3865,4 +3906,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.google && window.google.maps && window.google.maps.places) {
         window.app.initPlacesAutocomplete();
     }
+    
+    // Optimize buttons for mobile
+    window.app.optimizeButtonsForMobile();
+    
+    // Re-optimize on window resize
+    window.addEventListener('resize', () => {
+        window.app.optimizeButtonsForMobile();
+    });
 });
