@@ -559,8 +559,11 @@ class CampingApp {
             if (response.ok) {
                 const data = await response.json();
                 this.renderTripWeather(tripId, data);
+            } else if (response.status === 400) {
+                // Expected error for trips without coordinates - don't log as error
+                this.renderWeatherError(tripId, 'coordinates');
             } else {
-                console.error('Failed to load weather forecast');
+                console.error('Failed to load weather forecast:', response.status);
                 this.renderWeatherError(tripId);
             }
         } catch (error) {
@@ -569,16 +572,26 @@ class CampingApp {
         }
     }
 
-    renderWeatherError(tripId) {
+    renderWeatherError(tripId, errorType = 'general') {
         const container = document.getElementById(`weatherForecast-${tripId}`);
         if (container) {
-            container.innerHTML = `
-                <div class="text-center py-4 text-gray-500">
-                    <span class="material-icons text-2xl mb-2 opacity-50">cloud_off</span>
-                    <p class="ios-footnote">Weather forecast unavailable</p>
-                    <p class="ios-caption text-gray-400">Check your internet connection</p>
-                </div>
-            `;
+            if (errorType === 'coordinates') {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-gray-500">
+                        <span class="material-icons text-2xl mb-2 opacity-50">location_off</span>
+                        <p class="ios-footnote">Weather forecast unavailable</p>
+                        <p class="ios-caption text-xs">Trip location coordinates needed</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-gray-500">
+                        <span class="material-icons text-2xl mb-2 opacity-50">cloud_off</span>
+                        <p class="ios-footnote">Weather forecast unavailable</p>
+                        <p class="ios-caption text-xs">Check your internet connection</p>
+                    </div>
+                `;
+            }
         }
     }
 
