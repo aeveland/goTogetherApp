@@ -389,6 +389,26 @@
         #modalTripCodeSection .material-icons.text-gray-500 {
             color: var(--text-tertiary) !important;
         }
+        
+        /* Fix undefined iOS variables in trip cards */
+        :root {
+            --ios-gray: var(--text-tertiary);
+            --ios-gray-6: var(--bg-secondary);
+            --ios-secondary-label: var(--text-tertiary);
+            --ios-blue: var(--accent-blue);
+            --ios-green: var(--primary-green);
+        }
+        
+        /* Fix trip card map backgrounds */
+        [style*="background: #f3f4f6"] {
+            background: var(--bg-tertiary) !important;
+        }
+        
+        /* Fix trip card badges with white backgrounds */
+        [style*="background: white"] {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
 
         .ios-card-large {
             background: var(--bg-card);
