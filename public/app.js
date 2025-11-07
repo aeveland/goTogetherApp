@@ -1851,15 +1851,15 @@ class CampingApp {
             detailsSection.style.display = 'none';
         }
         
-        // Show dashboard title and main action buttons when returning to dashboard
-        const dashboardTitle = document.getElementById('dashboardTitle');
-        if (dashboardTitle) {
-            dashboardTitle.style.display = 'block';
+        // Show dashboard content when returning from trip details
+        const dashboardHeader = document.querySelector('#dashboard > .flex.justify-between.items-center.mb-8');
+        if (dashboardHeader) {
+            dashboardHeader.style.display = 'flex';
         }
         
-        const mainActionButtons = document.getElementById('mainActionButtons');
-        if (mainActionButtons) {
-            mainActionButtons.style.display = 'grid';
+        const dashboardGrid = document.querySelector('#dashboard > .grid.grid-cols-1.lg\\:grid-cols-3');
+        if (dashboardGrid) {
+            dashboardGrid.style.display = 'grid';
         }
         
         const joinSection = document.getElementById('joinTripSection');
@@ -2839,15 +2839,15 @@ class CampingApp {
         document.getElementById('allTripsContainer').classList.add('hidden');
         document.getElementById('createTripSection').classList.add('hidden');
         
-        // Hide dashboard title and main action buttons when viewing trip details
-        const dashboardTitle = document.getElementById('dashboardTitle');
-        if (dashboardTitle) {
-            dashboardTitle.style.display = 'none';
+        // Hide the entire dashboard content to avoid confusion
+        const dashboardHeader = document.querySelector('#dashboard > .flex.justify-between.items-center.mb-8');
+        if (dashboardHeader) {
+            dashboardHeader.style.display = 'none';
         }
         
-        const mainActionButtons = document.getElementById('mainActionButtons');
-        if (mainActionButtons) {
-            mainActionButtons.style.display = 'none';
+        const dashboardGrid = document.querySelector('#dashboard > .grid.grid-cols-1.lg\\:grid-cols-3');
+        if (dashboardGrid) {
+            dashboardGrid.style.display = 'none';
         }
         
         // Create or show trip details section
