@@ -390,13 +390,34 @@
             color: var(--text-tertiary) !important;
         }
         
-        /* Fix undefined iOS variables in trip cards */
+        /* Fix ALL undefined iOS variables */
         :root {
             --ios-gray: var(--text-tertiary);
+            --ios-gray-1: var(--text-muted);
+            --ios-gray-2: var(--text-tertiary);
+            --ios-gray-3: var(--text-secondary);
+            --ios-gray-4: var(--border-primary);
+            --ios-gray-5: var(--border-secondary);
             --ios-gray-6: var(--bg-secondary);
             --ios-secondary-label: var(--text-tertiary);
+            --ios-tertiary-label: var(--text-muted);
+            --ios-quaternary-label: var(--text-muted);
             --ios-blue: var(--accent-blue);
             --ios-green: var(--primary-green);
+            --ios-red: var(--danger-red);
+            --ios-orange: var(--warning-orange);
+            --ios-purple: #af52de;
+            --ios-pink: #ff2d92;
+            --ios-indigo: #5856d6;
+            --ios-background: var(--bg-primary);
+            --ios-secondary-background: var(--bg-secondary);
+            --ios-tertiary-background: var(--bg-tertiary);
+            --ios-grouped-background: var(--bg-primary);
+            --ios-secondary-grouped-background: var(--bg-card);
+            --ios-label: var(--text-primary);
+            --ios-shadow-1: var(--shadow-sm);
+            --ios-shadow-2: var(--shadow-md);
+            --ios-shadow-3: var(--shadow-lg);
         }
         
         /* Fix trip card map backgrounds */
