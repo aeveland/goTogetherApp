@@ -2834,6 +2834,11 @@ class CampingApp {
                                         class="ios-button-secondary ios-button-compact">
                                     <span class="material-icons mr-1" style="font-size: 14px;">edit</span>Edit
                                 </button>
+                                <button id="deleteTripBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                        class="ios-button-secondary ios-button-compact" 
+                                        style="color: #FF3B30; border-color: #FF3B30;">
+                                    <span class="material-icons mr-1" style="font-size: 14px;">delete</span>Delete
+                                </button>
                             ` : ''}
                         </div>
                     </div>
@@ -3012,6 +3017,14 @@ class CampingApp {
         if (editBtn) {
             editBtn.addEventListener('click', () => {
                 this.showEditTrip(trip.id);
+            });
+        }
+
+        // Add delete trip button event listener if it exists
+        const deleteBtn = document.getElementById(`deleteTripBtn-${trip.id}`);
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                this.confirmDeleteTrip(trip.id, trip.title);
             });
         }
 
@@ -3845,6 +3858,75 @@ class CampingApp {
                 delete input.dataset.lng;
             }
         });
+    }
+
+    // Confirm trip deletion with modal
+    confirmDeleteTrip(tripId, tripTitle) {
+        this.modalTitle.textContent = 'Delete Trip';
+        this.modalBody.innerHTML = `
+            <div class="text-center py-6">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <span class="material-icons text-red-600">warning</span>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Delete "${tripTitle}"?</h3>
+                <p class="text-sm text-gray-500 mb-6">
+                    This action cannot be undone. All tasks, shopping items, and other trip data will be permanently deleted.
+                </p>
+                <div class="flex flex-col gap-3">
+                    <button id="confirmDeleteBtn" class="ios-button-primary" 
+                            style="background: linear-gradient(135deg, #FF3B30 0%, #DC3545 100%);">
+                        <span class="material-icons mr-2" style="font-size: 16px;">delete_forever</span>
+                        Delete Trip
+                    </button>
+                    <button id="cancelDeleteBtn" class="ios-button-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        this.modalOverlay.classList.add('show');
+        
+        // Add event listeners
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            this.deleteTrip(tripId);
+        });
+        
+        document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+            this.closeModal();
+        });
+    }
+
+    // Delete trip
+    async deleteTrip(tripId) {
+        try {
+            const response = await fetch(`/api/trips/${tripId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                this.showMessage('Trip deleted successfully', 'success');
+                this.closeModal();
+                
+                // Remove trip from local data
+                this.myTrips = this.myTrips.filter(trip => trip.id !== tripId);
+                
+                // Refresh the trips view
+                this.showMyTrips();
+                
+                // If we're currently viewing this trip's details, go back to trips
+                const detailsSection = document.getElementById('tripDetailsSection');
+                if (detailsSection && !detailsSection.classList.contains('hidden')) {
+                    this.showMyTrips();
+                }
+            } else {
+                const data = await response.json();
+                this.showMessage(data.error || 'Failed to delete trip', 'error');
+            }
+        } catch (error) {
+            this.showMessage('Network error. Please try again.', 'error');
+        }
     }
 
     // Helper method to create iOS switch

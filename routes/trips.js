@@ -463,4 +463,46 @@ router.get('/my-stats', authenticateToken, async (req, res) => {
   }
 });
 
+// Delete a camping trip (only organizer can delete)
+router.delete('/:id', authenticateToken, [
+  param('id').isInt().withMessage('Trip ID must be a number')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const tripId = req.params.id;
+    const userId = req.user.id;
+
+    // Check if user is the organizer of this trip
+    const organizerCheck = await pool.query(`
+      SELECT organizer_id 
+      FROM camping_trips 
+      WHERE id = $1
+    `, [tripId]);
+
+    if (organizerCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Trip not found' });
+    }
+
+    if (organizerCheck.rows[0].organizer_id !== userId) {
+      return res.status(403).json({ error: 'Only the trip organizer can delete this trip' });
+    }
+
+    // Delete the trip (CASCADE will handle related data)
+    await pool.query(`
+      DELETE FROM camping_trips 
+      WHERE id = $1
+    `, [tripId]);
+
+    res.json({ message: 'Trip deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting trip:', error);
+    res.status(500).json({ error: 'Failed to delete trip' });
+  }
+});
+
 module.exports = router;
