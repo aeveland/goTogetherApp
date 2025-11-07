@@ -453,16 +453,16 @@ class CampingApp {
         let dietaryInfo = '';
         if (dietaryRestrictions && dietaryRestrictions.length > 0) {
             const restrictionsList = dietaryRestrictions.map(person => 
-                `<span class="inline-block px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800 mr-1 mb-1">
+                `<span class="inline-block px-2 py-1 text-xs rounded-full mr-1 mb-1" style="background: var(--warning-orange); color: #000;">
                     ${person.first_name}: ${person.dietary_restrictions}
                 </span>`
             ).join('');
             
             dietaryInfo = `
-                <div class="mb-4 p-3 rounded-lg" style="background: var(--ios-orange-light, #FFF3E0); border: 1px solid var(--ios-orange, #FF9500);">
+                <div class="mb-4 p-3 rounded-lg" style="background: var(--bg-card); border: 1px solid var(--warning-orange);">
                     <div class="flex items-center mb-2">
-                        <span class="material-icons mr-2 text-orange-600" style="font-size: 18px;">restaurant_menu</span>
-                        <span class="ios-footnote font-medium text-orange-800">Dietary Restrictions to Consider</span>
+                        <span class="material-icons mr-2" style="font-size: 18px; color: var(--warning-orange);">restaurant_menu</span>
+                        <span class="ios-footnote font-medium" style="color: var(--text-primary);">Dietary Restrictions to Consider</span>
                     </div>
                     <div class="flex flex-wrap">
                         ${restrictionsList}
