@@ -2905,8 +2905,7 @@ class CampingApp {
                             <span class="font-medium">Add Task</span>
                         </button>
                         <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary flex items-center justify-center py-4" 
-                                style="background: var(--ios-purple);">
+                                class="ios-button-primary flex items-center justify-center py-4">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_shopping_cart</span>
                             <span class="font-medium">Add Item</span>
                         </button>
