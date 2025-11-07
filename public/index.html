@@ -11,206 +11,136 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* CLEAN DARK THEME - NO iOS COMPLEXITY */
+        /* COMPREHENSIVE DARK THEME SYSTEM */
         :root {
-            /* Simple Color System */
-            --green: #22c55e;
-            --green-dark: #16a34a;
-            --green-light: #4ade80;
-            --blue: #3b82f6;
-            --red: #ef4444;
-            --orange: #f59e0b;
+            /* Core Color Palette */
+            --primary-green: #22c55e;
+            --primary-green-dark: #16a34a;
+            --primary-green-light: #4ade80;
+            --accent-blue: #3b82f6;
+            --danger-red: #ef4444;
+            --warning-orange: #f59e0b;
             
-            /* Background Colors */
-            --bg-dark: #0f172a;
+            /* Background System */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
             --bg-card: #1e293b;
-            --bg-hover: #334155;
+            --bg-modal: #0f172a;
+            --bg-hover: #475569;
+            --bg-active: #64748b;
             
-            /* Text Colors - High Contrast */
-            --text-white: #ffffff;
-            --text-light: #f1f5f9;
-            --text-gray: #cbd5e1;
+            /* Text System - WCAG AA+ Compliant */
+            --text-primary: #ffffff;
+            --text-secondary: #f1f5f9;
+            --text-tertiary: #e2e8f0;
+            --text-muted: #cbd5e1;
+            --text-disabled: #94a3b8;
             
-            /* Border Colors */
-            --border: #334155;
-            --border-light: #475569;
+            /* Border System */
+            --border-primary: #334155;
+            --border-secondary: #475569;
+            --border-accent: #22c55e;
+            --border-focus: #3b82f6;
             
-            /* Shadows */
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            /* Shadow System */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.3);
+            
+            /* Complete iOS Variable Mapping */
+            --ios-blue: #3b82f6;
+            --ios-green: #22c55e;
+            --ios-red: #ef4444;
+            --ios-orange: #f59e0b;
+            --ios-purple: #8b5cf6;
+            --ios-pink: #ec4899;
+            --ios-indigo: #6366f1;
+            --ios-gray: #94a3b8;
+            --ios-gray-1: #f8fafc;
+            --ios-gray-2: #f1f5f9;
+            --ios-gray-3: #e2e8f0;
+            --ios-gray-4: #cbd5e1;
+            --ios-gray-5: #94a3b8;
+            --ios-gray-6: #64748b;
+            
+            /* iOS Background System */
+            --ios-background: var(--bg-primary);
+            --ios-secondary-background: var(--bg-secondary);
+            --ios-tertiary-background: var(--bg-tertiary);
+            --ios-grouped-background: var(--bg-primary);
+            --ios-secondary-grouped-background: var(--bg-card);
+            
+            /* iOS Text System */
+            --ios-label: var(--text-primary);
+            --ios-secondary-label: var(--text-secondary);
+            --ios-tertiary-label: var(--text-tertiary);
+            --ios-quaternary-label: var(--text-muted);
+            
+            /* iOS Shadow System */
+            --ios-shadow-1: var(--shadow-sm);
+            --ios-shadow-2: var(--shadow-md);
+            --ios-shadow-3: var(--shadow-lg);
         }
 
         body { 
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.5;
             font-size: 16px;
             margin: 0;
             padding: 0;
         }
-        
-        /* CLEAN COMPONENT STYLES */
-        
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            transition: all 0.2s ease;
-        }
-        
-        .card:hover {
-            background: var(--bg-hover);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        /* Buttons */
-        .btn-primary {
-            background: var(--green);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary:hover {
-            background: var(--green-light);
-        }
-        
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-white);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 12px 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: var(--bg-hover);
-        }
 
-        /* SIMPLE OVERRIDES - NO COMPLEXITY */
+        /* SYSTEMATIC HARDCODED COLOR REPLACEMENT */
         
-        /* Text Colors */
-        .text-gray-900, .text-gray-800, .text-gray-700 { color: var(--text-white) !important; }
-        .text-gray-600, .text-gray-500, .text-gray-400 { color: var(--text-light) !important; }
-        .text-gray-300 { color: var(--text-gray) !important; }
+        /* Tailwind Gray Scale Override */
+        .text-gray-900 { color: var(--text-primary) !important; }
+        .text-gray-800 { color: var(--text-primary) !important; }
+        .text-gray-700 { color: var(--text-secondary) !important; }
+        .text-gray-600 { color: var(--text-tertiary) !important; }
+        .text-gray-500 { color: var(--text-muted) !important; }
+        .text-gray-400 { color: var(--text-disabled) !important; }
+        .text-gray-300 { color: var(--text-disabled) !important; }
         
-        /* Backgrounds */
-        .bg-white { background: var(--bg-card) !important; }
-        .bg-gray-50, .bg-gray-100 { background: var(--bg-card) !important; }
-        .bg-gray-200 { background: var(--bg-hover) !important; }
+        /* Background Color Overrides */
+        .bg-white { background-color: var(--bg-card) !important; }
+        .bg-gray-50 { background-color: var(--bg-secondary) !important; }
+        .bg-gray-100 { background-color: var(--bg-tertiary) !important; }
+        .bg-gray-200 { background-color: var(--bg-hover) !important; }
         
-        /* Borders */
-        .border-gray-200, .border-gray-300 { border-color: var(--border) !important; }
+        /* Border Color Overrides */
+        .border-gray-200 { border-color: var(--border-primary) !important; }
+        .border-gray-300 { border-color: var(--border-secondary) !important; }
+        .border-gray-400 { border-color: var(--border-secondary) !important; }
         
-        /* Hover States */
-        .hover\\:bg-gray-50:hover, .hover\\:bg-gray-100:hover { background: var(--bg-hover) !important; }
-        .hover\\:text-gray-900:hover { color: var(--text-white) !important; }
+        /* Hover State Overrides */
+        .hover\\:bg-gray-50:hover { background-color: var(--bg-hover) !important; }
+        .hover\\:bg-gray-100:hover { background-color: var(--bg-hover) !important; }
+        .hover\\:bg-gray-200:hover { background-color: var(--bg-hover) !important; }
+        .hover\\:text-gray-900:hover { color: var(--text-primary) !important; }
+        .hover\\:text-gray-800:hover { color: var(--text-primary) !important; }
         
-        /* Replace iOS Classes with Simple Classes */
-        .ios-card, .trip-card { 
-            background: var(--bg-card) !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 12px !important;
-            box-shadow: var(--shadow) !important;
-            color: var(--text-white) !important;
-        }
+        /* Typography System Override */
+        .ios-footnote { color: var(--text-secondary) !important; }
+        .ios-caption { color: var(--text-tertiary) !important; }
+        .ios-callout { color: var(--text-secondary) !important; }
+        .ios-subhead { color: var(--text-tertiary) !important; }
+        .ios-headline { color: var(--text-primary) !important; }
+        .ios-body { color: var(--text-secondary) !important; }
         
-        .ios-card:hover, .trip-card:hover {
-            background: var(--bg-hover) !important;
-            box-shadow: var(--shadow-lg) !important;
-        }
-        
-        .ios-headline, .ios-callout, .ios-footnote, .ios-caption { 
-            color: var(--text-white) !important; 
-        }
-        
-        .ios-button-primary { 
-            background: var(--green) !important;
-            color: #000 !important;
-            border: none !important;
-        }
-        
-        .ios-button-secondary { 
-            background: transparent !important;
-            color: var(--text-white) !important;
-            border: 1px solid var(--border-light) !important;
-        }
-        
-        /* Simple Color Overrides */
-        .text-blue-600, .text-blue-800 { color: var(--green) !important; }
-        .bg-blue-600 { background: var(--green) !important; }
-        
-        /* Form Elements */
-        input, textarea, select {
-            background: var(--bg-card) !important;
-            color: var(--text-white) !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 8px !important;
-        }
-        
-        input::placeholder, textarea::placeholder {
-            color: var(--text-gray) !important;
-        }
-        
-        /* Material Icons */
-        .material-icons {
-            color: var(--text-light) !important;
-        }
-        
-        /* Clean and simple - no more iOS complexity! */
-    </style>
-</head>
-<body>
-    <!-- Authentication Container -->
-    <div id="authContainer" class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Welcome to GoTogether
-                </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
-                    Plan amazing camping adventures with friends
-                </p>
-            </div>
+        /* Theme Color Overrides */
+        .text-blue-600 { color: var(--primary-green) !important; }
+        .text-blue-800 { color: var(--primary-green-dark) !important; }
+        .hover\\:text-blue-800:hover { color: var(--primary-green-light) !important; }
+        .bg-blue-600 { background-color: var(--primary-green) !important; }
+        .hover\\:bg-blue-700:hover { background-color: var(--primary-green-dark) !important; }
 
-            <!-- Login Form -->
-            <div id="loginForm">
-                <div class="text-center mb-8">
-                    <h2 class="ios-title-1 text-gray-900 mb-2">Welcome Back</h2>
-                    <p class="ios-body text-gray-600">Sign in to your camping adventure account</p>
-                </div>
-                
-                <form id="loginFormElement" class="space-y-6">
-                    <div>
-                        <label for="loginEmail" class="sr-only">Email address</label>
-                        <input id="loginEmail" name="email" type="email" required 
-                               class="form-input w-full" placeholder="Email address">
-                    </div>
-                    <div>
-                        <label for="loginPassword" class="sr-only">Password</label>
-                        <input id="loginPassword" name="password" type="password" required 
-                               class="form-input w-full" placeholder="Password">
-                    </div>
-
-                    <button type="submit" class="btn-primary w-full">
-                        Sign In
-                    </button>
-                </form>
-                <p class="mt-4 text-center text-sm text-gray-600">
-                    Don't have an account? 
-                    <button id="showRegister" class="text-blue-600 hover:text-blue-800 font-medium">Sign up</button>
-                </p>
-            </div>
+        /* Dark Theme Button Styles */
         .ios-button-primary {
             background: var(--primary-green);
             color: #000000 !important;
