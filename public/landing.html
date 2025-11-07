@@ -251,10 +251,53 @@
             modal.classList.remove('flex');
         }
 
-        function handleAuth(event, type) {
+        async function handleAuth(event, type) {
             event.preventDefault();
-            // Redirect to main app with auth type
-            window.location.href = `/app?auth=${type}`;
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            try {
+                let endpoint, body;
+                
+                if (type === 'login') {
+                    endpoint = '/api/auth/login';
+                    body = {
+                        email: form.querySelector('input[type="email"]').value,
+                        password: form.querySelector('input[type="password"]').value
+                    };
+                } else {
+                    endpoint = '/api/auth/register';
+                    const inputs = form.querySelectorAll('input');
+                    body = {
+                        firstName: inputs[0].value,
+                        lastName: inputs[1].value,
+                        email: inputs[2].value,
+                        password: inputs[3].value
+                    };
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Success - redirect to main app
+                    window.location.href = '/app';
+                } else {
+                    // Show error message
+                    alert(data.message || 'Authentication failed');
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
+                alert('Network error. Please try again.');
+            }
         }
 
         // Close modal on outside click
