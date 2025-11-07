@@ -3,45 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoTogether - Plan Amazing Camping Adventures</title>
+    <title>GoTogether - Plan Epic Camping Adventures</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .hero-bg { 
-            background: linear-gradient(135deg, rgba(0,122,255,0.8) 0%, rgba(52,199,89,0.8) 100%), 
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect fill="%23134e4a" width="1200" height="800"/><circle fill="%23065f46" cx="200" cy="200" r="100"/><circle fill="%23047857" cx="800" cy="300" r="150"/><circle fill="%23059669" cx="400" cy="600" r="80"/></svg>');
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%), 
+                        url('https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
         }
-        .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+        .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
         .fade-in.visible { opacity: 1; transform: translateY(0); }
-        .slide-in-left { opacity: 0; transform: translateX(-50px); transition: all 0.8s ease; }
-        .slide-in-left.visible { opacity: 1; transform: translateX(0); }
-        .slide-in-right { opacity: 0; transform: translateX(50px); transition: all 0.8s ease; }
-        .slide-in-right.visible { opacity: 1; transform: translateX(0); }
-        .floating { animation: float 6s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-        .gradient-text { background: linear-gradient(135deg, #007AFF 0%, #34C759 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .slide-up { opacity: 0; transform: translateY(40px); transition: all 0.8s ease; }
+        .slide-up.visible { opacity: 1; transform: translateY(0); }
+        .glow-on-hover { transition: all 0.3s ease; }
+        .glow-on-hover:hover { box-shadow: 0 0 30px rgba(34, 197, 94, 0.3); transform: translateY(-2px); }
+        .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bg-noise { 
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+        }
+        .feature-card { 
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover { 
+            border-color: rgba(34, 197, 94, 0.3);
+            transform: translateY(-5px);
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900 text-white">
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="fixed top-0 w-full bg-black/80 backdrop-blur-md z-50 border-b border-gray-800">
+        <div class="max-w-6xl mx-auto px-6">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <span class="material-icons text-green-600 text-2xl mr-2">nature_people</span>
-                    <span class="text-xl font-bold text-gray-900">GoTogether</span>
+                    <span class="material-icons text-green-400 text-2xl mr-2">nature_people</span>
+                    <span class="text-xl font-bold text-white">GoTogether</span>
                 </div>
-                <div class="flex space-x-4">
-                    <a href="#features" class="text-gray-600 hover:text-green-600 transition-colors">Features</a>
-                    <a href="#how-it-works" class="text-gray-600 hover:text-green-600 transition-colors">How It Works</a>
-                    <button onclick="showAuthModal('login')" class="text-green-600 hover:text-green-700 font-medium">Sign In</button>
-                    <button onclick="showAuthModal('register')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Get Started</button>
+                <div class="flex items-center space-x-6">
+                    <a href="#features" class="text-gray-300 hover:text-green-400 transition-colors text-sm font-medium">Features</a>
+                    <button onclick="showAuthModal('login')" class="text-gray-300 hover:text-white font-medium text-sm">Sign In</button>
+                    <button onclick="showAuthModal('register')" class="bg-green-500 text-black px-5 py-2 rounded-lg hover:bg-green-400 transition-all font-semibold text-sm glow-on-hover">Get Started</button>
                 </div>
             </div>
         </div>
@@ -49,111 +57,40 @@
 
     <!-- Hero Section -->
     <section class="hero-bg min-h-screen flex items-center justify-center text-white relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-green-900/20 to-blue-900/20"></div>
-        <div class="relative z-10 text-center max-w-4xl mx-auto px-4">
-            <div class="fade-in">
-                <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                    Plan Epic<br>
-                    <span class="gradient-text">Camping Adventures</span>
-                </h1>
-                <p class="text-xl md:text-2xl mb-8 text-gray-100 max-w-2xl mx-auto">
-                    From dream to campfire. Organize trips, coordinate tasks, and create unforgettable memories with friends.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button onclick="showAuthModal('register')" class="bg-white text-green-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105">
-                        Start Planning Free
-                    </button>
-                    <button onclick="document.getElementById('story').scrollIntoView({behavior: 'smooth'})" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-green-600 transition-all">
-                        See How It Works
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 floating">
-            <span class="material-icons text-white text-3xl">keyboard_arrow_down</span>
-        </div>
-    </section>
-
-    <!-- The Story Section -->
-    <section id="story" class="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">The Camping Journey</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Every great adventure starts with a dream. Let us walk you through the journey from inspiration to s'mores around the campfire.</p>
-            </div>
-
-            <!-- Timeline -->
-            <div class="relative">
-                <!-- Timeline Line -->
-                <div class="absolute left-1/2 transform -translate-x-1/2 w-1 bg-green-200 h-full hidden md:block"></div>
-                
-                <!-- Phase 1: The Dream -->
-                <div class="mb-20 md:mb-32">
-                    <div class="flex flex-col md:flex-row items-center">
-                        <div class="md:w-1/2 md:pr-12 slide-in-left">
-                            <div class="bg-white rounded-2xl p-8 shadow-lg card-hover">
-                                <div class="flex items-center mb-4">
-                                    <div class="bg-green-100 p-3 rounded-full mr-4">
-                                        <span class="material-icons text-green-600 text-2xl">lightbulb</span>
-                                    </div>
-                                    <h3 class="text-2xl font-bold text-gray-900">The Dream Begins</h3>
-                                </div>
-                                <p class="text-gray-600 text-lg leading-relaxed">
-                                    "Let's go camping!" It starts with excitement, but quickly becomes overwhelming. Where should we go? When? Who's bringing what? How do we coordinate everything?
-                                </p>
-                            </div>
-                        </div>
-                        <div class="md:w-1/2 md:pl-12 mt-8 md:mt-0 slide-in-right">
-                            <div class="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl h-64 flex items-center justify-center text-white text-6xl">
-                                <span class="material-icons text-8xl">explore</span>
-                            </div>
-                        </div>
+        <div class="relative z-10 max-w-6xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="fade-in">
+                    <h1 class="text-4xl md:text-6xl font-black mb-4 leading-tight text-shadow">
+                        Plan. Coordinate.<br>
+                        <span class="text-green-400">Adventure.</span>
+                    </h1>
+                    <p class="text-lg md:text-xl mb-8 text-gray-200 font-medium max-w-lg">
+                        The ultimate camping trip planner. Organize gear, coordinate tasks, track weather, and create epic memories.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="showAuthModal('register')" class="bg-green-500 text-black px-6 py-3 rounded-lg font-bold hover:bg-green-400 transition-all glow-on-hover">
+                            Start Planning Free
+                        </button>
+                        <button onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})" class="border border-gray-400 text-white px-6 py-3 rounded-lg font-semibold hover:border-green-400 hover:text-green-400 transition-all">
+                            See Features
+                        </button>
                     </div>
                 </div>
-
-                <!-- Phase 2: The Planning -->
-                <div class="mb-20 md:mb-32">
-                    <div class="flex flex-col md:flex-row-reverse items-center">
-                        <div class="md:w-1/2 md:pl-12 slide-in-right">
-                            <div class="bg-white rounded-2xl p-8 shadow-lg card-hover">
-                                <div class="flex items-center mb-4">
-                                    <div class="bg-blue-100 p-3 rounded-full mr-4">
-                                        <span class="material-icons text-blue-600 text-2xl">event_note</span>
-                                    </div>
-                                    <h3 class="text-2xl font-bold text-gray-900">Smart Planning</h3>
-                                </div>
-                                <p class="text-gray-600 text-lg leading-relaxed">
-                                    GoTogether transforms chaos into clarity. Create your trip, invite friends, assign tasks, and watch everything fall into place. Weather forecasts, shopping lists, and coordination made simple.
-                                </p>
-                            </div>
+                <div class="slide-up hidden lg:block">
+                    <div class="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+                        <div class="flex items-center mb-4">
+                            <span class="material-icons text-green-400 mr-2">event</span>
+                            <span class="font-semibold">Upcoming Trip</span>
                         </div>
-                        <div class="md:w-1/2 md:pr-12 mt-8 md:mt-0 slide-in-left">
-                            <div class="bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl h-64 flex items-center justify-center text-white">
-                                <span class="material-icons text-8xl">assignment</span>
+                        <h3 class="text-xl font-bold mb-2">Yosemite Backpacking</h3>
+                        <p class="text-gray-300 text-sm mb-4">Nov 15-18 • 4 campers</p>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-400">Tasks completed</span>
+                                <span class="text-green-400 font-semibold">8/12</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Phase 3: The Adventure -->
-                <div class="mb-20 md:mb-32">
-                    <div class="flex flex-col md:flex-row items-center">
-                        <div class="md:w-1/2 md:pr-12 slide-in-left">
-                            <div class="bg-white rounded-2xl p-8 shadow-lg card-hover">
-                                <div class="flex items-center mb-4">
-                                    <div class="bg-green-100 p-3 rounded-full mr-4">
-                                        <span class="material-icons text-green-600 text-2xl">nature_people</span>
-                                    </div>
-                                    <h3 class="text-2xl font-bold text-gray-900">The Adventure</h3>
-                                </div>
-                                <p class="text-gray-600 text-lg leading-relaxed">
-                                    Arrive prepared, organized, and excited. No forgotten essentials, no confusion about who's doing what. Just pure adventure, stunning nature, and memories that last a lifetime.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="md:w-1/2 md:pl-12 mt-8 md:mt-0 slide-in-right">
-                            <div class="bg-gradient-to-br from-green-400 to-teal-500 rounded-2xl h-64 flex items-center justify-center text-white">
-                                <span class="material-icons text-8xl">local_fire_department</span>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-400 h-2 rounded-full" style="width: 67%"></div>
                             </div>
                         </div>
                     </div>
@@ -161,76 +98,65 @@
             </div>
         </div>
     </section>
+
 
     <!-- Features Section -->
-    <section id="features" class="py-20 bg-gray-900 text-white">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
-                <p class="text-xl text-gray-300 max-w-3xl mx-auto">Powerful features designed specifically for camping trip coordination</p>
+    <section id="features" class="py-20 bg-black bg-noise">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-12 fade-in">
+                <h2 class="text-3xl md:text-4xl font-black mb-3 text-white">Built for Adventure</h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">Everything you need to plan, coordinate, and execute the perfect camping trip.</p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-gray-800 rounded-2xl p-8 card-hover fade-in">
-                    <div class="bg-blue-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                        <span class="material-icons text-white text-2xl">group</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">Trip Coordination</h3>
-                    <p class="text-gray-300">Invite friends, set dates, choose locations. Everyone stays in sync from planning to packing.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="feature-card bg-gray-900/50 rounded-xl p-6 fade-in">
+                    <span class="material-icons text-green-400 text-3xl mb-3 block">group</span>
+                    <h3 class="text-lg font-bold mb-2 text-white">Trip Coordination</h3>
+                    <p class="text-gray-400 text-sm">Invite friends, set dates, choose locations. Keep everyone in sync.</p>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl p-8 card-hover fade-in">
-                    <div class="bg-green-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                        <span class="material-icons text-white text-2xl">assignment</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">Task Management</h3>
-                    <p class="text-gray-300">Assign who brings what, track progress, and ensure nothing gets forgotten.</p>
+                <div class="feature-card bg-gray-900/50 rounded-xl p-6 fade-in">
+                    <span class="material-icons text-green-400 text-3xl mb-3 block">assignment</span>
+                    <h3 class="text-lg font-bold mb-2 text-white">Task Management</h3>
+                    <p class="text-gray-400 text-sm">Assign gear, track progress, ensure nothing gets forgotten.</p>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl p-8 card-hover fade-in">
-                    <div class="bg-purple-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                        <span class="material-icons text-white text-2xl">shopping_cart</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">Smart Shopping</h3>
-                    <p class="text-gray-300">Collaborative shopping lists with categories. No duplicate purchases, no forgotten essentials.</p>
+                <div class="feature-card bg-gray-900/50 rounded-xl p-6 fade-in">
+                    <span class="material-icons text-green-400 text-3xl mb-3 block">shopping_cart</span>
+                    <h3 class="text-lg font-bold mb-2 text-white">Smart Shopping</h3>
+                    <p class="text-gray-400 text-sm">Collaborative lists with categories. No duplicates, no forgotten essentials.</p>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl p-8 card-hover fade-in">
-                    <div class="bg-orange-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                        <span class="material-icons text-white text-2xl">wb_sunny</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">Weather Insights</h3>
-                    <p class="text-gray-300">Real-time weather forecasts and camping-specific insights to plan the perfect trip.</p>
+                <div class="feature-card bg-gray-900/50 rounded-xl p-6 fade-in">
+                    <span class="material-icons text-green-400 text-3xl mb-3 block">wb_sunny</span>
+                    <h3 class="text-lg font-bold mb-2 text-white">Weather Insights</h3>
+                    <p class="text-gray-400 text-sm">Real-time forecasts and camping-specific weather data.</p>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl p-8 card-hover fade-in">
-                    <div class="bg-red-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                        <span class="material-icons text-white text-2xl">map</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">Location Maps</h3>
-                    <p class="text-gray-300">Interactive maps, location details, and directions to your camping destination.</p>
+                <div class="feature-card bg-gray-900/50 rounded-xl p-6 fade-in">
+                    <span class="material-icons text-green-400 text-3xl mb-3 block">map</span>
+                    <h3 class="text-lg font-bold mb-2 text-white">Interactive Maps</h3>
+                    <p class="text-gray-400 text-sm">Location details, directions, and campsite information.</p>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl p-8 card-hover fade-in">
-                    <div class="bg-teal-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                        <span class="material-icons text-white text-2xl">phone_iphone</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4">Mobile First</h3>
-                    <p class="text-gray-300">Beautiful mobile experience. Plan on desktop, coordinate on mobile, enjoy in nature.</p>
+                <div class="feature-card bg-gray-900/50 rounded-xl p-6 fade-in">
+                    <span class="material-icons text-green-400 text-3xl mb-3 block">phone_iphone</span>
+                    <h3 class="text-lg font-bold mb-2 text-white">Mobile Optimized</h3>
+                    <p class="text-gray-400 text-sm">Plan on desktop, coordinate on mobile, adventure in nature.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 bg-gradient-to-br from-green-600 to-blue-600 text-white">
-        <div class="max-w-4xl mx-auto text-center px-4 fade-in">
-            <h2 class="text-4xl md:text-5xl font-bold mb-6">Ready for Your Next Adventure?</h2>
-            <p class="text-xl mb-8 text-green-100">Join thousands of campers who've made trip planning effortless</p>
-            <button onclick="showAuthModal('register')" class="bg-white text-green-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105">
-                Start Planning Your Trip
+    <section class="py-20 bg-gray-900">
+        <div class="max-w-4xl mx-auto text-center px-6 fade-in">
+            <h2 class="text-3xl md:text-4xl font-black mb-4 text-white">Start Your Adventure</h2>
+            <p class="text-lg mb-8 text-gray-400">Join outdoor enthusiasts who plan smarter, not harder.</p>
+            <button onclick="showAuthModal('register')" class="bg-green-500 text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-400 transition-all glow-on-hover">
+                Get Started Free
             </button>
-            <p class="text-sm text-green-200 mt-4">Free forever • No credit card required</p>
+            <p class="text-sm text-gray-500 mt-4">No credit card • Always free</p>
         </div>
     </section>
 
@@ -261,7 +187,7 @@
             });
         }, observerOptions);
 
-        document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => {
+        document.querySelectorAll('.fade-in, .slide-up').forEach(el => {
             observer.observe(el);
         });
 
