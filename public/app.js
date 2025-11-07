@@ -292,7 +292,7 @@ class CampingApp {
             const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
             
             return `
-                <div class="flex items-center justify-between p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                <div class="flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors"
                      onclick="app.showTripDetails(${trip.id})" style="border: 1px solid var(--ios-gray-5);">
                     <div class="flex-1 min-w-0">
                         <h4 class="ios-callout font-medium truncate">${trip.title}</h4>
