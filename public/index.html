@@ -483,6 +483,19 @@
         [style*="color: #FF9500"] { color: var(--warning-orange) !important; }
         [style*="color: #F59E0B"] { color: var(--warning-orange) !important; }
         [style*="color: #3B82F6"] { color: var(--accent-blue) !important; }
+        
+        /* CRITICAL: Force visibility for dynamically generated content */
+        .text-gray-800.font-medium { color: var(--text-primary) !important; }
+        .text-gray-500.block { color: var(--text-tertiary) !important; }
+        .text-sm.text-gray-500 { color: var(--text-tertiary) !important; }
+        
+        /* Radio button labels and descriptions */
+        label span.font-medium { color: var(--text-primary) !important; }
+        label span.block { color: var(--text-tertiary) !important; }
+        
+        /* Ensure all form labels are visible */
+        input[type="radio"] + span { color: var(--text-primary) !important; }
+        input[type="radio"] + span span { color: var(--text-tertiary) !important; }
 
         .ios-card-large {
             background: var(--bg-card);
