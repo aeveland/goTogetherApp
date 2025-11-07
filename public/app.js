@@ -154,10 +154,14 @@ class CampingApp {
                 this.userTasks = data.tasks || [];
                 this.renderDashboardTasks();
             } else {
-                console.error('Failed to load user tasks');
+                // Silently handle task loading failure
+                this.userTasks = [];
+                this.renderDashboardTasks();
             }
         } catch (error) {
-            console.error('Error loading user tasks:', error);
+            // Silently handle task loading failure
+            this.userTasks = [];
+            this.renderDashboardTasks();
         }
     }
 
@@ -560,14 +564,14 @@ class CampingApp {
                 const data = await response.json();
                 this.renderTripWeather(tripId, data);
             } else if (response.status === 400) {
-                // Expected error for trips without coordinates - don't log as error
+                // Expected error for trips without coordinates - silent failure
                 this.renderWeatherError(tripId, 'coordinates');
             } else {
-                console.error('Failed to load weather forecast:', response.status);
+                // Other errors - silent failure, no console logging
                 this.renderWeatherError(tripId);
             }
         } catch (error) {
-            console.error('Error loading weather forecast:', error);
+            // Network errors - silent failure, no console logging
             this.renderWeatherError(tripId);
         }
     }
