@@ -190,6 +190,22 @@
             box-shadow: var(--shadow-lg);
             border-color: var(--border-accent);
         }
+        
+        /* Ensure text visibility on card hover */
+        .ios-card:hover .ios-headline,
+        .ios-card:hover .ios-callout,
+        .ios-card:hover .ios-body,
+        .ios-card:hover .ios-title-3,
+        .ios-card:hover .ios-subhead,
+        .ios-card:hover span,
+        .ios-card:hover p {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Keep material icons visible on hover */
+        .ios-card:hover .material-icons {
+            color: var(--text-secondary) !important;
+        }
 
         .ios-card-large {
             background: var(--bg-card);
