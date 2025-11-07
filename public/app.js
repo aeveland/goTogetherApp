@@ -1227,10 +1227,22 @@ class CampingApp {
         const formData = new FormData(e.target);
         const hasDueDate = document.getElementById('modalHasDueDate').checked;
         
+        const assignedToValue = formData.get('assignedTo');
+        let assignmentType, assignedTo;
+        
+        if (assignedToValue === 'everyone' || assignedToValue === 'anyone') {
+            assignmentType = assignedToValue;
+            assignedTo = null;
+        } else {
+            assignmentType = 'specific';
+            assignedTo = assignedToValue;
+        }
+        
         const taskData = {
             title: formData.get('title'),
             description: formData.get('description'),
-            assignedTo: formData.get('assignedTo'),
+            assignmentType: assignmentType,
+            assignedTo: assignedTo,
             hasDueDate: hasDueDate
         };
         
