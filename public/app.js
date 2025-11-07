@@ -1708,15 +1708,34 @@ class CampingApp {
 
     createMiniMap(containerId, lat, lon, location) {
         try {
-            // Create map container if it doesn't exist
             const container = document.getElementById(containerId);
             if (!container) return null;
 
-            // Clear any existing map
+            // Check if map already exists and is valid
+            if (container._leaflet_id) {
+                try {
+                    // Map already exists, just update it
+                    const existingMap = container._leaflet_map;
+                    if (existingMap) {
+                        existingMap.setView([lat, lon], 10);
+                        return existingMap;
+                    }
+                } catch (e) {
+                    // Map exists but is broken, remove it
+                    container._leaflet_id = undefined;
+                    container.innerHTML = '';
+                }
+            }
+
+            // Create new map with stable container
+            const mapDiv = document.createElement('div');
+            mapDiv.style.height = '100%';
+            mapDiv.style.width = '100%';
+            mapDiv.style.minHeight = '200px';
             container.innerHTML = '';
+            container.appendChild(mapDiv);
             
-            // Create map
-            const map = L.map(containerId, {
+            const map = L.map(mapDiv, {
                 center: [lat, lon],
                 zoom: 10,
                 zoomControl: false,
@@ -1729,6 +1748,9 @@ class CampingApp {
                 attributionControl: false
             });
 
+            // Store reference to prevent recreation
+            container._leaflet_map = map;
+
             // Add tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: ''
@@ -1737,6 +1759,13 @@ class CampingApp {
             // Add marker
             L.marker([lat, lon]).addTo(map)
                 .bindPopup(location);
+
+            // Force map to resize after a short delay
+            setTimeout(() => {
+                if (map) {
+                    map.invalidateSize();
+                }
+            }, 100);
 
             return map;
         } catch (error) {
@@ -1750,12 +1779,35 @@ class CampingApp {
             const container = document.getElementById(containerId);
             if (!container) return null;
 
+            // Check if map already exists and is valid
+            if (container._leaflet_id) {
+                try {
+                    const existingMap = container._leaflet_map;
+                    if (existingMap) {
+                        existingMap.setView([lat, lon], 12);
+                        return existingMap;
+                    }
+                } catch (e) {
+                    container._leaflet_id = undefined;
+                    container.innerHTML = '';
+                }
+            }
+
+            // Create stable map container
+            const mapDiv = document.createElement('div');
+            mapDiv.style.height = '100%';
+            mapDiv.style.width = '100%';
+            mapDiv.style.minHeight = '400px';
             container.innerHTML = '';
+            container.appendChild(mapDiv);
             
-            const map = L.map(containerId, {
+            const map = L.map(mapDiv, {
                 center: [lat, lon],
                 zoom: 12
             });
+
+            // Store reference
+            container._leaflet_map = map;
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
@@ -1764,6 +1816,13 @@ class CampingApp {
             L.marker([lat, lon]).addTo(map)
                 .bindPopup(`<b>${location}</b>`)
                 .openPopup();
+
+            // Force resize after delay
+            setTimeout(() => {
+                if (map) {
+                    map.invalidateSize();
+                }
+            }, 100);
 
             return map;
         } catch (error) {
@@ -3845,17 +3904,35 @@ class CampingApp {
     }
 
     initFallbackAddressLookup() {
-        console.log('Initializing fallback address lookup');
-        // Add helpful placeholder text for manual entry
+        console.log('Initializing fallback address lookup with basic geocoding');
         const locationInputs = ['modalTripLocation', 'tripLocation'];
         
         locationInputs.forEach(inputId => {
             const input = document.getElementById(inputId);
             if (input) {
                 input.placeholder = 'Enter camping location (e.g., Yosemite National Park, CA)';
-                // Clear any stored coordinates since we'll geocode on submit
-                delete input.dataset.lat;
-                delete input.dataset.lng;
+                
+                // Add basic address validation and geocoding on blur
+                input.addEventListener('blur', async () => {
+                    const address = input.value.trim();
+                    if (address && address.length > 3) {
+                        try {
+                            // Use a simple geocoding service (Nominatim - free OpenStreetMap service)
+                            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=us,ca`);
+                            const data = await response.json();
+                            
+                            if (data && data.length > 0) {
+                                const result = data[0];
+                                input.dataset.lat = result.lat;
+                                input.dataset.lng = result.lon;
+                                input.value = result.display_name;
+                                console.log('Geocoded address:', result.display_name);
+                            }
+                        } catch (error) {
+                            console.log('Geocoding failed, using manual entry:', error.message);
+                        }
+                    }
+                });
             }
         });
     }
