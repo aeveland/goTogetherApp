@@ -11,70 +11,68 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* iOS Native Design System */
+        /* Dark Adventure Theme */
         :root {
-            /* iOS Color Palette */
-            --ios-blue: #007AFF;
-            --ios-blue-light: #5AC8FA;
-            --ios-blue-dark: #0051D5;
-            --ios-green: #34C759;
-            --ios-red: #FF3B30;
-            --ios-orange: #FF9500;
-            --ios-yellow: #FFCC00;
-            --ios-purple: #AF52DE;
-            --ios-pink: #FF2D92;
-            --ios-indigo: #5856D6;
+            /* Adventure Color Palette */
+            --primary-green: #22c55e;
+            --primary-green-dark: #16a34a;
+            --primary-green-light: #4ade80;
+            --accent-blue: #3b82f6;
+            --danger-red: #ef4444;
+            --warning-orange: #f59e0b;
             
-            /* iOS Grays */
-            --ios-gray: #8E8E93;
-            --ios-gray-2: #AEAEB2;
-            --ios-gray-3: #C7C7CC;
-            --ios-gray-4: #D1D1D6;
-            --ios-gray-5: #E5E5EA;
-            --ios-gray-6: #F2F2F7;
+            /* Dark Theme Colors */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-card: #1e293b;
+            --bg-modal: #0f172a;
             
-            /* iOS System Colors */
-            --ios-background: #F2F2F7;
-            --ios-secondary-background: #FFFFFF;
-            --ios-tertiary-background: #FFFFFF;
-            --ios-grouped-background: #F2F2F7;
-            --ios-secondary-grouped-background: #FFFFFF;
+            /* Text Colors */
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-muted: #64748b;
             
-            /* iOS Text Colors */
-            --ios-label: #000000;
-            --ios-secondary-label: #3C3C43;
-            --ios-tertiary-label: #3C3C43;
-            --ios-quaternary-label: #3C3C43;
+            /* Border Colors */
+            --border-primary: #334155;
+            --border-secondary: #475569;
+            --border-accent: #22c55e;
             
-            /* iOS Shadows */
-            --ios-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12);
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.3);
             --ios-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.07);
             --ios-shadow-3: 0 10px 15px rgba(0, 0, 0, 0.1);
             --ios-shadow-4: 0 20px 25px rgba(0, 0, 0, 0.15);
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background: var(--ios-grouped-background);
-            color: var(--ios-label);
-            line-height: 1.47;
-            font-size: 17px; /* iOS body text size */
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
         }
 
-        /* iOS Button Styles - Polished & Professional */
+        /* Dark Theme Button Styles */
         .ios-button-primary {
-            background: var(--ios-blue);
-            color: white !important;
+            background: var(--primary-green);
+            color: #000000 !important;
             border: none;
-            border-radius: 12px;
-            font-size: 17px;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
-            padding: 16px 24px;
-            min-height: 52px;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+            padding: 12px 20px;
+            min-height: 44px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             text-align: center;
@@ -87,28 +85,28 @@
             overflow: hidden;
         }
         .ios-button-primary * {
-            color: white !important;
+            color: #000000 !important;
         }
         .ios-button-primary:hover {
-            background: var(--ios-blue-dark);
+            background: var(--primary-green-light);
             transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.35);
+            box-shadow: var(--shadow-glow);
         }
         .ios-button-primary:active {
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+            background: var(--primary-green-dark);
         }
 
         .ios-button-secondary {
-            background: white;
-            color: var(--ios-blue);
-            border: 2px solid var(--ios-blue);
-            border-radius: 12px;
-            font-size: 17px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
-            padding: 14px 24px;
-            min-height: 52px;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding: 12px 20px;
+            min-height: 44px;
+            transition: all 0.3s ease;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             text-align: center;
@@ -164,24 +162,25 @@
             font-weight: 500;
         }
 
-        /* iOS Card Styles */
+        /* Dark Theme Card Styles */
         .ios-card {
-            background: var(--ios-secondary-grouped-background);
-            border-radius: 16px;
-            box-shadow: var(--ios-shadow-1);
-            border: 0.5px solid var(--ios-gray-4);
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-primary);
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 0.3s ease;
         }
         .ios-card:hover {
             transform: translateY(-2px);
-            box-shadow: var(--ios-shadow-3);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-accent);
         }
 
         .ios-card-large {
-            background: var(--ios-secondary-grouped-background);
-            border-radius: 20px;
-            box-shadow: var(--ios-shadow-2);
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
             border: 0.5px solid var(--ios-gray-4);
             overflow: hidden;
             padding: 24px;
@@ -399,15 +398,16 @@
         }
         
         .modal-container {
-            background: white;
+            background: var(--bg-modal);
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
             max-width: 600px;
             width: 100%;
             max-height: 90vh;
             overflow: hidden;
             transform: scale(0.9) translateY(20px);
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 0.3s ease;
         }
         
         .modal-overlay.show .modal-container {
@@ -416,15 +416,15 @@
         
         .modal-header {
             padding: 24px 24px 0 24px;
-            border-bottom: 1px solid var(--ios-gray-5);
-            background: white;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-modal);
             border-radius: 16px 16px 0 0;
         }
         
         .modal-title {
             font-size: 20px;
             font-weight: 600;
-            color: var(--ios-label);
+            color: var(--text-primary);
             margin: 0;
             padding-right: 40px;
         }
