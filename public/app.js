@@ -2675,7 +2675,7 @@ class CampingApp {
                                 ${trip.difficulty_level}
                             </span>
                         ` : ''}
-                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                        <span class="px-2 py-1 text-xs rounded-full" style="background: var(--accent-blue); color: #000;">
                             <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
                             ${trip.trip_type.replace('_', ' ')}
                         </span>
@@ -2727,7 +2727,7 @@ class CampingApp {
                         </button>
                     ` : ''}
                     ${isOrganizer ? `
-                        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-md">
+                        <div class="px-4 py-2 rounded-md" style="background: var(--accent-blue); color: #000;">
                             <span class="material-icons text-sm mr-2">star</span>You organize this trip
                         </div>
                     ` : ''}
@@ -2884,7 +2884,7 @@ class CampingApp {
                             </div>
                         </div>
                         <div class="flex flex-col gap-2 ml-4">
-                            <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 flex items-center">
+                            <span class="px-3 py-1 text-sm rounded-full flex items-center" style="background: var(--accent-blue); color: #000;">
                                 <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
                                 ${trip.trip_type.replace('_', ' ')}
                             </span>
