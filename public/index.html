@@ -297,22 +297,21 @@
         }
         
         /* Material Icons in Hover States */
-        .ios-card:hover .material-icons,
-        .cursor-pointer:hover .material-icons {
-            color: var(--text-secondary) !important;
-        }
         
-        /* Ensure interactive elements have proper contrast */
-        .material-icons {
-            color: var(--text-tertiary) !important;
-        }
+/* Ensure interactive elements have proper contrast */
+.material-icons {
+    color: var(--text-light) !important;
+}
         
-        button .material-icons {
-            color: inherit !important;
-        }
+button .material-icons {
+    color: inherit !important;
+}
         
-        /* Focus States for Accessibility */
-        button:focus,
+/* Trip List Item Hover States */
+.cursor-pointer.transition-colors:hover {
+    background-color: var(--bg-hover) !important;
+    border-color: var(--border-light) !important;
+}
         input:focus,
         select:focus,
         textarea:focus {
@@ -1573,6 +1572,20 @@
             .mobile-text-center {
                 text-align: center !important;
             }
+        }
+        
+        /* Trip List Item Hover States */
+        .cursor-pointer.transition-colors:hover {
+            background-color: var(--bg-hover) !important;
+            border-color: var(--border-light) !important;
+        }
+        
+        .cursor-pointer.transition-colors:hover * {
+            color: var(--text-white) !important;
+        }
+        
+        .cursor-pointer.transition-colors:hover .material-icons {
+            color: var(--text-light) !important;
         }
     </style>
 </head>
