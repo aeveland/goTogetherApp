@@ -28,11 +28,11 @@
             --bg-card: #1e293b;
             --bg-modal: #0f172a;
             
-            /* Text Colors */
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-tertiary: #94a3b8;
-            --text-muted: #64748b;
+            /* Text Colors - High Contrast */
+            --text-primary: #ffffff;
+            --text-secondary: #e2e8f0;
+            --text-tertiary: #cbd5e1;
+            --text-muted: #94a3b8;
             
             /* Border Colors */
             --border-primary: #334155;
@@ -60,6 +60,20 @@
             margin: 0;
             padding: 0;
         }
+
+        /* Dark Theme Text Contrast Fixes */
+        .text-gray-900 { color: var(--text-primary) !important; }
+        .text-gray-800 { color: var(--text-primary) !important; }
+        .text-gray-700 { color: var(--text-secondary) !important; }
+        .text-gray-600 { color: var(--text-tertiary) !important; }
+        .text-gray-500 { color: var(--text-muted) !important; }
+        
+        /* Theme Color Overrides */
+        .text-blue-600 { color: var(--primary-green) !important; }
+        .text-blue-800 { color: var(--primary-green-dark) !important; }
+        .hover\\:text-blue-800:hover { color: var(--primary-green-light) !important; }
+        .bg-blue-600 { background-color: var(--primary-green) !important; }
+        .hover\\:bg-blue-700:hover { background-color: var(--primary-green-dark) !important; }
 
         /* Dark Theme Button Styles */
         .ios-button-primary {
@@ -1268,17 +1282,17 @@
                 <h2 class="ios-title-2 mb-6 text-center">Sign In</h2>
                 <form id="loginFormElement">
                     <div class="mb-4">
-                        <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <label for="loginEmail" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Email</label>
                         <input type="email" id="loginEmail" required
                                class="w-full form-input">
                     </div>
                     <div class="mb-6">
-                        <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <label for="loginPassword" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Password</label>
                         <input type="password" id="loginPassword" required
                                class="w-full form-input">
                     </div>
                     <button type="submit" 
-                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                            class="w-full ios-button-primary">
                         Sign In
                     </button>
                 </form>
