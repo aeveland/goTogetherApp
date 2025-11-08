@@ -1574,53 +1574,116 @@ button .material-icons {
             }
         }
         
-        /* CONSISTENT BUTTON SYSTEM */
+        /* MOBILE-FIRST BUTTON SYSTEM */
         
-        /* Button Groups - Equal Width for 2-Action Pairs */
+        /* Mobile Button Base Styles */
+        .mobile-button-primary,
+        .mobile-button-secondary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            min-height: 44px;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .mobile-button-primary {
+            background: var(--green);
+            color: #000;
+        }
+        
+        .mobile-button-primary:hover {
+            background: var(--green-light);
+            transform: translateY(-1px);
+        }
+        
+        .mobile-button-secondary {
+            background: transparent;
+            color: var(--text-white);
+            border: 1px solid var(--border-light);
+        }
+        
+        .mobile-button-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--green);
+        }
+        
+        /* Button Groups - Mobile-First */
         .button-group {
             display: flex;
-            gap: 12px;
+            flex-direction: column;
+            gap: 8px;
             width: 100%;
         }
         
-        .button-group .btn-primary,
-        .button-group .btn-secondary,
-        .button-group .ios-button-primary,
-        .button-group .ios-button-secondary {
-            flex: 1;
-            min-width: 0;
+        .button-group > * {
+            flex: none;
+            width: 100%;
         }
         
-        /* Mobile Button Layout */
-        @media (max-width: 640px) {
+        /* Desktop Button Layout */
+        @media (min-width: 640px) {
             .button-group {
-                flex-direction: column;
-                gap: 8px;
+                flex-direction: row;
+                gap: 12px;
             }
             
-            .button-group .btn-primary,
-            .button-group .btn-secondary,
-            .button-group .ios-button-primary,
-            .button-group .ios-button-secondary {
-                width: 100%;
-                flex: none;
+            .button-group > * {
+                flex: 1;
+                width: auto;
             }
         }
         
-        /* Mobile Header Improvements */
+        /* Mobile Text Truncation */
+        .mobile-truncate {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        @media (min-width: 640px) {
+            .mobile-truncate {
+                max-width: none;
+            }
+        }
+        
+        /* Mobile Card Improvements */
         @media (max-width: 640px) {
-            .header-actions {
-                gap: 8px !important;
+            .ios-card {
+                margin-bottom: 12px !important;
+                padding: 16px !important;
+                border-radius: 12px !important;
             }
             
-            .header-actions button {
-                min-width: 44px !important;
-                padding: 8px 12px !important;
-                font-size: 14px !important;
+            .ios-card-large {
+                padding: 20px !important;
             }
             
-            .header-actions .material-icons {
-                font-size: 18px !important;
+            /* Mobile Typography Scale */
+            .ios-title-1 { font-size: 24px !important; }
+            .ios-title-2 { font-size: 20px !important; }
+            .ios-title-3 { font-size: 18px !important; }
+            .ios-headline { font-size: 16px !important; }
+            .ios-callout { font-size: 15px !important; }
+            .ios-footnote { font-size: 13px !important; }
+            .ios-caption { font-size: 12px !important; }
+            
+            /* Mobile Spacing */
+            .mb-6 { margin-bottom: 16px !important; }
+            .mb-8 { margin-bottom: 20px !important; }
+            .p-6 { padding: 16px !important; }
+            .p-4 { padding: 12px !important; }
+            
+            /* Mobile Grid Improvements */
+            .grid-cols-1.lg\\:grid-cols-3 {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
             }
         }
         
@@ -1640,25 +1703,29 @@ button .material-icons {
     </style>
 </head>
 <body class="min-h-screen">
-    <div class="container mx-auto px-4 py-6" style="max-width: 1200px;">
-        <!-- iOS Header -->
-        <div class="flex justify-between items-center mb-6 px-4">
-            <div class="min-w-0 flex-1">
-                <h1 class="ios-title-1 flex items-center">
-                    <span class="material-icons mr-3" style="font-size: 32px; color: var(--ios-green);">nature</span>
+    <div class="container mx-auto px-3 py-4 sm:px-4 sm:py-6" style="max-width: 1200px;">
+        <!-- Mobile-First Header -->
+        <div class="flex justify-between items-center mb-3 px-1 sm:px-4 sm:mb-4">
+            <!-- Mobile: No branding, Desktop: Minimal branding -->
+            <div class="min-w-0 flex-1 hidden sm:block">
+                <h1 class="text-xl font-semibold flex items-center" style="color: var(--text-primary);">
+                    <span class="material-icons mr-2" style="font-size: 24px; color: var(--green);">nature</span>
                     <span class="truncate">GoTogether</span>
                 </h1>
-                <p class="ios-subhead truncate mt-1">Discover and join amazing camping adventures!</p>
             </div>
-            <div id="headerUserSection" class="hidden header-actions flex items-center gap-3 flex-shrink-0">
-                <button id="headerUserProfileBtn" class="ios-button-compact ios-button-secondary">
-                    <span class="material-icons">account_circle</span>
-                    <span id="headerUserName" class="hidden sm:inline truncate-mobile"></span>
-                </button>
-                <button id="headerLogoutBtn" class="ios-button-compact ios-button-destructive">
-                    <span class="material-icons">logout</span>
-                    <span class="hidden sm:inline">Sign Out</span>
-                </button>
+            
+            <!-- Mobile: Full-width user section -->
+            <div id="headerUserSection" class="hidden w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2">
+                <div class="flex items-center gap-2 flex-1 sm:flex-none">
+                    <button id="headerUserProfileBtn" class="mobile-button-primary flex-1 sm:flex-none">
+                        <span class="material-icons mr-1">account_circle</span>
+                        <span id="headerUserName" class="truncate max-w-24 sm:max-w-none"></span>
+                    </button>
+                    <button id="headerLogoutBtn" class="mobile-button-secondary">
+                        <span class="material-icons">logout</span>
+                        <span class="hidden sm:inline ml-1">Sign Out</span>
+                    </button>
+                </div>
             </div>
         </div>
 
