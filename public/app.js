@@ -3051,6 +3051,19 @@ class CampingApp {
                         <div class="mb-6">
                             <h4 class="ios-callout font-medium text-gray-800 mb-3">Location</h4>
                             <div id="trip-detail-map" style="height: 250px; width: 100%; border-radius: 12px; background: var(--ios-gray-6);"></div>
+                            
+                            <!-- Google Maps Route Button -->
+                            <div class="button-group mt-4">
+                                <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}', '${trip.title.replace(/'/g, "\\'")}')" 
+                                        class="ios-button-secondary">
+                                    <span class="material-icons mr-2">directions</span>Get Directions
+                                </button>
+                                <div id="travelTimeCallout-${trip.id}" class="flex items-center justify-center px-3 py-2 rounded-lg" 
+                                     style="background: var(--bg-tertiary); color: var(--text-secondary); min-height: 44px;">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">schedule</span>
+                                    <span class="text-sm">Calculating route...</span>
+                                </div>
+                            </div>
                         </div>
 
                         ${trip.participants && trip.participants.length > 0 ? `
