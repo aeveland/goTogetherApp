@@ -1574,6 +1574,56 @@ button .material-icons {
             }
         }
         
+        /* CONSISTENT BUTTON SYSTEM */
+        
+        /* Button Groups - Equal Width for 2-Action Pairs */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+        
+        .button-group .btn-primary,
+        .button-group .btn-secondary,
+        .button-group .ios-button-primary,
+        .button-group .ios-button-secondary {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        /* Mobile Button Layout */
+        @media (max-width: 640px) {
+            .button-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .button-group .btn-primary,
+            .button-group .btn-secondary,
+            .button-group .ios-button-primary,
+            .button-group .ios-button-secondary {
+                width: 100%;
+                flex: none;
+            }
+        }
+        
+        /* Mobile Header Improvements */
+        @media (max-width: 640px) {
+            .header-actions {
+                gap: 8px !important;
+            }
+            
+            .header-actions button {
+                min-width: 44px !important;
+                padding: 8px 12px !important;
+                font-size: 14px !important;
+            }
+            
+            .header-actions .material-icons {
+                font-size: 18px !important;
+            }
+        }
+        
         /* Trip List Item Hover States */
         .cursor-pointer.transition-colors:hover {
             background-color: var(--bg-hover) !important;
@@ -1600,13 +1650,13 @@ button .material-icons {
                 </h1>
                 <p class="ios-subhead truncate mt-1">Discover and join amazing camping adventures!</p>
             </div>
-            <div id="headerUserSection" class="hidden flex items-center gap-2 flex-shrink-0">
+            <div id="headerUserSection" class="hidden header-actions flex items-center gap-3 flex-shrink-0">
                 <button id="headerUserProfileBtn" class="ios-button-compact ios-button-secondary">
-                    <span class="material-icons" style="font-size: 18px;">account_circle</span>
+                    <span class="material-icons">account_circle</span>
                     <span id="headerUserName" class="hidden sm:inline truncate-mobile"></span>
                 </button>
                 <button id="headerLogoutBtn" class="ios-button-compact ios-button-destructive">
-                    <span class="material-icons" style="font-size: 16px;">logout</span>
+                    <span class="material-icons">logout</span>
                     <span class="hidden sm:inline">Sign Out</span>
                 </button>
             </div>

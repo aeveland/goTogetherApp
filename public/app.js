@@ -1678,6 +1678,49 @@ class CampingApp {
         document.getElementById('registerFormElement').reset();
     }
 
+    // Google Maps Route Integration
+    async openGoogleMapsRoute(destination, tripTitle) {
+        try {
+            // Get user's address from profile
+            const userAddress = this.currentUser?.address;
+            
+            if (userAddress && userAddress !== 'Not specified') {
+                // Build route URL with user's address as origin
+                const origin = encodeURIComponent(userAddress);
+                const dest = encodeURIComponent(destination);
+                const googleMapsUrl = `https://www.google.com/maps/dir/${origin}/${dest}`;
+                
+                // Calculate and display travel time
+                this.calculateTravelTime(userAddress, destination, tripTitle);
+                
+                window.open(googleMapsUrl, '_blank');
+            } else {
+                // Fallback: Just open destination in Google Maps
+                const dest = encodeURIComponent(destination);
+                const googleMapsUrl = `https://www.google.com/maps/search/${dest}`;
+                window.open(googleMapsUrl, '_blank');
+                
+                // Show message about adding address for directions
+                this.showNotification('Add your address in profile settings to get personalized directions!', 'info');
+            }
+        } catch (error) {
+            console.error('Error opening Google Maps:', error);
+            this.showNotification('Unable to open directions', 'error');
+        }
+    }
+
+    async calculateTravelTime(origin, destination, tripTitle) {
+        // This would typically use Google Maps API, but for now we'll show a placeholder
+        // In a production app, you'd want to use the Google Maps Distance Matrix API
+        const travelTimeElement = document.querySelector(`[id*="travelTimeCallout"]`);
+        if (travelTimeElement) {
+            travelTimeElement.innerHTML = `
+                <span class="material-icons mr-1" style="font-size: 16px;">schedule</span>
+                <span class="text-sm">Route opened in Maps</span>
+            `;
+        }
+    }
+
     // Utility method to scroll to top smoothly
     scrollToTop() {
         window.scrollTo({
@@ -2601,6 +2644,19 @@ class CampingApp {
                     
                     <!-- Mini Map -->
                     <div id="${mapId}" style="height: 100px; width: 100%; border-radius: 8px; margin-bottom: 12px; background: #f3f4f6;" class="sm:h-[120px] sm:mb-4"></div>
+                    
+                    <!-- Google Maps Route Button -->
+                    <div class="button-group mb-4">
+                        <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}', '${trip.title.replace(/'/g, "\\'")}')" 
+                                class="ios-button-secondary">
+                            <span class="material-icons mr-2">directions</span>Get Directions
+                        </button>
+                        <div id="travelTimeCallout-${trip.id}" class="flex items-center justify-center px-3 py-2 rounded-lg" 
+                             style="background: var(--bg-tertiary); color: var(--text-secondary); min-height: 44px;">
+                            <span class="material-icons mr-1" style="font-size: 16px;">schedule</span>
+                            <span class="text-sm">Calculating route...</span>
+                        </div>
+                    </div>
                     
                     <div class="space-y-3 mb-4">
                         <div class="flex items-center min-w-0">
