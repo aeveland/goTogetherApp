@@ -2106,7 +2106,7 @@ class CampingApp {
         if (!profileContainer) {
             profileContainer = document.createElement('div');
             profileContainer.id = 'simpleProfileContainer';
-            profileContainer.style.cssText = 'padding: 20px; background: #f9fafb; min-height: 100vh;';
+            profileContainer.style.cssText = 'padding: 20px; background: var(--bg-dark); min-height: 100vh;';
             document.body.appendChild(profileContainer);
         }
         
