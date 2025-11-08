@@ -2645,19 +2645,6 @@ class CampingApp {
                     <!-- Mini Map -->
                     <div id="${mapId}" style="height: 100px; width: 100%; border-radius: 8px; margin-bottom: 12px; background: #f3f4f6;" class="sm:h-[120px] sm:mb-4"></div>
                     
-                    <!-- Google Maps Route Button -->
-                    <div class="button-group mb-4">
-                        <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}', '${trip.title.replace(/'/g, "\\'")}')" 
-                                class="ios-button-secondary">
-                            <span class="material-icons mr-2">directions</span>Get Directions
-                        </button>
-                        <div id="travelTimeCallout-${trip.id}" class="flex items-center justify-center px-3 py-2 rounded-lg" 
-                             style="background: var(--bg-tertiary); color: var(--text-secondary); min-height: 44px;">
-                            <span class="material-icons mr-1" style="font-size: 16px;">schedule</span>
-                            <span class="text-sm">Calculating route...</span>
-                        </div>
-                    </div>
-                    
                     <div class="space-y-3 mb-4">
                         <div class="flex items-center min-w-0">
                             <span class="material-icons mr-3 flex-shrink-0" style="font-size: 18px; color: var(--ios-gray);">place</span>
