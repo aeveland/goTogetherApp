@@ -1808,11 +1808,12 @@ button .material-icons {
         
         #headerUserProfileBtn {
             min-width: 140px;
-            background: var(--green) !important;
+            background: var(--bg-tertiary) !important;
+            border: 1px solid var(--border-secondary) !important;
         }
         
         #headerUserProfileBtn * {
-            color: #000 !important;
+            color: var(--text-white) !important;
             font-weight: 700 !important;
         }
         
@@ -1860,7 +1861,7 @@ button .material-icons {
             <!-- User section with improved styling -->
             <div id="headerUserSection" class="hidden w-full sm:w-auto flex items-center justify-between sm:justify-end gap-3">
                 <div class="flex items-center gap-3 flex-1 sm:flex-none">
-                    <button id="headerUserProfileBtn" class="mobile-button-primary flex-1 sm:flex-none">
+                    <button id="headerUserProfileBtn" class="mobile-button-secondary flex-1 sm:flex-none">
                         <span class="material-icons mr-2">account_circle</span>
                         <span id="headerUserName" class="truncate max-w-32 sm:max-w-none"></span>
                     </button>
