@@ -202,12 +202,22 @@ class CampingApp {
             return;
         }
 
-        // Show pending tasks only
+        // Calculate progress
+        const completedTasks = this.userTasks.filter(task => task.is_completed);
+        const totalTasks = this.userTasks.length;
         const pendingTasks = this.userTasks.filter(task => !task.is_completed);
+        
         taskCount.textContent = pendingTasks.length;
 
+        // Add progress bar at the top
+        const progressHtml = `
+            <div class="mb-4 p-3 rounded-lg" style="background: var(--ios-gray-6);">
+                ${this.getProgressBar(completedTasks.length, totalTasks, 'task')}
+            </div>
+        `;
+
         if (pendingTasks.length === 0) {
-            container.innerHTML = `
+            container.innerHTML = progressHtml + `
                 <div class="text-center py-8 text-gray-500">
                     <span class="material-icons text-4xl mb-2 opacity-50" style="color: var(--ios-green);">check_circle</span>
                     <p class="ios-callout">All tasks completed! 🎉</p>
@@ -219,7 +229,7 @@ class CampingApp {
         // Show up to 5 most urgent tasks
         const tasksToShow = pendingTasks.slice(0, 5);
         
-        container.innerHTML = tasksToShow.map(task => {
+        container.innerHTML = progressHtml + tasksToShow.map(task => {
             const isOverdue = task.due_date && new Date(task.due_date) < new Date();
             const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : null;
             
@@ -403,12 +413,24 @@ class CampingApp {
             return;
         }
 
-        shoppingCount.textContent = this.userShoppingAssignments.length;
+        // Calculate progress
+        const purchasedItems = this.userShoppingAssignments.filter(item => item.is_purchased);
+        const totalItems = this.userShoppingAssignments.length;
+        const pendingItems = this.userShoppingAssignments.filter(item => !item.is_purchased);
+        
+        shoppingCount.textContent = pendingItems.length;
+
+        // Add progress bar at the top
+        const progressHtml = `
+            <div class="mb-4 p-3 rounded-lg" style="background: var(--ios-gray-6);">
+                ${this.getProgressBar(purchasedItems.length, totalItems, 'shopping')}
+            </div>
+        `;
 
         // Show up to 5 most urgent shopping items
-        const itemsToShow = this.userShoppingAssignments.slice(0, 5);
+        const itemsToShow = pendingItems.slice(0, 5);
         
-        container.innerHTML = itemsToShow.map(item => {
+        container.innerHTML = progressHtml + itemsToShow.map(item => {
             const priorityColor = {
                 'high': 'var(--ios-red)',
                 'medium': 'var(--ios-orange)', 
@@ -434,7 +456,7 @@ class CampingApp {
             `;
         }).join('');
 
-        if (this.userShoppingAssignments.length > 5) {
+        if (pendingItems.length > 5) {
             container.innerHTML += `
                 <div class="text-center pt-3">
                     <button class="ios-footnote text-blue-600 hover:text-blue-800">
@@ -466,9 +488,14 @@ class CampingApp {
         const container = document.getElementById(`shoppingList-${tripId}`);
         const countBadge = document.getElementById(`tripShoppingCount-${tripId}`);
         
-        // Update count badge
+        // Calculate progress
+        const purchasedItems = items ? items.filter(item => item.is_purchased) : [];
+        const totalItems = items ? items.length : 0;
+        const pendingItems = items ? items.filter(item => !item.is_purchased) : [];
+        
+        // Update count badge with pending items
         if (countBadge) {
-            countBadge.textContent = items ? items.length : 0;
+            countBadge.textContent = pendingItems.length;
         }
         
         // Create dietary restrictions summary
@@ -493,6 +520,13 @@ class CampingApp {
             `;
         }
         
+        // Add progress bar
+        const progressHtml = totalItems > 0 ? `
+            <div class="mb-4 p-4 rounded-lg" style="background: var(--ios-gray-6);">
+                ${this.getProgressBar(purchasedItems.length, totalItems, 'shopping')}
+            </div>
+        ` : '';
+
         if (!items || items.length === 0) {
             container.innerHTML = `
                 ${dietaryInfo}
@@ -573,7 +607,7 @@ class CampingApp {
             `;
         });
         
-        container.innerHTML = dietaryInfo + html;
+        container.innerHTML = dietaryInfo + progressHtml + html;
     }
 
     async loadTripWeather(tripId) {
@@ -802,6 +836,47 @@ class CampingApp {
                 <span class="material-icons mr-1" style="font-size: 14px;">${config.icon}</span>
                 ${config.text}
             </span>
+        `;
+    }
+
+    getProgressBar(completed, total, type = 'default') {
+        if (total === 0) {
+            return `
+                <div class="flex items-center text-sm text-gray-500">
+                    <span class="material-icons mr-2" style="font-size: 16px;">info</span>
+                    <span>No ${type}s yet</span>
+                </div>
+            `;
+        }
+
+        const percentage = Math.round((completed / total) * 100);
+        const isComplete = completed === total;
+        
+        const colors = {
+            tasks: { bg: '#E8F5E8', fill: '#34C759', icon: 'task_alt' },
+            shopping: { bg: '#E6F2FF', fill: '#007AFF', icon: 'shopping_cart' },
+            default: { bg: '#F2F2F7', fill: '#8E8E93', icon: 'analytics' }
+        };
+        
+        const color = colors[type] || colors.default;
+        
+        return `
+            <div class="flex items-center gap-3">
+                <span class="material-icons" style="font-size: 16px; color: ${color.fill};">${color.icon}</span>
+                <div class="flex-1">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium" style="color: ${isComplete ? color.fill : '#333'};">
+                            ${completed}/${total} ${type}${completed === 1 ? '' : 's'} ${type === 'shopping' ? 'purchased' : 'completed'}
+                        </span>
+                        <span class="text-xs text-gray-500">${percentage}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full transition-all duration-300" 
+                             style="width: ${percentage}%; background: ${color.fill};"></div>
+                    </div>
+                </div>
+                ${isComplete ? `<span class="material-icons text-green-600" style="font-size: 18px;">check_circle</span>` : ''}
+            </div>
         `;
     }
 
@@ -3502,12 +3577,12 @@ class CampingApp {
         
         if (!tasksList) return;
 
-        // Update count badge
-        if (countBadge) {
-            countBadge.textContent = tasks ? tasks.length : 0;
-        }
-
         if (!tasks || tasks.length === 0) {
+            // Update count badge
+            if (countBadge) {
+                countBadge.textContent = 0;
+            }
+            
             tasksList.innerHTML = `
                 <div class="text-center py-6 text-gray-500">
                     <span class="material-icons text-3xl mb-2 opacity-50">assignment</span>
@@ -3518,7 +3593,24 @@ class CampingApp {
             return;
         }
 
-        tasksList.innerHTML = tasks.map(task => this.createTaskCard(task)).join('');
+        // Calculate progress
+        const completedTasks = tasks.filter(task => task.is_completed);
+        const totalTasks = tasks.length;
+        const pendingTasks = tasks.filter(task => !task.is_completed);
+        
+        // Update count badge with pending tasks
+        if (countBadge) {
+            countBadge.textContent = pendingTasks.length;
+        }
+
+        // Add progress bar at the top
+        const progressHtml = `
+            <div class="mb-4 p-4 rounded-lg" style="background: var(--ios-gray-6);">
+                ${this.getProgressBar(completedTasks.length, totalTasks, 'task')}
+            </div>
+        `;
+
+        tasksList.innerHTML = progressHtml + tasks.map(task => this.createTaskCard(task)).join('');
 
         // Add event listeners for task actions
         tasks.forEach(task => {
