@@ -1522,6 +1522,52 @@ button .material-icons {
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
             }
 
+            /* Weather Scroll Enhancements */
+            .weather-scroll-container {
+                position: relative;
+            }
+
+            .scroll-hint-arrow {
+                animation: scrollBounce 2s ease-in-out infinite;
+            }
+
+            @keyframes scrollBounce {
+                0%, 20%, 50%, 80%, 100% {
+                    transform: translateX(0);
+                }
+                40% {
+                    transform: translateX(4px);
+                }
+                60% {
+                    transform: translateX(2px);
+                }
+            }
+
+            /* Scroll fade effects */
+            .scroll-fade-left, .scroll-fade-right {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .weather-scroll-container:hover .scroll-fade-left,
+            .weather-scroll-container:hover .scroll-fade-right {
+                opacity: 1;
+            }
+
+            /* Initial scroll hint animation */
+            .weather-forecast-container {
+                animation: initialScrollHint 3s ease-in-out 1s 1;
+            }
+
+            @keyframes initialScrollHint {
+                0%, 90%, 100% {
+                    transform: translateX(0);
+                }
+                45% {
+                    transform: translateX(-8px);
+                }
+            }
+
             /* Profile Mobile Optimization */
             .profile-container {
                 padding: 16px;
