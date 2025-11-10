@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/database');
+const pool = require('../database/db');
 
 // Debug route to check database schema
 router.get('/schema', async (req, res) => {
