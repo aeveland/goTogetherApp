@@ -120,6 +120,7 @@ router.post('/', authenticateToken, [
   body('startDate').isISO8601().withMessage('Invalid start date'),
   body('endDate').isISO8601().withMessage('Invalid end date'),
   body('tripType').isIn(['car_camping', 'backpacking', 'rv_camping', 'glamping']).withMessage('Invalid trip type'),
+  body('status').optional().isIn(['planning', 'active', 'completed']).withMessage('Invalid status'),
   body('isPublic').isBoolean().withMessage('isPublic must be boolean'),
   body('tripCode').optional().trim().custom((value, { req }) => {
     // Only validate trip code if it's provided or if the trip is private
@@ -148,6 +149,7 @@ router.post('/', authenticateToken, [
       startDate,
       endDate,
       tripType,
+      status = 'planning',
       isPublic,
       tripCode,
       latitude,
@@ -172,12 +174,12 @@ router.post('/', authenticateToken, [
     const result = await pool.query(`
       INSERT INTO camping_trips (
         title, description, location, start_date, end_date,
-        trip_type, organizer_id, is_public, trip_code, latitude, longitude
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        trip_type, status, organizer_id, is_public, trip_code, latitude, longitude
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
     `, [
       title, description, location, startDate, endDate,
-      tripType, req.user.id, isPublic, tripCode, latitude || null, longitude || null
+      tripType, status, req.user.id, isPublic, tripCode, latitude || null, longitude || null
     ]);
 
     // Automatically add organizer as participant

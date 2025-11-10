@@ -769,6 +769,39 @@ class CampingApp {
         return iconMap[weatherMain] || 'wb_cloudy';
     }
 
+    getStatusBadge(status) {
+        const statusConfig = {
+            'planning': {
+                color: '#007AFF',
+                background: '#E6F2FF',
+                text: 'Planning',
+                icon: 'schedule'
+            },
+            'active': {
+                color: '#34C759',
+                background: '#E8F5E8',
+                text: 'Active',
+                icon: 'play_circle'
+            },
+            'completed': {
+                color: '#8E8E93',
+                background: '#F2F2F7',
+                text: 'Completed',
+                icon: 'check_circle'
+            }
+        };
+
+        const config = statusConfig[status] || statusConfig['planning'];
+        
+        return `
+            <span class="px-3 py-1 text-xs rounded-full font-medium flex items-center" 
+                  style="background: ${config.background}; color: ${config.color};">
+                <span class="material-icons mr-1" style="font-size: 14px;">${config.icon}</span>
+                ${config.text}
+            </span>
+        `;
+    }
+
     getWindDirection(degrees) {
         if (!degrees) return '';
         const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
@@ -2681,13 +2714,14 @@ class CampingApp {
                 <div class="p-5">
                     <div class="flex justify-between items-start mb-4">
                         <h4 class="ios-headline truncate-2 flex-1 mr-3">${trip.title}</h4>
-                        ${trip.difficulty_level ? `
-                            <div class="flex gap-2 flex-shrink-0">
+                        <div class="flex gap-2 flex-shrink-0">
+                            ${this.getStatusBadge(trip.status || 'planning')}
+                            ${trip.difficulty_level ? `
                                 <span class="px-3 py-1 text-xs rounded-full font-medium" style="background: var(--ios-gray-6); color: var(--ios-secondary-label);">
                                     ${trip.difficulty_level}
                                 </span>
-                            </div>
-                        ` : ''}
+                            ` : ''}
+                        </div>
                     </div>
                     
                     <!-- Mini Map -->
@@ -2855,6 +2889,7 @@ class CampingApp {
             startDate: document.getElementById('tripStartDate').value,
             endDate: document.getElementById('tripEndDate').value,
             tripType: document.getElementById('tripType').value,
+            status: document.getElementById('tripStatus').value,
             isPublic: document.getElementById('tripPublic').checked,
             tripCode: tripCode
         };

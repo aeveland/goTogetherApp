@@ -392,4 +392,53 @@ router.get('/fix-coordinates-now', async (req, res) => {
   }
 });
 
+// Add trip status migration
+router.post('/add-trip-status', async (req, res) => {
+    try {
+        // Check if status column already exists
+        const checkColumn = await pool.query(`
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'camping_trips' AND column_name = 'status'
+        `);
+
+        if (checkColumn.rows.length > 0) {
+            return res.json({ 
+                success: true, 
+                message: 'Trip status column already exists',
+                alreadyExists: true 
+            });
+        }
+
+        // Add status column
+        await pool.query(`
+            ALTER TABLE camping_trips 
+            ADD COLUMN status VARCHAR(20) DEFAULT 'planning' 
+            CHECK (status IN ('planning', 'active', 'completed'))
+        `);
+
+        // Update existing trips
+        await pool.query(`
+            UPDATE camping_trips 
+            SET status = 'planning' 
+            WHERE status IS NULL
+        `);
+
+        // Add indexes
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_camping_trips_status ON camping_trips(status)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_camping_trips_status_date ON camping_trips(status, start_date)');
+
+        res.json({ 
+            success: true, 
+            message: 'Trip status column added successfully' 
+        });
+    } catch (error) {
+        console.error('Migration error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
 module.exports = router;
