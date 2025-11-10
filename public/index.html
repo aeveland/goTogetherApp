@@ -1379,37 +1379,59 @@ button .material-icons {
                 font-size: 17px;
                 font-weight: 600;
                 border-radius: 12px;
-                margin-bottom: 12px;
-                min-height: 50px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
+                min-height: 50px;
                 transition: all 0.2s ease;
             }
 
             .ios-button-primary {
-                background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
-                color: white;
+                background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%) !important;
+                color: white !important;
                 border: none;
                 box-shadow: 0 3px 12px rgba(0, 122, 255, 0.3);
+            }
+
+            .ios-button-primary * {
+                color: white !important;
             }
 
             .ios-button-primary:hover {
                 transform: translateY(-1px);
                 box-shadow: 0 5px 16px rgba(0, 122, 255, 0.4);
+                background: linear-gradient(135deg, #0056CC 0%, #003D99 100%) !important;
             }
 
             .ios-button-secondary {
-                background: white;
-                color: #007AFF;
-                border: 2px solid #007AFF;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                background: rgba(255, 255, 255, 0.1) !important;
+                color: white !important;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+            }
+
+            .ios-button-secondary * {
+                color: white !important;
             }
 
             .ios-button-secondary:hover {
-                background: #F0F8FF;
+                background: rgba(255, 255, 255, 0.2) !important;
+                border-color: rgba(255, 255, 255, 0.3);
                 transform: translateY(-1px);
+            }
+
+            /* Mobile Action Buttons Specific Styling */
+            .mobile-action-buttons {
+                width: 100%;
+                margin-top: 16px;
+            }
+
+            .mobile-action-buttons .ios-button-compact {
+                padding: 18px 24px;
+                font-size: 16px;
+                font-weight: 700;
+                min-height: 56px;
             }
 
             /* Profile Mobile Optimization */
@@ -2037,11 +2059,11 @@ button .material-icons {
                         <p class="ios-subhead mt-2">Your upcoming adventures</p>
                     </div>
                     <!-- Quick Actions -->
-                    <div class="flex gap-3">
-                        <button id="createTripBtn" class="ios-button-primary ios-button-compact">
+                    <div class="flex flex-col sm:flex-row gap-3 mobile-action-buttons">
+                        <button id="createTripBtn" class="ios-button-primary ios-button-compact w-full sm:w-auto">
                             <span class="material-icons mr-2" style="font-size: 16px;">add_circle</span>Create Trip
                         </button>
-                        <button id="joinTripBtn" class="ios-button-secondary ios-button-compact">
+                        <button id="joinTripBtn" class="ios-button-secondary ios-button-compact w-full sm:w-auto">
                             <span class="material-icons mr-2" style="font-size: 16px;">search</span>Join Trip
                         </button>
                     </div>
