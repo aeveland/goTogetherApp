@@ -134,76 +134,103 @@
         .ios-body { color: var(--text-secondary) !important; }
         
         /* Theme Color Overrides */
-        .text-blue-600 { color: var(--primary-green) !important; }
-        .text-blue-800 { color: var(--primary-green-dark) !important; }
-        .hover\\:text-blue-800:hover { color: var(--primary-green-light) !important; }
-        .bg-blue-600 { background-color: var(--primary-green) !important; }
-        .hover\\:bg-blue-700:hover { background-color: var(--primary-green-dark) !important; }
+        .text-blue-600 { color: var(--ios-blue) !important; }
+        .text-blue-800 { color: #0056CC !important; }
+        .hover\\:text-blue-800:hover { color: #003D99 !important; }
+        .bg-blue-600 { background-color: var(--ios-blue) !important; }
+        .hover\\:bg-blue-700:hover { background-color: #0056CC !important; }
 
         /* Dark Theme Button Styles */
         .ios-button-primary {
-            background: var(--primary-green);
-            color: #000000 !important;
+            background: var(--ios-blue);
+            color: white !important;
             border: none;
+            padding: 12px 24px;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
-            padding: 12px 20px;
-            min-height: 44px;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-md);
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            text-align: center;
-            display: flex;
+            transition: all 0.2s ease;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            min-height: 48px;
+            text-decoration: none;
             letter-spacing: 0.3px;
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 122, 255, 0.2);
         }
         .ios-button-primary * {
-            color: #000000 !important;
+            color: white !important;
         }
         .ios-button-primary:hover {
-            background: var(--primary-green-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-glow);
+            background: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
         }
         .ios-button-primary:active {
-            transform: translateY(-1px);
-            background: var(--primary-green-dark);
+            transform: translateY(0);
+            background: #003D99;
         }
 
         .ios-button-secondary {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-primary);
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--ios-blue) !important;
+            border: 1px solid rgba(0, 122, 255, 0.2);
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 500;
             padding: 12px 20px;
-            min-height: 44px;
-            transition: all 0.3s ease;
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            text-align: center;
-            display: flex;
+            transition: all 0.2s ease;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            min-height: 48px;
+            text-decoration: none;
             letter-spacing: 0.3px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+        .ios-button-secondary * {
+            color: var(--ios-blue) !important;
         }
         .ios-button-secondary:hover {
-            background: var(--ios-blue);
-            color: white;
+            background: rgba(0, 122, 255, 0.15);
+            border-color: rgba(0, 122, 255, 0.3);
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
         }
         .ios-button-secondary:active {
             transform: translateY(0);
+        }
+
+        /* Tertiary button for less important actions */
+        .ios-button-tertiary {
+            background: transparent;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-secondary);
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 40px;
+            text-decoration: none;
+        }
+        .ios-button-tertiary * {
+            color: var(--text-secondary) !important;
+        }
+        .ios-button-tertiary:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-primary);
+            color: var(--text-primary) !important;
+        }
+        .ios-button-tertiary:hover * {
+            color: var(--text-primary) !important;
         }
 
         .ios-button-destructive {
@@ -1354,10 +1381,10 @@ button .material-icons {
             }
 
             .ios-button-primary {
-                background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%) !important;
+                background: var(--ios-blue) !important;
                 color: white !important;
                 border: none;
-                box-shadow: 0 3px 12px rgba(0, 122, 255, 0.3);
+                box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
             }
 
             .ios-button-primary * {
@@ -1366,24 +1393,23 @@ button .material-icons {
 
             .ios-button-primary:hover {
                 transform: translateY(-1px);
-                box-shadow: 0 5px 16px rgba(0, 122, 255, 0.4);
-                background: linear-gradient(135deg, #0056CC 0%, #003D99 100%) !important;
+                box-shadow: 0 3px 12px rgba(0, 122, 255, 0.35);
+                background: #0056CC !important;
             }
 
             .ios-button-secondary {
-                background: rgba(255, 255, 255, 0.1) !important;
-                color: white !important;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(10px);
+                background: rgba(0, 122, 255, 0.1) !important;
+                color: var(--ios-blue) !important;
+                border: 1px solid rgba(0, 122, 255, 0.2);
             }
 
             .ios-button-secondary * {
-                color: white !important;
+                color: var(--ios-blue) !important;
             }
 
             .ios-button-secondary:hover {
-                background: rgba(255, 255, 255, 0.2) !important;
-                border-color: rgba(255, 255, 255, 0.3);
+                background: rgba(0, 122, 255, 0.15) !important;
+                border-color: rgba(0, 122, 255, 0.3);
                 transform: translateY(-1px);
             }
 
