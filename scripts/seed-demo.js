@@ -15,7 +15,7 @@ async function seedDemoData() {
         // Find Demo123 user
         const userResult = await client.query(
             'SELECT id FROM users WHERE email = $1',
-            ['demo123@example.com']
+            ['demo123@email.com']
         );
         
         if (userResult.rows.length === 0) {
