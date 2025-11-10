@@ -3516,16 +3516,16 @@ class CampingApp {
                                     <input type="radio" name="visibility" value="public" ${trip.is_public ? 'checked' : ''}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="ml-3">
-                                        <span class="font-medium text-gray-900">Public Trip</span>
-                                        <span class="block text-sm text-gray-700">Anyone can discover and join this trip</span>
+                                        <span class="font-medium" style="color: #000000;">Public Trip</span>
+                                        <span class="block text-sm" style="color: #333333;">Anyone can discover and join this trip</span>
                                     </span>
                                 </label>
                                 <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 ${!trip.is_public ? 'bg-blue-50 border-blue-200' : ''}">
                                     <input type="radio" name="visibility" value="private" ${!trip.is_public ? 'checked' : ''}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="ml-3">
-                                        <span class="font-medium text-gray-900">Private Trip</span>
-                                        <span class="block text-sm text-gray-700">Only people with the trip code can join</span>
+                                        <span class="font-medium" style="color: #000000;">Private Trip</span>
+                                        <span class="block text-sm" style="color: #333333;">Only people with the trip code can join</span>
                                     </span>
                                 </label>
                             </div>
