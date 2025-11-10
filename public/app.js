@@ -3134,8 +3134,9 @@ class CampingApp {
                             <div class="flex items-center gap-3">
                                 <span id="tripTaskCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
                                       style="background: var(--ios-blue); color: white;">0</span>
+                                <!-- Desktop Add Task Button -->
                                 <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
-                                        class="ios-button-primary ios-button-compact">
+                                        class="ios-button-primary ios-button-compact hidden md:flex">
                                     <span class="material-icons mr-1" style="font-size: 16px;">add</span>
                                     Add Task
                                 </button>
@@ -3144,6 +3145,12 @@ class CampingApp {
                         <div id="tasksList-${trip.id}" class="space-y-3">
                             <!-- Tasks will be loaded here -->
                         </div>
+                        <!-- Mobile Add Task Button -->
+                        <button id="addTaskBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
+                                class="ios-button-primary w-full mt-4 md:hidden">
+                            <span class="material-icons mr-2" style="font-size: 18px;">add</span>
+                            Add Task
+                        </button>
                     </div>
                 </div>
 
@@ -3158,8 +3165,9 @@ class CampingApp {
                             <div class="flex items-center gap-3">
                                 <span id="tripShoppingCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
                                       style="background: var(--ios-purple); color: white;">0</span>
+                                <!-- Desktop Add Item Button -->
                                 <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
-                                        class="ios-button-secondary ios-button-compact">
+                                        class="ios-button-secondary ios-button-compact hidden md:flex">
                                     <span class="material-icons mr-1" style="font-size: 16px;">add</span>
                                     Add Item
                                 </button>
@@ -3168,6 +3176,12 @@ class CampingApp {
                         <div id="shoppingList-${trip.id}" class="space-y-3">
                             <!-- Shopping items will be loaded here -->
                         </div>
+                        <!-- Mobile Add Item Button -->
+                        <button id="addShoppingItemBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
+                                class="ios-button-secondary w-full mt-4 md:hidden">
+                            <span class="material-icons mr-2" style="font-size: 18px;">add</span>
+                            Add Item
+                        </button>
                     </div>
                 </div>
             </div>
@@ -3295,18 +3309,30 @@ class CampingApp {
         }
 
 
-        // Add task button event listener
+        // Add task button event listeners (both desktop and mobile)
         const addTaskBtn = document.getElementById(`addTaskBtn-${trip.id}`);
+        const addTaskBtnMobile = document.getElementById(`addTaskBtn-mobile-${trip.id}`);
         if (addTaskBtn) {
             addTaskBtn.addEventListener('click', () => {
                 this.showAddTaskModal(trip.id);
             });
         }
+        if (addTaskBtnMobile) {
+            addTaskBtnMobile.addEventListener('click', () => {
+                this.showAddTaskModal(trip.id);
+            });
+        }
 
-        // Add shopping item button event listener
+        // Add shopping item button event listeners (both desktop and mobile)
         const addShoppingBtn = document.getElementById(`addShoppingItemBtn-${trip.id}`);
+        const addShoppingBtnMobile = document.getElementById(`addShoppingItemBtn-mobile-${trip.id}`);
         if (addShoppingBtn) {
             addShoppingBtn.addEventListener('click', () => {
+                this.showAddShoppingModal(trip.id);
+            });
+        }
+        if (addShoppingBtnMobile) {
+            addShoppingBtnMobile.addEventListener('click', () => {
                 this.showAddShoppingModal(trip.id);
             });
         }
