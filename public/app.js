@@ -2692,15 +2692,46 @@ class CampingApp {
         return code;
     }
 
-    handleJoinByCode() {
+    async handleJoinByCode() {
         const tripCode = document.getElementById('tripCode').value.trim();
         if (!tripCode) {
             this.showMessage('Please enter a trip code', 'error');
             return;
         }
         
-        // TODO: Implement join by code functionality
-        this.showMessage('Join by code feature coming soon!', 'info');
+        try {
+            const response = await fetch('/api/trips/join-by-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ tripCode })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage(`Successfully joined "${data.trip.title}"!`, 'success');
+                // Clear the input
+                document.getElementById('tripCode').value = '';
+                // Refresh user's trips and go back to dashboard
+                setTimeout(() => {
+                    this.loadMyTrips();
+                    this.showMyTripsView();
+                }, 1500);
+            } else {
+                if (data.errors) {
+                    const errorMessages = data.errors.map(err => err.msg).join(', ');
+                    this.showMessage(errorMessages, 'error');
+                } else {
+                    this.showMessage(data.error || 'Failed to join trip', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error joining trip by code:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
     }
 
     async loadAllTripsAndFilterMine() {

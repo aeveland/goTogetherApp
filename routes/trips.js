@@ -528,4 +528,77 @@ router.delete('/:id', authenticateToken, [
   }
 });
 
+// Join trip by code
+router.post('/join-by-code', authenticateToken, [
+  body('tripCode').trim().isLength({ min: 1 }).withMessage('Trip code is required')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { tripCode } = req.body;
+    const userId = req.user.id;
+
+    // Find trip by code
+    const tripResult = await pool.query(`
+      SELECT * FROM camping_trips 
+      WHERE trip_code = $1 AND is_active = true
+    `, [tripCode.toUpperCase()]);
+
+    if (tripResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Invalid trip code. Please check the code and try again.' });
+    }
+
+    const trip = tripResult.rows[0];
+
+    // Check if user is already a participant
+    const existingParticipant = await pool.query(`
+      SELECT * FROM trip_participants 
+      WHERE trip_id = $1 AND user_id = $2
+    `, [trip.id, userId]);
+
+    if (existingParticipant.rows.length > 0) {
+      return res.status(400).json({ error: 'You are already a member of this trip.' });
+    }
+
+    // Check if user is the organizer
+    if (trip.organizer_id === userId) {
+      return res.status(400).json({ error: 'You cannot join your own trip.' });
+    }
+
+    // Check if trip is at capacity
+    const participantCount = await pool.query(`
+      SELECT COUNT(*) as count FROM trip_participants 
+      WHERE trip_id = $1 AND status = 'confirmed'
+    `, [trip.id]);
+
+    if (parseInt(participantCount.rows[0].count) >= trip.max_participants) {
+      return res.status(400).json({ error: 'This trip is at full capacity.' });
+    }
+
+    // Add user as participant
+    await pool.query(`
+      INSERT INTO trip_participants (trip_id, user_id, status, joined_at)
+      VALUES ($1, $2, 'confirmed', NOW())
+    `, [trip.id, userId]);
+
+    res.json({ 
+      message: 'Successfully joined the trip!', 
+      trip: {
+        id: trip.id,
+        title: trip.title,
+        location: trip.location,
+        start_date: trip.start_date,
+        end_date: trip.end_date
+      }
+    });
+
+  } catch (error) {
+    console.error('Error joining trip by code:', error);
+    res.status(500).json({ error: 'Failed to join trip. Please try again.' });
+  }
+});
+
 module.exports = router;
