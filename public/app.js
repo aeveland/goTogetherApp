@@ -3543,20 +3543,20 @@ class CampingApp {
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-3">Trip Visibility *</label>
                             <div class="space-y-3">
-                                <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-blue-100 cursor-pointer transition-all duration-200" style="background-color: #dbeafe !important; border-color: #93c5fd !important;">
+                                <label class="flex items-center p-4 rounded-xl cursor-pointer transition-all duration-200 ${trip.is_public ? 'bg-blue-50 border-blue-200' : ''}" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary); color: var(--text-primary);">
                                     <input type="radio" name="visibility" value="public" ${trip.is_public ? 'checked' : ''}
-                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                           class="h-4 w-4" style="accent-color: var(--ios-blue);">
                                     <span class="ml-3">
-                                        <span style="color: #1f2937 !important; font-weight: bold !important; font-size: 16px !important; display: block !important;">Public Trip</span>
-                                        <span style="color: #374151 !important; font-size: 14px !important; display: block !important; margin-top: 4px !important;">Anyone can discover and join this trip</span>
+                                        <span style="color: var(--text-primary); font-weight: 600; font-size: 16px; display: block;">Public Trip</span>
+                                        <span style="color: var(--text-secondary); font-size: 14px; display: block; margin-top: 4px;">Anyone can discover and join this trip</span>
                                     </span>
                                 </label>
-                                <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-blue-100 cursor-pointer transition-all duration-200" style="background-color: #dbeafe !important; border-color: #93c5fd !important;">
+                                <label class="flex items-center p-4 rounded-xl cursor-pointer transition-all duration-200 ${!trip.is_public ? 'bg-blue-50 border-blue-200' : ''}" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary); color: var(--text-primary);">
                                     <input type="radio" name="visibility" value="private" ${!trip.is_public ? 'checked' : ''}
-                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                           class="h-4 w-4" style="accent-color: var(--ios-blue);">
                                     <span class="ml-3">
-                                        <span style="color: #1f2937 !important; font-weight: bold !important; font-size: 16px !important; display: block !important;">Private Trip</span>
-                                        <span style="color: #374151 !important; font-size: 14px !important; display: block !important; margin-top: 4px !important;">Only people with the trip code can join</span>
+                                        <span style="color: var(--text-primary); font-weight: 600; font-size: 16px; display: block;">Private Trip</span>
+                                        <span style="color: var(--text-secondary); font-size: 14px; display: block; margin-top: 4px;">Only people with the trip code can join</span>
                                     </span>
                                 </label>
                             </div>
