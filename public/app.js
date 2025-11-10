@@ -3179,13 +3179,13 @@ class CampingApp {
 
                     <!-- Trip Code -->
                     ${trip.trip_code ? `
-                        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                            <h4 class="ios-callout font-medium text-gray-800 mb-3 flex items-center">
+                        <div class="mb-6 p-4 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
+                            <h4 class="mb-3 flex items-center" style="color: var(--text-primary); font-weight: 600; font-size: 16px;">
                                 <span class="material-icons mr-2" style="font-size: 18px; color: var(--ios-blue);">share</span>
                                 Trip Code
                             </h4>
                             <div class="flex items-center gap-3">
-                                <div class="flex-1 p-3 bg-white rounded-lg border border-gray-200 font-mono text-lg font-bold text-center text-gray-800">
+                                <div class="flex-1 p-3 rounded-lg font-mono text-lg font-bold text-center" style="background: var(--bg-tertiary); border: 1px solid var(--border-secondary); color: var(--text-primary);">
                                     ${trip.trip_code}
                                 </div>
                                 <button onclick="app.copyTripCode('${trip.trip_code}')" 
@@ -3194,7 +3194,7 @@ class CampingApp {
                                     Copy
                                 </button>
                             </div>
-                            <p class="text-sm text-gray-600 mt-2">Share this code with friends so they can join your trip</p>
+                            <p class="text-sm mt-2" style="color: var(--text-secondary);">Share this code with friends so they can join your trip</p>
                         </div>
                     ` : ''}
                     
