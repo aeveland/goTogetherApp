@@ -625,14 +625,14 @@ class CampingApp {
         const container = document.getElementById(`weatherForecast-${tripId}`);
         if (!container) return;
 
-        // Current weather
+        // Current weather with proper validation
         const current = weatherData.current;
-        const currentTemp = Math.round(current.temp);
-        const feelsLike = Math.round(current.feels_like);
-        const humidity = current.humidity;
-        const windSpeed = Math.round(current.wind_speed);
+        const currentTemp = current.temp ? Math.round(current.temp) : '--';
+        const feelsLike = current.feels_like ? Math.round(current.feels_like) : '--';
+        const humidity = current.humidity || '--';
+        const windSpeed = current.wind_speed ? Math.round(current.wind_speed) : 0;
         const windDirection = this.getWindDirection(current.wind_deg);
-        const uvIndex = Math.round(current.uvi);
+        const uvIndex = current.uvi !== undefined ? Math.round(current.uvi) : 0;
         
         // 7-day forecast
         const daily = weatherData.daily.slice(0, 7);
@@ -659,17 +659,17 @@ class CampingApp {
                 <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
                     <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">air</span>
                     <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Wind</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">${windSpeed} mph ${windDirection}</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">${windSpeed < 1 ? 'Calm' : `${windSpeed} mph ${windDirection}`}</div>
                 </div>
                 <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
                     <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">water_drop</span>
                     <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Humidity</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">${humidity}%</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">${humidity !== '--' ? `${humidity}%` : 'N/A'}</div>
                 </div>
                 <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
                     <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">wb_sunny</span>
                     <div style="font-size: 12px; color: #666; margin-bottom: 4px;">UV Index</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">${uvIndex} ${this.getUVLevel(uvIndex)}</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">${uvIndex !== undefined ? `${uvIndex} ${this.getUVLevel(uvIndex)}` : 'N/A'}</div>
                 </div>
                 <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
                     <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">visibility</span>
@@ -688,15 +688,18 @@ class CampingApp {
                         const date = new Date(day.dt * 1000);
                         const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
                         const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        const high = Math.round(day.temp.max);
-                        const low = Math.round(day.temp.min);
-                        const rainChance = Math.round(day.pop * 100);
+                        
+                        // Handle missing temperature data properly
+                        const high = day.temp && day.temp.max ? Math.round(day.temp.max) : (day.temp ? Math.round(day.temp) : '--');
+                        const low = day.temp && day.temp.min ? Math.round(day.temp.min) : '--';
+                        const rainChance = day.pop ? Math.round(day.pop * 100) : 0;
+                        const weatherMain = day.weather && day.weather[0] ? day.weather[0].main : 'Clear';
                         
                         return `
                             <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px; ${index === 0 ? 'background: #f8f9ff; border-color: #e6eeff;' : ''}">
                                 <div style="font-size: 12px; font-weight: 600; color: ${index === 0 ? '#007AFF' : '#333'}; margin-bottom: 4px;">${dayName}</div>
                                 <div style="font-size: 11px; color: #666; margin-bottom: 8px;">${monthDay}</div>
-                                <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(day.weather[0].main)}</span>
+                                <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(weatherMain)}</span>
                                 <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 2px;">${high}°</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${low}°</div>
                                 ${rainChance > 10 ? `<div style="font-size: 11px; color: #007AFF;">💧${rainChance}%</div>` : ''}
