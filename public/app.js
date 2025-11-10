@@ -3516,16 +3516,16 @@ class CampingApp {
                                     <input type="radio" name="visibility" value="public" ${trip.is_public ? 'checked' : ''}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="ml-3">
-                                        <span class="font-medium text-gray-800">Public Trip</span>
-                                        <span class="block text-sm text-gray-500">Anyone can discover and join this trip</span>
+                                        <span class="font-medium text-gray-900">Public Trip</span>
+                                        <span class="block text-sm text-gray-700">Anyone can discover and join this trip</span>
                                     </span>
                                 </label>
                                 <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 ${!trip.is_public ? 'bg-blue-50 border-blue-200' : ''}">
                                     <input type="radio" name="visibility" value="private" ${!trip.is_public ? 'checked' : ''}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="ml-3">
-                                        <span class="font-medium text-gray-800">Private Trip</span>
-                                        <span class="block text-sm text-gray-500">Only people with the trip code can join</span>
+                                        <span class="font-medium text-gray-900">Private Trip</span>
+                                        <span class="block text-sm text-gray-700">Only people with the trip code can join</span>
                                     </span>
                                 </label>
                             </div>
@@ -3538,16 +3538,21 @@ class CampingApp {
                                       placeholder="Describe the camping trip, what to expect, what to bring, etc.">${trip.description || ''}</textarea>
                         </div>
 
-                        <div class="flex gap-3">
-                            <button type="submit" class="ios-button-primary flex-1">
-                                <span class="material-icons mr-2" style="font-size: 16px;">save</span>Update Trip
-                            </button>
-                            <button type="button" id="cancelEditTripBtn" class="ios-button-secondary flex-1">
-                                <span class="material-icons mr-2" style="font-size: 16px;">close</span>Cancel
-                            </button>
+                        <!-- Mobile: Stack buttons vertically, Desktop: 2+1 layout -->
+                        <div class="space-y-3 md:space-y-0">
+                            <!-- Primary actions row -->
+                            <div class="flex flex-col md:flex-row gap-3">
+                                <button type="submit" class="ios-button-primary w-full md:flex-1">
+                                    <span class="material-icons mr-2" style="font-size: 16px;">save</span>Update Trip
+                                </button>
+                                <button type="button" id="cancelEditTripBtn" class="ios-button-secondary w-full md:flex-1">
+                                    <span class="material-icons mr-2" style="font-size: 16px;">close</span>Cancel
+                                </button>
+                            </div>
+                            <!-- Delete button separate row -->
                             <button type="button" id="deleteEditTripBtn" data-trip-id="${trip.id}"
-                                    class="flex-1 px-4 py-3 border border-red-300 text-red-700 bg-white rounded-xl hover:bg-red-50 hover:border-red-400 transition-all duration-200 flex items-center justify-center font-medium">
-                                <span class="material-icons mr-2" style="font-size: 16px;">delete</span>Delete
+                                    class="w-full px-4 py-3 border border-red-300 text-red-700 bg-white rounded-xl hover:bg-red-50 hover:border-red-400 transition-all duration-200 flex items-center justify-center font-medium">
+                                <span class="material-icons mr-2" style="font-size: 16px;">delete</span>Delete Trip
                             </button>
                         </div>
                     </form>
