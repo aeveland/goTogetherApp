@@ -1847,7 +1847,9 @@ class CampingApp {
             
             const map = L.map(mapDiv, {
                 center: [lat, lon],
-                zoom: 12
+                zoom: 12,
+                zoomControl: true,
+                attributionControl: true
             });
 
             // Store reference
@@ -1861,10 +1863,17 @@ class CampingApp {
                 .bindPopup(`<b>${location}</b>`)
                 .openPopup();
 
-            // Force resize after delay
+            // Force resize after delay and ensure controls are visible
             setTimeout(() => {
                 if (map) {
                     map.invalidateSize();
+                    // Force controls to be visible
+                    const zoomControl = container.querySelector('.leaflet-control-zoom');
+                    if (zoomControl) {
+                        zoomControl.style.visibility = 'visible';
+                        zoomControl.style.display = 'block';
+                        zoomControl.style.opacity = '1';
+                    }
                 }
             }, 100);
 
