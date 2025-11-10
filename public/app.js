@@ -2949,68 +2949,52 @@ class CampingApp {
         
         detailsSection.classList.remove('hidden');
         detailsSection.innerHTML = `
-            <!-- Trip Header with Key Actions -->
+            <!-- Trip Header -->
             <div class="ios-card mb-6">
                 <div class="p-6">
-                    <button id="backFromDetailsBtn" class="ios-button-secondary ios-button-compact mb-4">
+                    <!-- Back Button - Full Width -->
+                    <button id="backFromDetailsBtn" class="ios-button-secondary w-full mb-6">
                         <span class="material-icons mr-2" style="font-size: 16px;">arrow_back</span>Back to Trips
                     </button>
                     
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="flex-1 min-w-0">
-                            <h1 class="ios-title-1 mb-2">${trip.title}</h1>
-                            <p class="ios-callout text-gray-600 mb-3">${trip.location}</p>
-                            <div class="flex items-center gap-4 text-sm text-gray-500">
-                                <span class="flex items-center">
-                                    <span class="material-icons mr-1" style="font-size: 16px;">event</span>
-                                    ${startDate} - ${endDate}
-                                </span>
-                                <span class="flex items-center">
-                                    <span class="material-icons mr-1" style="font-size: 16px;">group</span>
+                    <!-- Trip Info -->
+                    <div class="mb-6">
+                        <h1 class="ios-title-1 mb-2">${trip.title}</h1>
+                        <p class="ios-callout text-gray-600 mb-3">${trip.location}</p>
+                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
+                            <span class="flex items-center">
+                                <span class="material-icons mr-1" style="font-size: 16px;">event</span>
+                                ${startDate} - ${endDate}
                             </span>
                             <span class="flex items-center">
                                 <span class="material-icons mr-1" style="font-size: 16px;">group</span>
                                 ${trip.current_participants}/${trip.max_participants} joined
                             </span>
                         </div>
-                    </div>
-                    <div class="flex flex-col gap-2 ml-4">
-                        <span class="px-3 py-1 text-sm rounded-full flex items-center" style="background: var(--accent-blue); color: #000;">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                             <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
                             ${trip.trip_type.replace('_', ' ')}
                         </span>
-                        <div class="mb-4">
-                            <div class="flex justify-between items-start mb-3 sm:mb-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                    ${trip.trip_type.replace('_', ' ')}
-                                </span>
-                                ${isOrganizer ? `
-                                    <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
-                                            class="ios-button-secondary ios-button-compact hidden sm:flex">
-                                        <span class="material-icons mr-1" style="font-size: 14px;">edit</span>Edit
-                                    </button>
-                                ` : ''}
-                            </div>
-                            ${isOrganizer ? `
-                                <button id="editTripBtn-mobile-${trip.id}" data-trip-id="${trip.id}" 
-                                        class="ios-button-secondary w-full sm:hidden mobile-full-width-btn">
-                                    <span class="material-icons mr-2" style="font-size: 16px;">edit</span>Edit Trip
-                                </button>
-                            ` : ''}
-                        </div>
                     </div>
-                    <!-- Quick Action Buttons -->
-                    <div class="space-y-3 mb-4 mobile-trip-actions">
+                    
+                    <!-- Action Buttons - Each on own row, 100% width -->
+                    <div class="space-y-3">
                         <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary flex items-center justify-center py-4 w-full">
+                                class="ios-button-primary w-full py-4">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_task</span>
                             <span class="font-medium">Add Task</span>
                         </button>
                         <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary flex items-center justify-center py-4 w-full">
+                                class="ios-button-primary w-full py-4">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_shopping_cart</span>
                             <span class="font-medium">Add Item</span>
                         </button>
+                        ${isOrganizer ? `
+                            <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                    class="ios-button-secondary w-full py-4">
+                                <span class="material-icons mr-2" style="font-size: 16px;">edit</span>Edit Trip
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -3192,14 +3176,6 @@ class CampingApp {
         const editBtn = document.getElementById(`editTripBtn-${trip.id}`);
         if (editBtn) {
             editBtn.addEventListener('click', () => {
-                this.showEditTrip(trip.id);
-            });
-        }
-
-        // Add mobile edit trip button event listener
-        const editBtnMobile = document.getElementById(`editTripBtn-mobile-${trip.id}`);
-        if (editBtnMobile) {
-            editBtnMobile.addEventListener('click', () => {
                 this.showEditTrip(trip.id);
             });
         }
