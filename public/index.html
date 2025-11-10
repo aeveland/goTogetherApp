@@ -1434,6 +1434,58 @@ button .material-icons {
                 min-height: 56px;
             }
 
+            /* Mobile Full Width Buttons */
+            .mobile-full-width-btn {
+                padding: 16px 24px !important;
+                font-size: 16px !important;
+                font-weight: 700 !important;
+                min-height: 52px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            /* Mobile Trip Action Buttons */
+            .mobile-trip-actions .ios-button-primary {
+                padding: 18px 24px !important;
+                font-size: 16px !important;
+                min-height: 56px !important;
+            }
+
+            /* Weather Forecast Mobile Improvements */
+            .weather-forecast-scroll {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(0, 122, 255, 0.3) transparent;
+            }
+
+            .weather-forecast-scroll::-webkit-scrollbar {
+                height: 6px;
+            }
+
+            .weather-forecast-scroll::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.1);
+                border-radius: 3px;
+            }
+
+            .weather-forecast-scroll::-webkit-scrollbar-thumb {
+                background: rgba(0, 122, 255, 0.3);
+                border-radius: 3px;
+            }
+
+            .weather-forecast-scroll::-webkit-scrollbar-thumb:hover {
+                background: rgba(0, 122, 255, 0.5);
+            }
+
+            .weather-day-card {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .weather-day-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            }
+
             /* Profile Mobile Optimization */
             .profile-container {
                 padding: 16px;
@@ -2114,13 +2166,18 @@ button .material-icons {
                         <!-- Upcoming Trips Section -->
                         <div class="ios-card">
                             <div class="p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="ios-title-3 flex items-center">
-                                        <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-green);">event</span>
-                                        Upcoming Trips
-                                    </h3>
-                                    <button id="browseTripsBtn" class="ios-button-secondary ios-button-compact">
-                                        <span class="material-icons mr-1" style="font-size: 14px;">public</span>Browse All
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-3 sm:mb-4">
+                                        <h3 class="ios-title-3 flex items-center">
+                                            <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-green);">event</span>
+                                            Upcoming Trips
+                                        </h3>
+                                        <button id="browseTripsBtn" class="ios-button-secondary ios-button-compact hidden sm:flex">
+                                            <span class="material-icons mr-1" style="font-size: 14px;">public</span>Browse All
+                                        </button>
+                                    </div>
+                                    <button id="browseTripsBtn-mobile" class="ios-button-secondary w-full sm:hidden mobile-full-width-btn">
+                                        <span class="material-icons mr-2" style="font-size: 16px;">public</span>Browse All Trips
                                     </button>
                                 </div>
                                 <div id="dashboardUpcomingTrips" class="space-y-4">

@@ -56,6 +56,7 @@ class CampingApp {
         document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripModal());
         document.getElementById('joinTripBtn').addEventListener('click', () => this.showJoinTripsView());
         document.getElementById('browseTripsBtn').addEventListener('click', () => this.showBrowseTripsView());
+        document.getElementById('browseTripsBtn-mobile').addEventListener('click', () => this.showBrowseTripsView());
         document.getElementById('backToMyTripsBtn').addEventListener('click', () => this.showMyTripsView());
         
         // Inline form actions
@@ -678,26 +679,28 @@ class CampingApp {
             </div>
 
             <!-- 7-Day Forecast -->
-            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 32px;">
-                ${daily.map((day, index) => {
-                    const date = new Date(day.dt * 1000);
-                    const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
-                    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    const high = Math.round(day.temp.max);
-                    const low = Math.round(day.temp.min);
-                    const rainChance = Math.round(day.pop * 100);
-                    
-                    return `
-                        <div style="text-align: center; padding: 16px 8px; background: white; border: 1px solid #E5E5EA; border-radius: 8px;">
-                            <div style="font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">${dayName}</div>
-                            <div style="font-size: 11px; color: #666; margin-bottom: 8px;">${monthDay}</div>
-                            <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(day.weather[0].main)}</span>
-                            <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 2px;">${high}°</div>
-                            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${low}°</div>
-                            ${rainChance > 10 ? `<div style="font-size: 11px; color: #007AFF;">💧${rainChance}%</div>` : ''}
-                        </div>
-                    `;
-                }).join('')}
+            <div class="weather-forecast-container" style="margin-bottom: 32px;">
+                <div class="weather-forecast-scroll" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
+                    ${daily.map((day, index) => {
+                        const date = new Date(day.dt * 1000);
+                        const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+                        const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const high = Math.round(day.temp.max);
+                        const low = Math.round(day.temp.min);
+                        const rainChance = Math.round(day.pop * 100);
+                        
+                        return `
+                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: white; border: 1px solid #E5E5EA; border-radius: 8px; min-width: 120px; flex-shrink: 0;">
+                                <div style="font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px;">${dayName}</div>
+                                <div style="font-size: 11px; color: #666; margin-bottom: 8px;">${monthDay}</div>
+                                <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(day.weather[0].main)}</span>
+                                <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 2px;">${high}°</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${low}°</div>
+                                ${rainChance > 10 ? `<div style="font-size: 11px; color: #007AFF;">💧${rainChance}%</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
             </div>
             
             <!-- Camping Conditions -->
@@ -735,6 +738,14 @@ class CampingApp {
         const refreshBtn = document.getElementById(`refreshWeatherBtn-${tripId}`);
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
+                this.loadTripWeather(tripId);
+            });
+        }
+
+        // Add mobile refresh button event listener
+        const refreshBtnMobile = document.getElementById(`refreshWeatherBtn-mobile-${tripId}`);
+        if (refreshBtnMobile) {
+            refreshBtnMobile.addEventListener('click', () => {
                 this.loadTripWeather(tripId);
             });
         }
@@ -2956,33 +2967,47 @@ class CampingApp {
                                 </span>
                                 <span class="flex items-center">
                                     <span class="material-icons mr-1" style="font-size: 16px;">group</span>
-                                    ${trip.current_participants}/${trip.max_participants} joined
-                                </span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-2 ml-4">
-                            <span class="px-3 py-1 text-sm rounded-full flex items-center" style="background: var(--accent-blue); color: #000;">
-                                <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
-                                ${trip.trip_type.replace('_', ' ')}
                             </span>
+                            <span class="flex items-center">
+                                <span class="material-icons mr-1" style="font-size: 16px;">group</span>
+                                ${trip.current_participants}/${trip.max_participants} joined
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 ml-4">
+                        <span class="px-3 py-1 text-sm rounded-full flex items-center" style="background: var(--accent-blue); color: #000;">
+                            <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
+                            ${trip.trip_type.replace('_', ' ')}
+                        </span>
+                        <div class="mb-4">
+                            <div class="flex justify-between items-start mb-3 sm:mb-4">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    ${trip.trip_type.replace('_', ' ')}
+                                </span>
+                                ${isOrganizer ? `
+                                    <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                            class="ios-button-secondary ios-button-compact hidden sm:flex">
+                                        <span class="material-icons mr-1" style="font-size: 14px;">edit</span>Edit
+                                    </button>
+                                ` : ''}
+                            </div>
                             ${isOrganizer ? `
-                                <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
-                                        class="ios-button-secondary ios-button-compact">
-                                    <span class="material-icons mr-1" style="font-size: 14px;">edit</span>Edit
+                                <button id="editTripBtn-mobile-${trip.id}" data-trip-id="${trip.id}" 
+                                        class="ios-button-secondary w-full sm:hidden mobile-full-width-btn">
+                                    <span class="material-icons mr-2" style="font-size: 16px;">edit</span>Edit Trip
                                 </button>
                             ` : ''}
                         </div>
                     </div>
-                    
                     <!-- Quick Action Buttons -->
-                    <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 mobile-trip-actions">
                         <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary flex items-center justify-center py-4">
+                                class="ios-button-primary flex items-center justify-center py-4 w-full">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_task</span>
                             <span class="font-medium">Add Task</span>
                         </button>
                         <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary flex items-center justify-center py-4">
+                                class="ios-button-primary flex items-center justify-center py-4 w-full">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_shopping_cart</span>
                             <span class="font-medium">Add Item</span>
                         </button>
@@ -3030,21 +3055,27 @@ class CampingApp {
             <!-- Weather Forecast -->
             <div class="ios-card mb-6">
                 <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="ios-title-3 flex items-center">
-                            <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-blue);">wb_sunny</span>
-                            Weather Forecast
-                        </h3>
-                        <button id="refreshWeatherBtn-${trip.id}" data-trip-id="${trip.id}" 
-                                class="ios-button-secondary ios-button-compact">
-                            <span class="material-icons mr-1" style="font-size: 14px;">refresh</span>Refresh
-                        </button>
-                    </div>
-                    <div id="weatherForecast-${trip.id}">
-                        <div class="text-center py-4 text-gray-500">
-                            <span class="material-icons text-2xl mb-2 opacity-50">cloud</span>
-                            <p class="ios-footnote">Loading weather forecast...</p>
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="ios-title-3 flex items-center">
+                                <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-blue);">wb_sunny</span>
+                                Weather Forecast
+                            </h3>
+                            <button id="refreshWeatherBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                    class="ios-button-secondary ios-button-compact hidden sm:flex">
+                                <span class="material-icons mr-1" style="font-size: 14px;">refresh</span>Refresh
+                            </button>
                         </div>
+                        <div id="weatherForecast-${trip.id}">
+                            <div class="text-center py-4 text-gray-500">
+                                <span class="material-icons text-2xl mb-2 opacity-50">cloud</span>
+                                <p class="ios-footnote">Loading weather forecast...</p>
+                            </div>
+                        </div>
+                        <button id="refreshWeatherBtn-mobile-${trip.id}" data-trip-id="${trip.id}" 
+                                class="ios-button-secondary w-full sm:hidden mobile-full-width-btn mt-4">
+                            <span class="material-icons mr-2" style="font-size: 16px;">refresh</span>Refresh Weather
+                        </button>
                     </div>
                 </div>
             </div>
@@ -3161,6 +3192,14 @@ class CampingApp {
         const editBtn = document.getElementById(`editTripBtn-${trip.id}`);
         if (editBtn) {
             editBtn.addEventListener('click', () => {
+                this.showEditTrip(trip.id);
+            });
+        }
+
+        // Add mobile edit trip button event listener
+        const editBtnMobile = document.getElementById(`editTripBtn-mobile-${trip.id}`);
+        if (editBtnMobile) {
+            editBtnMobile.addEventListener('click', () => {
                 this.showEditTrip(trip.id);
             });
         }
