@@ -730,13 +730,13 @@ class CampingApp {
                         const weatherMain = day.weather && day.weather[0] ? day.weather[0].main : 'Clear';
                         
                         return `
-                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px; ${index === 0 ? 'background: #f8f9ff; border-color: #e6eeff;' : ''}">
-                                <div style="font-size: 12px; font-weight: 600; color: ${index === 0 ? '#007AFF' : '#333'}; margin-bottom: 4px;">${dayName}</div>
-                                <div style="font-size: 11px; color: #666; margin-bottom: 8px;">${monthDay}</div>
-                                <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(weatherMain)}</span>
-                                <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 2px;">${high}°</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${low}°</div>
-                                ${rainChance > 10 ? `<div style="font-size: 11px; color: #007AFF;">💧${rainChance}%</div>` : ''}
+                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: white; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); ${index === 0 ? 'background: #f0f8ff; border-color: #007AFF;' : ''}">
+                                <div style="font-size: 13px; font-weight: 700; color: ${index === 0 ? '#007AFF' : '#000'}; margin-bottom: 4px;">${dayName}</div>
+                                <div style="font-size: 11px; color: #666; margin-bottom: 8px; font-weight: 500;">${monthDay}</div>
+                                <span class="material-icons" style="font-size: 28px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(weatherMain)}</span>
+                                <div style="font-size: 16px; font-weight: bold; color: #000; margin-bottom: 2px;">${high}°</div>
+                                <div style="font-size: 13px; color: #666; margin-bottom: 4px; font-weight: 500;">${low}°</div>
+                                ${rainChance > 10 ? `<div style="font-size: 11px; color: #007AFF; font-weight: 600;">💧${rainChance}%</div>` : ''}
                             </div>
                         `;
                     }).join('')}
@@ -3092,6 +3092,22 @@ class CampingApp {
                             ${trip.trip_type.replace('_', ' ')}
                         </span>
                     </div>
+
+                    <!-- Trip Description -->
+                    ${trip.description ? `
+                        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="ios-callout font-medium text-gray-800 mb-2">About This Trip</h4>
+                            <p class="ios-footnote text-gray-600 leading-relaxed">${trip.description}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Who's Going -->
+                    <div class="mb-6">
+                        <h4 class="ios-callout font-medium text-gray-800 mb-3">Who's Going</h4>
+                        <div id="trip-participants-${trip.id}" class="space-y-2">
+                            <!-- Participants will be loaded here -->
+                        </div>
+                    </div>
                     
                     <!-- Action Buttons - Edit Trip only -->
                     <div>
@@ -3196,12 +3212,6 @@ class CampingApp {
                     </button>
                     
                     <div id="tripDetailsContent-${trip.id}" class="map-section mt-6">
-                        ${trip.description ? `
-                            <div class="mb-6">
-                                <h4 class="ios-callout font-medium text-gray-800 mb-2">Description</h4>
-                                <p class="ios-footnote text-gray-600 leading-relaxed">${trip.description}</p>
-                            </div>
-                        ` : ''}
 
                         <!-- Location Map -->
                         <div class="mb-6">
@@ -3317,11 +3327,12 @@ class CampingApp {
             });
         }
 
-        // Load tasks, shopping items, and weather for this trip
+        // Load tasks, shopping items, weather, and participants for this trip
         this.initializeCollapsibleSections(trip.id);
         this.loadTripTasks(trip.id);
         this.loadTripShopping(trip.id);
         this.loadTripWeather(trip.id);
+        this.loadTripParticipantsForDetail(trip.id);
 
         // Initialize full map for trip location
         setTimeout(async () => {
@@ -4027,6 +4038,51 @@ class CampingApp {
         } catch (error) {
             console.error('Error loading trip details:', error);
             this.showMessage('Network error', 'error');
+        }
+    }
+
+    async loadTripParticipantsForDetail(tripId) {
+        try {
+            const response = await fetch(`/api/trips/${tripId}/participants`, {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.renderTripParticipantsForDetail(tripId, data.participants);
+            }
+        } catch (error) {
+            console.error('Error loading trip participants:', error);
+        }
+    }
+
+    renderTripParticipantsForDetail(tripId, participants) {
+        const participantsDiv = document.getElementById(`trip-participants-${tripId}`);
+        if (!participantsDiv) return;
+        
+        if (participants && participants.length > 0) {
+            participantsDiv.innerHTML = participants.map(participant => `
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="material-icons text-blue-600" style="font-size: 20px;">person</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">${participant.first_name} ${participant.last_name}</div>
+                        <div class="text-sm text-gray-500">${participant.status === 'confirmed' ? 'Confirmed' : 'Pending'}</div>
+                    </div>
+                    ${participant.status === 'confirmed' ? 
+                        '<span class="material-icons text-green-600" style="font-size: 18px;">check_circle</span>' : 
+                        '<span class="material-icons text-orange-500" style="font-size: 18px;">schedule</span>'
+                    }
+                </div>
+            `).join('');
+        } else {
+            participantsDiv.innerHTML = `
+                <div class="text-center py-4 text-gray-500">
+                    <span class="material-icons text-2xl mb-2 opacity-50">person_add</span>
+                    <p class="text-sm">No participants yet</p>
+                </div>
+            `;
         }
     }
 
