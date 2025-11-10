@@ -679,15 +679,11 @@ class CampingApp {
             </div>
 
             <!-- 7-Day Forecast -->
-            <div class="weather-forecast-container" style="margin-bottom: 32px; position: relative;">
-                <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                    <h4 style="font-size: 16px; font-weight: 600; color: #333; margin: 0; flex: 1;">7-Day Forecast</h4>
-                    <div style="font-size: 12px; color: #666; display: flex; align-items: center;">
-                        <span style="margin-right: 4px;">Swipe</span>
-                        <span class="material-icons scroll-hint-arrow" style="font-size: 16px; color: #007AFF;">keyboard_arrow_right</span>
-                    </div>
+            <div class="weather-forecast-container" style="margin-bottom: 32px;">
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">7-Day Forecast</h4>
                 </div>
-                <div class="weather-forecast-scroll weather-scroll-container" style="display: flex; gap: 12px; overflow-x: auto; padding: 8px 0 16px 0; -webkit-overflow-scrolling: touch; scroll-behavior: smooth;">
+                <div class="weather-forecast-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; max-width: 100%;">
                     ${daily.map((day, index) => {
                         const date = new Date(day.dt * 1000);
                         const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -697,7 +693,7 @@ class CampingApp {
                         const rainChance = Math.round(day.pop * 100);
                         
                         return `
-                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: white; border: 1px solid #E5E5EA; border-radius: 8px; min-width: 110px; flex-shrink: 0; ${index === 0 ? 'border-color: #007AFF; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);' : ''}">
+                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px; ${index === 0 ? 'background: #f8f9ff; border-color: #e6eeff;' : ''}">
                                 <div style="font-size: 12px; font-weight: 600; color: ${index === 0 ? '#007AFF' : '#333'}; margin-bottom: 4px;">${dayName}</div>
                                 <div style="font-size: 11px; color: #666; margin-bottom: 8px;">${monthDay}</div>
                                 <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(day.weather[0].main)}</span>
@@ -707,14 +703,7 @@ class CampingApp {
                             </div>
                         `;
                     }).join('')}
-                    <!-- Scroll indicator card -->
-                    <div style="min-width: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                        <div style="width: 4px; height: 40px; background: linear-gradient(to bottom, #007AFF, transparent); border-radius: 2px; opacity: 0.5;"></div>
-                    </div>
                 </div>
-                <!-- Fade indicators for scroll -->
-                <div class="scroll-fade-left" style="position: absolute; left: 0; top: 40px; bottom: 16px; width: 20px; background: linear-gradient(to right, rgba(240, 248, 255, 0.8), transparent); pointer-events: none; z-index: 1;"></div>
-                <div class="scroll-fade-right" style="position: absolute; right: 0; top: 40px; bottom: 16px; width: 20px; background: linear-gradient(to left, rgba(240, 248, 255, 0.8), transparent); pointer-events: none; z-index: 1;"></div>
             </div>
             
             <!-- Camping Conditions -->
