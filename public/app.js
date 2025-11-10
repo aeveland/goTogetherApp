@@ -1760,6 +1760,43 @@ class CampingApp {
         this.showNotification(message, type);
     }
 
+    copyTripCode(tripCode) {
+        if (navigator.clipboard && window.isSecureContext) {
+            // Use modern clipboard API
+            navigator.clipboard.writeText(tripCode).then(() => {
+                this.showMessage('Trip code copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy trip code:', err);
+                this.fallbackCopyTripCode(tripCode);
+            });
+        } else {
+            // Fallback for older browsers or non-secure contexts
+            this.fallbackCopyTripCode(tripCode);
+        }
+    }
+
+    fallbackCopyTripCode(tripCode) {
+        // Create a temporary textarea element
+        const textArea = document.createElement('textarea');
+        textArea.value = tripCode;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            this.showMessage('Trip code copied to clipboard!', 'success');
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+            this.showMessage('Failed to copy trip code. Please copy manually: ' + tripCode, 'error');
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    }
+
     showNotification(message, type = 'info', duration = 5000) {
         const notificationContainer = document.getElementById('notificationContainer');
         
@@ -3108,6 +3145,27 @@ class CampingApp {
                             <!-- Participants will be loaded here -->
                         </div>
                     </div>
+
+                    <!-- Trip Code -->
+                    ${trip.trip_code ? `
+                        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <h4 class="ios-callout font-medium text-gray-800 mb-3 flex items-center">
+                                <span class="material-icons mr-2" style="font-size: 18px; color: var(--ios-blue);">share</span>
+                                Trip Code
+                            </h4>
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 p-3 bg-white rounded-lg border border-gray-200 font-mono text-lg font-bold text-center text-gray-800">
+                                    ${trip.trip_code}
+                                </div>
+                                <button onclick="app.copyTripCode('${trip.trip_code}')" 
+                                        class="ios-button-secondary ios-button-compact">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">content_copy</span>
+                                    Copy
+                                </button>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">Share this code with friends so they can join your trip</p>
+                        </div>
+                    ` : ''}
                     
                     <!-- Action Buttons - Edit Trip only -->
                     <div>
