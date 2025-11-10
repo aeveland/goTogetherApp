@@ -2978,14 +2978,14 @@ class CampingApp {
                     </div>
                     
                     <!-- Action Buttons - Each on own row, 100% width -->
-                    <div class="space-y-3">
+                    <div>
                         <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary w-full py-4">
+                                class="ios-button-primary w-full py-4 mb-3">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_task</span>
                             <span class="font-medium">Add Task</span>
                         </button>
                         <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary w-full py-4">
+                                class="ios-button-primary w-full py-4 mb-3">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_shopping_cart</span>
                             <span class="font-medium">Add Item</span>
                         </button>

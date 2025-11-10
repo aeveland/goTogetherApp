@@ -1468,17 +1468,23 @@ button .material-icons {
                 .ios-button-primary, .ios-button-secondary {
                     width: 100% !important;
                     max-width: none !important;
-                    margin: 0 !important;
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
                     box-sizing: border-box !important;
                 }
                 
-                .mobile-action-buttons, .mobile-trip-actions, .space-y-3 {
+                .mobile-action-buttons, .mobile-trip-actions {
                     width: 100% !important;
                 }
                 
-                .mobile-action-buttons > *, .mobile-trip-actions > *, .space-y-3 > * {
+                .mobile-action-buttons > *, .mobile-trip-actions > * {
                     width: 100% !important;
                     flex: none !important;
+                }
+                
+                /* Ensure proper button spacing */
+                .mb-3 {
+                    margin-bottom: 12px !important;
                 }
             }
 
@@ -2141,8 +2147,8 @@ button .material-icons {
                         <p class="ios-subhead mt-2">Your upcoming adventures</p>
                     </div>
                     <!-- Quick Actions - Each button on its own row -->
-                    <div class="space-y-3">
-                        <button id="createTripBtn" class="ios-button-primary ios-button-compact w-full">
+                    <div>
+                        <button id="createTripBtn" class="ios-button-primary ios-button-compact w-full mb-3">
                             <span class="material-icons mr-2" style="font-size: 16px;">add_circle</span>Create Trip
                         </button>
                         <button id="joinTripBtn" class="ios-button-secondary ios-button-compact w-full">
