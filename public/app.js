@@ -730,13 +730,13 @@ class CampingApp {
                         const weatherMain = day.weather && day.weather[0] ? day.weather[0].main : 'Clear';
                         
                         return `
-                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: white; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); ${index === 0 ? 'background: #f0f8ff; border-color: #007AFF;' : ''}">
-                                <div style="font-size: 13px; font-weight: 700; color: ${index === 0 ? '#007AFF' : '#000'}; margin-bottom: 4px;">${dayName}</div>
-                                <div style="font-size: 11px; color: #666; margin-bottom: 8px; font-weight: 500;">${monthDay}</div>
-                                <span class="material-icons" style="font-size: 28px; color: #007AFF; margin-bottom: 8px; display: block;">${this.getWeatherIcon(weatherMain)}</span>
-                                <div style="font-size: 16px; font-weight: bold; color: #000; margin-bottom: 2px;">${high}°</div>
-                                <div style="font-size: 13px; color: #666; margin-bottom: 4px; font-weight: 500;">${low}°</div>
-                                ${rainChance > 10 ? `<div style="font-size: 11px; color: #007AFF; font-weight: 600;">💧${rainChance}%</div>` : ''}
+                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; backdrop-filter: blur(10px); ${index === 0 ? 'background: rgba(0, 122, 255, 0.2); border-color: #007AFF;' : ''}">
+                                <div style="font-size: 13px; font-weight: 700; color: ${index === 0 ? '#87CEEB' : '#ffffff'}; margin-bottom: 4px;">${dayName}</div>
+                                <div style="font-size: 11px; color: #cccccc; margin-bottom: 8px; font-weight: 500;">${monthDay}</div>
+                                <span class="material-icons" style="font-size: 28px; color: #87CEEB; margin-bottom: 8px; display: block;">${this.getWeatherIcon(weatherMain)}</span>
+                                <div style="font-size: 16px; font-weight: bold; color: #ffffff; margin-bottom: 2px;">${high}°</div>
+                                <div style="font-size: 13px; color: #cccccc; margin-bottom: 4px; font-weight: 500;">${low}°</div>
+                                ${rainChance > 10 ? `<div style="font-size: 11px; color: #87CEEB; font-weight: 600;">💧${rainChance}%</div>` : ''}
                             </div>
                         `;
                     }).join('')}
