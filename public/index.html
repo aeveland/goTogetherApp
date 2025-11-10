@@ -2115,17 +2115,17 @@ button .material-icons {
             <!-- Dashboard (shown after login) -->
             <div id="dashboard">
                 <!-- Dashboard Header -->
-                <div class="flex justify-between items-center mb-8">
-                    <div>
+                <div class="mb-8">
+                    <div class="mb-6">
                         <h2 class="ios-title-1">My Camping Dashboard</h2>
                         <p class="ios-subhead mt-2">Your upcoming adventures</p>
                     </div>
-                    <!-- Quick Actions -->
-                    <div class="flex flex-col sm:flex-row gap-3 mobile-action-buttons">
-                        <button id="createTripBtn" class="ios-button-primary ios-button-compact w-full sm:w-auto">
+                    <!-- Quick Actions - Each button on its own row -->
+                    <div class="space-y-3">
+                        <button id="createTripBtn" class="ios-button-primary ios-button-compact w-full">
                             <span class="material-icons mr-2" style="font-size: 16px;">add_circle</span>Create Trip
                         </button>
-                        <button id="joinTripBtn" class="ios-button-secondary ios-button-compact w-full sm:w-auto">
+                        <button id="joinTripBtn" class="ios-button-secondary ios-button-compact w-full">
                             <span class="material-icons mr-2" style="font-size: 16px;">search</span>Join Trip
                         </button>
                     </div>
