@@ -3234,22 +3234,6 @@ class CampingApp {
                             </div>
                         </div>
 
-                        ${trip.participants && trip.participants.length > 0 ? `
-                            <div class="mb-6">
-                                <h4 class="ios-callout font-medium text-gray-800 mb-3">Who's Going (${trip.participants.length})</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    ${trip.participants.map(p => `
-                                        <div class="flex items-center p-3 rounded-lg" style="background: var(--ios-gray-6);">
-                                            <span class="material-icons text-xl text-gray-400 mr-3">account_circle</span>
-                                            <div>
-                                                <div class="ios-footnote font-medium text-gray-800">${p.name}</div>
-                                                <div class="ios-caption text-gray-500">joined ${new Date(p.joined_at).toLocaleDateString()}</div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -3332,7 +3316,13 @@ class CampingApp {
         this.loadTripTasks(trip.id);
         this.loadTripShopping(trip.id);
         this.loadTripWeather(trip.id);
-        this.loadTripParticipantsForDetail(trip.id);
+        
+        // Render participants if they're already in the trip data
+        if (trip.participants) {
+            this.renderTripParticipantsForDetail(trip.id, trip.participants);
+        } else {
+            this.loadTripParticipantsForDetail(trip.id);
+        }
 
         // Initialize full map for trip location
         setTimeout(async () => {
