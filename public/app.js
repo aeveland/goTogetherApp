@@ -140,13 +140,19 @@ class CampingApp {
 
     async loadDashboardData() {
         try {
-            // Load all user's trips and tasks in parallel
-            await Promise.all([
+            // Load all user's trips and tasks in parallel with better error handling
+            const results = await Promise.allSettled([
                 this.loadMyTrips(),
                 this.loadDashboardTasks(),
                 this.loadDashboardShopping(),
                 this.loadTripStatistics()
             ]);
+            
+            // Check for any failed requests
+            const failures = results.filter(result => result.status === 'rejected');
+            if (failures.length > 0) {
+                console.warn('Some dashboard data failed to load:', failures);
+            }
             
             // Update dashboard sections
             this.updateDashboardUpcomingTrips();
@@ -1516,8 +1522,11 @@ class CampingApp {
             const data = await response.json();
 
             if (response.ok) {
-                this.showMessage('Login successful!', 'success');
-                this.showDashboard(data.user);
+                this.showMessage('Welcome back!', 'success');
+                // Add small delay to ensure cookie is properly set
+                setTimeout(() => {
+                    this.showDashboard(data.user);
+                }, 200);
             } else {
                 this.showMessage(data.error || 'Login failed', 'error');
             }
