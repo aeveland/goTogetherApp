@@ -3093,18 +3093,8 @@ class CampingApp {
                         </span>
                     </div>
                     
-                    <!-- Action Buttons - Each on own row, 100% width -->
+                    <!-- Action Buttons - Edit Trip only -->
                     <div>
-                        <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary w-full py-3 mb-3">
-                            <span class="material-icons mr-2" style="font-size: 18px;">add_task</span>
-                            <span class="font-medium">Add Task</span>
-                        </button>
-                        <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-secondary w-full py-3 mb-3">
-                            <span class="material-icons mr-2" style="font-size: 18px;">add_shopping_cart</span>
-                            <span class="font-medium">Add Item</span>
-                        </button>
                         ${isOrganizer ? `
                             <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
                                     class="ios-button-tertiary w-full py-3">
@@ -3125,8 +3115,15 @@ class CampingApp {
                                 <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-blue);">checklist</span>
                                 Trip Tasks
                             </h3>
-                            <span id="tripTaskCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
-                                  style="background: var(--ios-blue); color: white;">0</span>
+                            <div class="flex items-center gap-3">
+                                <span id="tripTaskCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
+                                      style="background: var(--ios-blue); color: white;">0</span>
+                                <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
+                                        class="ios-button-primary ios-button-compact">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">add</span>
+                                    Add Task
+                                </button>
+                            </div>
                         </div>
                         <div id="tasksList-${trip.id}" class="space-y-3">
                             <!-- Tasks will be loaded here -->
@@ -3142,8 +3139,15 @@ class CampingApp {
                                 <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-purple);">shopping_cart</span>
                                 Shopping List
                             </h3>
-                            <span id="tripShoppingCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
-                                  style="background: var(--ios-purple); color: white;">0</span>
+                            <div class="flex items-center gap-3">
+                                <span id="tripShoppingCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
+                                      style="background: var(--ios-purple); color: white;">0</span>
+                                <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
+                                        class="ios-button-secondary ios-button-compact">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">add</span>
+                                    Add Item
+                                </button>
+                            </div>
                         </div>
                         <div id="shoppingList-${trip.id}" class="space-y-3">
                             <!-- Shopping items will be loaded here -->
