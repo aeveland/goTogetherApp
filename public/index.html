@@ -251,24 +251,7 @@
             transition: all 0.3s ease;
         }
         .ios-card:hover {
-            border-color: var(--border-secondary);
-            background-color: var(--bg-hover) !important;
-        }
-        
-        /* Ensure text visibility on card hover */
-        .ios-card:hover .ios-headline,
-        .ios-card:hover .ios-callout,
-        .ios-card:hover .ios-body,
-        .ios-card:hover .ios-title-3,
-        .ios-card:hover .ios-subhead,
-        .ios-card:hover span,
-        .ios-card:hover p {
-            color: var(--text-primary) !important;
-        }
-        
-        /* Keep material icons visible on hover */
-        .ios-card:hover .material-icons {
-            color: var(--text-secondary) !important;
+            background-color: rgba(0, 0, 0, 0.02);
         }
         
         /* COMPREHENSIVE HOVER STATE SYSTEM */
@@ -277,20 +260,7 @@
         button:hover { color: var(--text-primary) !important; }
         .cursor-pointer:hover { color: var(--text-primary) !important; }
         
-        /* Card Hover States */
-        .ios-card:hover {
-            border-color: var(--border-secondary);
-            background-color: var(--bg-hover) !important;
-        }
-        
-        /* Ensure ALL text in hovered cards is visible */
-        .ios-card:hover *,
-        .cursor-pointer:hover *,
-        .hover\\:bg-gray-50:hover *,
-        .hover\\:bg-gray-100:hover *,
-        .hover\\:bg-gray-200:hover * {
-            color: var(--text-primary) !important;
-        }
+        /* Card Hover States - Removed duplicate, keeping subtle hover only */
         
         /* Material Icons in Hover States */
         
