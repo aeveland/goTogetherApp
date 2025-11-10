@@ -1524,9 +1524,9 @@ class CampingApp {
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label for="modalItemCost">Estimated Cost ($)</label>
+                            <label for="modalItemCost">Estimated Cost ($) <span class="text-gray-500 text-sm">(optional)</span></label>
                             <input type="number" id="modalItemCost" name="estimatedCost" 
-                                   step="0.01" min="0" placeholder="0.00">
+                                   step="0.01" min="0" placeholder="Leave blank if unknown">
                         </div>
                         <div class="form-group">
                             <label for="modalItemPriority">Priority</label>

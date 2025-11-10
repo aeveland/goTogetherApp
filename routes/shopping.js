@@ -121,7 +121,7 @@ router.post('/trip/:tripId', authenticateToken, [
   body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description too long'),
   body('category').optional().trim().isLength({ max: 100 }).withMessage('Category too long'),
   body('quantity').optional().isInt({ min: 1 }).withMessage('Quantity must be positive integer'),
-  body('estimated_cost').optional().isFloat({ min: 0 }).withMessage('Cost must be positive number'),
+  body('estimated_cost').optional({ nullable: true, checkFalsy: true }).isFloat({ min: 0 }).withMessage('Cost must be positive number'),
   body('assigned_to').optional().trim(),
   body('priority').optional().isIn(['high', 'medium', 'low']).withMessage('Invalid priority'),
   body('notes').optional().trim().isLength({ max: 1000 }).withMessage('Notes too long')
@@ -185,7 +185,7 @@ router.put('/:itemId', authenticateToken, [
   body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description too long'),
   body('category').optional().trim().isLength({ max: 100 }).withMessage('Category too long'),
   body('quantity').optional().isInt({ min: 1 }).withMessage('Quantity must be positive integer'),
-  body('estimated_cost').optional().isFloat({ min: 0 }).withMessage('Cost must be positive number'),
+  body('estimated_cost').optional({ nullable: true, checkFalsy: true }).isFloat({ min: 0 }).withMessage('Cost must be positive number'),
   body('assigned_to').optional().trim(),
   body('priority').optional().isIn(['high', 'medium', 'low']).withMessage('Invalid priority'),
   body('notes').optional().trim().isLength({ max: 1000 }).withMessage('Notes too long')
