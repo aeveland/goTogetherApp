@@ -171,16 +171,37 @@ router.post('/', authenticateToken, [
     }
 
     // Create trip (handle missing latitude/longitude gracefully)
-    const result = await pool.query(`
-      INSERT INTO camping_trips (
-        title, description, location, start_date, end_date,
-        trip_type, status, organizer_id, is_public, trip_code, latitude, longitude
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-      RETURNING *
-    `, [
-      title, description, location, startDate, endDate,
-      tripType, status, req.user.id, isPublic, tripCode, latitude || null, longitude || null
-    ]);
+    // Try with status column first, fallback without it if column doesn't exist
+    let result;
+    try {
+      result = await pool.query(`
+        INSERT INTO camping_trips (
+          title, description, location, start_date, end_date,
+          trip_type, status, organizer_id, is_public, trip_code, latitude, longitude
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        RETURNING *
+      `, [
+        title, description, location, startDate, endDate,
+        tripType, status, req.user.id, isPublic, tripCode, latitude || null, longitude || null
+      ]);
+    } catch (error) {
+      // If status column doesn't exist, try without it
+      if (error.message.includes('column "status" of relation "camping_trips" does not exist')) {
+        console.log('Status column not found, creating trip without status');
+        result = await pool.query(`
+          INSERT INTO camping_trips (
+            title, description, location, start_date, end_date,
+            trip_type, organizer_id, is_public, trip_code, latitude, longitude
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          RETURNING *
+        `, [
+          title, description, location, startDate, endDate,
+          tripType, req.user.id, isPublic, tripCode, latitude || null, longitude || null
+        ]);
+      } else {
+        throw error;
+      }
+    }
 
     // Automatically add organizer as participant
     await pool.query(`

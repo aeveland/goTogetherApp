@@ -50,20 +50,35 @@ router.post('/register', [
       phone: phone?.trim() || null
     };
 
-    // Create user with profile fields
-    const result = await pool.query(`
-      INSERT INTO users (
-        email, password_hash, first_name, last_name,
-        bio, camper_type, group_size, dietary_restrictions, phone
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-      RETURNING id, email, first_name, last_name, bio, camper_type, 
-                group_size, dietary_restrictions, phone
-    `, [
-      email, passwordHash, firstName, lastName,
-      cleanedProfileData.bio, cleanedProfileData.camperType, 
-      cleanedProfileData.groupSize, cleanedProfileData.dietaryRestrictions, 
-      cleanedProfileData.phone
-    ]);
+    // Create user with profile fields (fallback to basic fields if profile columns don't exist)
+    let result;
+    try {
+      result = await pool.query(`
+        INSERT INTO users (
+          email, password_hash, first_name, last_name,
+          bio, camper_type, group_size, dietary_restrictions, phone
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+        RETURNING id, email, first_name, last_name, bio, camper_type, 
+                  group_size, dietary_restrictions, phone
+      `, [
+        email, passwordHash, firstName, lastName,
+        cleanedProfileData.bio, cleanedProfileData.camperType, 
+        cleanedProfileData.groupSize, cleanedProfileData.dietaryRestrictions, 
+        cleanedProfileData.phone
+      ]);
+    } catch (error) {
+      // If profile columns don't exist, create user with basic fields only
+      if (error.message.includes('column') && error.message.includes('does not exist')) {
+        console.log('Profile columns not found, creating user with basic fields only');
+        result = await pool.query(`
+          INSERT INTO users (email, password_hash, first_name, last_name) 
+          VALUES ($1, $2, $3, $4) 
+          RETURNING id, email, first_name, last_name
+        `, [email, passwordHash, firstName, lastName]);
+      } else {
+        throw error;
+      }
+    }
 
     const user = result.rows[0];
 
