@@ -1460,6 +1460,26 @@ button .material-icons {
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 12px !important;
+                width: 100% !important;
+            }
+
+            /* Force all buttons to be truly 100% width on mobile */
+            @media (max-width: 768px) {
+                .ios-button-primary, .ios-button-secondary {
+                    width: 100% !important;
+                    max-width: none !important;
+                    margin: 0 !important;
+                    box-sizing: border-box !important;
+                }
+                
+                .mobile-action-buttons, .mobile-trip-actions, .space-y-3 {
+                    width: 100% !important;
+                }
+                
+                .mobile-action-buttons > *, .mobile-trip-actions > *, .space-y-3 > * {
+                    width: 100% !important;
+                    flex: none !important;
+                }
             }
 
             /* Weather Forecast Mobile Improvements */

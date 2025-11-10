@@ -1940,9 +1940,9 @@ class CampingApp {
         }
         
         // Show dashboard content when returning from trip details
-        const dashboardHeader = document.querySelector('#dashboard > .flex.justify-between.items-center.mb-8');
+        const dashboardHeader = document.querySelector('#dashboard > .mb-8');
         if (dashboardHeader) {
-            dashboardHeader.style.display = 'flex';
+            dashboardHeader.style.display = 'block';
         }
         
         const dashboardGrid = document.querySelector('#dashboard > .grid.grid-cols-1.lg\\:grid-cols-3');
@@ -2928,7 +2928,7 @@ class CampingApp {
         document.getElementById('createTripSection').classList.add('hidden');
         
         // Hide the entire dashboard content to avoid confusion
-        const dashboardHeader = document.querySelector('#dashboard > .flex.justify-between.items-center.mb-8');
+        const dashboardHeader = document.querySelector('#dashboard > .mb-8');
         if (dashboardHeader) {
             dashboardHeader.style.display = 'none';
         }
