@@ -335,18 +335,18 @@ router.get('/my-tasks', authenticateToken, async (req, res) => {
       LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
       WHERE (
         -- Tasks assigned to everyone
-        tt.assigned_to = 'everyone'
+        tt.assigned_to = 'Everyone'
         -- Tasks assigned to anyone (user is participant)
-        OR (tt.assigned_to = 'anyone' AND (ct.organizer_id = $1 OR tp.user_id = $1))
-        -- Tasks assigned specifically to this user
-        OR tt.assigned_to = $1::text
+        OR (tt.assigned_to = 'Anyone' AND (ct.organizer_id = $1 OR tp.user_id = $1))
+        -- Tasks assigned specifically to this user by name
+        OR tt.assigned_to = $2
       )
       AND (ct.organizer_id = $1 OR tp.user_id = $1)
       ORDER BY 
         CASE WHEN tt.due_date IS NULL THEN 1 ELSE 0 END,
         tt.due_date ASC,
         tt.created_at DESC
-    `, [userId]);
+    `, [userId, `${req.user.firstName} ${req.user.lastName}`]);
     
     res.json({ tasks: result.rows });
   } catch (error) {

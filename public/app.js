@@ -103,6 +103,21 @@ class CampingApp {
         this.clearMessages();
     }
 
+    showAuthForms() {
+        // Hide dashboard and show auth forms
+        document.getElementById('dashboardContainer').classList.add('hidden');
+        document.getElementById('authContainer').classList.remove('hidden');
+        
+        // Hide user info in header
+        document.getElementById('headerUserSection').classList.add('hidden');
+        
+        // Show login form by default
+        this.showLoginForm();
+        
+        // Clear current user
+        this.currentUser = null;
+    }
+
     showDashboard(user) {
         this.currentUser = user;
         document.getElementById('authContainer').classList.add('hidden');
