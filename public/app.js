@@ -3000,7 +3000,7 @@ class CampingApp {
                         </div>
                     </div>
                     <!-- Quick Action Buttons -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 mobile-trip-actions">
+                    <div class="space-y-3 mb-4 mobile-trip-actions">
                         <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
                                 class="ios-button-primary flex items-center justify-center py-4 w-full">
                             <span class="material-icons mr-2" style="font-size: 20px;">add_task</span>
