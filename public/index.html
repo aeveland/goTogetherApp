@@ -1700,6 +1700,48 @@ button .material-icons {
         .cursor-pointer.transition-colors:hover .material-icons {
             color: var(--text-light) !important;
         }
+        
+        /* Map Container & Button Layout Fixes */
+        .map-container {
+            overflow: hidden;
+            border-radius: 12px;
+            position: relative;
+        }
+        
+        .map-container #trip-detail-map {
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Ensure buttons are properly positioned below map */
+        .button-group {
+            margin-top: 16px !important;
+            position: relative;
+            z-index: 10;
+            clear: both;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        @media (min-width: 640px) {
+            .button-group {
+                flex-direction: row;
+                gap: 12px;
+            }
+        }
+        
+        /* Fix hover states for trip details button */
+        #toggleTripDetails button:hover {
+            background-color: transparent !important;
+        }
+        
+        /* Ensure map doesn't overflow its container */
+        .leaflet-container {
+            border-radius: 12px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="min-h-screen">

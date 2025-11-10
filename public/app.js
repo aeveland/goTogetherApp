@@ -1840,7 +1840,8 @@ class CampingApp {
             const mapDiv = document.createElement('div');
             mapDiv.style.height = '100%';
             mapDiv.style.width = '100%';
-            mapDiv.style.minHeight = '400px';
+            mapDiv.style.minHeight = '300px';
+            mapDiv.style.position = 'relative';
             container.innerHTML = '';
             container.appendChild(mapDiv);
             
@@ -3037,11 +3038,13 @@ class CampingApp {
                         <!-- Location Map -->
                         <div class="mb-6">
                             <h4 class="ios-callout font-medium text-gray-800 mb-3">Location</h4>
-                            <div id="trip-detail-map" style="height: 250px; width: 100%; border-radius: 12px; background: var(--ios-gray-6);"></div>
+                            <div class="map-container" style="position: relative; margin-bottom: 16px;">
+                                <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 12px; background: var(--ios-gray-6); position: relative; z-index: 1;"></div>
+                            </div>
                             
                             <!-- Google Maps Route Button -->
-                            <div class="button-group mt-4">
-                                <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}', '${trip.title.replace(/'/g, "\\'")}')" 
+                            <div class="button-group" style="position: relative; z-index: 2; clear: both;">
+                                <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}'', '${trip.title.replace(/'/g, "\\'")}')" 
                                         class="ios-button-secondary">
                                     <span class="material-icons mr-2">directions</span>Get Directions
                                 </button>
