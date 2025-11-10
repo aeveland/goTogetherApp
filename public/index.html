@@ -1593,10 +1593,14 @@ button .material-icons {
         }
         
         .mobile-button-primary {
-            background: var(--green);
-            color: #000;
+            background: var(--green) !important;
+            color: #000 !important;
             font-weight: 600;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-button-primary * {
+            color: #000 !important;
         }
         
         .mobile-button-primary:hover {
@@ -1803,7 +1807,13 @@ button .material-icons {
         }
         
         #headerUserProfileBtn {
-            min-width: 120px;
+            min-width: 140px;
+            background: var(--green) !important;
+        }
+        
+        #headerUserProfileBtn * {
+            color: #000 !important;
+            font-weight: 700 !important;
         }
         
         #headerLogoutBtn {
@@ -1821,6 +1831,18 @@ button .material-icons {
             background: var(--bg-hover) !important;
             border-color: var(--green) !important;
         }
+        
+        /* Force header branding visibility */
+        .header-branding {
+            display: none !important;
+        }
+        
+        @media (min-width: 640px) {
+            .header-branding {
+                display: flex !important;
+                align-items: center;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -1828,10 +1850,10 @@ button .material-icons {
         <!-- Enhanced Header -->
         <div class="flex justify-between items-center mb-4 px-2 sm:px-6 py-3 sm:py-4" style="background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-primary);">
             <!-- Desktop: Show branding, Mobile: Hide branding -->
-            <div class="min-w-0 flex-1 hidden sm:flex">
-                <h1 class="text-xl font-bold flex items-center" style="color: var(--text-primary);">
-                    <span class="material-icons mr-3" style="font-size: 28px; color: var(--green);">nature</span>
-                    <span class="truncate">GoTogether</span>
+            <div class="min-w-0 flex-1">
+                <h1 class="text-xl font-bold header-branding" style="color: var(--text-white) !important;">
+                    <span class="material-icons mr-3" style="font-size: 28px; color: var(--green) !important;">nature</span>
+                    <span class="truncate" style="color: var(--text-white) !important;">GoTogether</span>
                 </h1>
             </div>
             
