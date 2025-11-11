@@ -4171,25 +4171,46 @@ class CampingApp {
         if (!participantsDiv) return;
         
         if (participants && participants.length > 0) {
-            participantsDiv.innerHTML = participants.map(participant => `
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span class="material-icons text-blue-600" style="font-size: 20px;">person</span>
-                    </div>
-                    <div class="flex-1">
-                        <div class="font-medium text-gray-900">${participant.first_name} ${participant.last_name}</div>
-                        <div class="text-sm text-gray-500">${participant.status === 'confirmed' ? 'Confirmed' : 'Pending'}</div>
-                    </div>
-                    ${participant.status === 'confirmed' ? 
-                        '<span class="material-icons text-green-600" style="font-size: 18px;">check_circle</span>' : 
-                        '<span class="material-icons text-orange-500" style="font-size: 18px;">schedule</span>'
+            participantsDiv.innerHTML = participants.map(participant => {
+                // Handle different participant data formats with proper fallbacks
+                let name = 'Unknown User';
+                
+                if (participant.name && participant.name.trim() && participant.name !== 'undefined undefined') {
+                    name = participant.name.trim();
+                } else if (participant.first_name || participant.last_name) {
+                    const firstName = (participant.first_name || '').trim();
+                    const lastName = (participant.last_name || '').trim();
+                    if (firstName || lastName) {
+                        name = `${firstName} ${lastName}`.trim();
                     }
-                </div>
-            `).join('');
+                } else if (participant.email) {
+                    // Use email username as fallback
+                    name = participant.email.split('@')[0];
+                }
+                
+                const status = participant.status || 'confirmed';
+                const joinedDate = participant.joined_at ? new Date(participant.joined_at).toLocaleDateString() : 'Recently';
+                
+                return `
+                    <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: var(--ios-blue); opacity: 0.2;">
+                            <span class="material-icons" style="font-size: 20px; color: var(--ios-blue);">person</span>
+                        </div>
+                        <div class="flex-1">
+                            <div style="font-weight: 600; color: var(--text-primary); font-size: 16px;">${name}</div>
+                            <div style="font-size: 14px; color: var(--text-secondary);">joined ${joinedDate}</div>
+                        </div>
+                        ${status === 'confirmed' ? 
+                            '<span class="material-icons" style="font-size: 18px; color: var(--ios-green);">check_circle</span>' : 
+                            '<span class="material-icons" style="font-size: 18px; color: var(--ios-orange);">schedule</span>'
+                        }
+                    </div>
+                `;
+            }).join('');
         } else {
             participantsDiv.innerHTML = `
-                <div class="text-center py-4 text-gray-500">
-                    <span class="material-icons text-2xl mb-2 opacity-50">person_add</span>
+                <div class="text-center py-4" style="color: var(--text-secondary);">
+                    <span class="material-icons text-2xl mb-2" style="opacity: 0.5; color: var(--text-secondary);">person_add</span>
                     <p class="text-sm">No participants yet</p>
                 </div>
             `;
