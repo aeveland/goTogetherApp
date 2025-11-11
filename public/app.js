@@ -3236,7 +3236,9 @@ class CampingApp {
                                       style="background: var(--ios-blue); color: white;">0</span>
                                 <!-- Desktop Add Task Button -->
                                 <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
-                                        class="ios-button-primary ios-button-compact hidden md:flex">
+                                        class="ios-button-primary ios-button-compact" 
+                                        style="display: none;"
+                                        data-desktop-button="true">
                                     <span class="material-icons mr-1" style="font-size: 16px;">add</span>
                                     Add Task
                                 </button>
@@ -3247,7 +3249,9 @@ class CampingApp {
                         </div>
                         <!-- Mobile Add Task Button -->
                         <button id="addTaskBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-primary w-full mt-4 md:hidden">
+                                class="ios-button-primary w-full mt-4" 
+                                style="display: none;"
+                                data-mobile-button="true">
                             <span class="material-icons mr-2" style="font-size: 18px;">add</span>
                             Add Task
                         </button>
@@ -3267,7 +3271,9 @@ class CampingApp {
                                       style="background: var(--ios-purple); color: white;">0</span>
                                 <!-- Desktop Add Item Button -->
                                 <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
-                                        class="ios-button-secondary ios-button-compact hidden md:flex">
+                                        class="ios-button-secondary ios-button-compact" 
+                                        style="display: none;"
+                                        data-desktop-button="true">
                                     <span class="material-icons mr-1" style="font-size: 16px;">add</span>
                                     Add Item
                                 </button>
@@ -3278,7 +3284,9 @@ class CampingApp {
                         </div>
                         <!-- Mobile Add Item Button -->
                         <button id="addShoppingItemBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
-                                class="ios-button-secondary w-full mt-4 md:hidden">
+                                class="ios-button-secondary w-full mt-4" 
+                                style="display: none;"
+                                data-mobile-button="true">
                             <span class="material-icons mr-2" style="font-size: 18px;">add</span>
                             Add Item
                         </button>
@@ -3442,6 +3450,9 @@ class CampingApp {
         this.loadTripTasks(trip.id);
         this.loadTripShopping(trip.id);
         this.loadTripWeather(trip.id);
+        
+        // Initialize responsive button visibility
+        this.initializeResponsiveButtons();
         
         // Render participants if they're already in the trip data
         if (trip.participants) {
@@ -4484,6 +4495,33 @@ class CampingApp {
                     button.style.marginBottom = '12px';
                 }
             }
+        });
+    }
+
+    // Initialize responsive button visibility
+    initializeResponsiveButtons() {
+        this.updateResponsiveButtons();
+        
+        // Update on window resize
+        window.addEventListener('resize', () => {
+            this.updateResponsiveButtons();
+        });
+    }
+
+    // Update button visibility based on screen size
+    updateResponsiveButtons() {
+        const isMobile = window.innerWidth <= 768;
+        
+        // Desktop buttons (show on desktop, hide on mobile)
+        const desktopButtons = document.querySelectorAll('[data-desktop-button="true"]');
+        desktopButtons.forEach(button => {
+            button.style.display = isMobile ? 'none' : 'flex';
+        });
+        
+        // Mobile buttons (show on mobile, hide on desktop)
+        const mobileButtons = document.querySelectorAll('[data-mobile-button="true"]');
+        mobileButtons.forEach(button => {
+            button.style.display = isMobile ? 'block' : 'none';
         });
     }
 }
