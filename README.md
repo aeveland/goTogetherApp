@@ -66,8 +66,8 @@ A comprehensive camping trip management platform that connects outdoor enthusias
 **Website**: [https://gotogether-m2g9.onrender.com](https://gotogether-m2g9.onrender.com)
 
 ### Test Account
-- **Email**: demo@gotogether.com
-- **Password**: demo123
+- **Email**: demo@demo.com
+- **Password**: password123
 
 *Or create your own account to explore all features!*
 
