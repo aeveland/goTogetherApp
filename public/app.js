@@ -3445,9 +3445,9 @@ class CampingApp {
         
         // Render participants if they're already in the trip data
         if (trip.participants) {
-            this.renderTripParticipantsForDetail(trip.id, trip.participants);
+            this.renderTripParticipantsForDetail(trip.id, trip.participants, trip.organizer_id);
         } else {
-            this.loadTripParticipantsForDetail(trip.id);
+            this.loadTripParticipantsForDetail(trip.id, trip.organizer_id);
         }
 
         // Initialize full map for trip location
@@ -4162,7 +4162,7 @@ class CampingApp {
         }
     }
 
-    async loadTripParticipantsForDetail(tripId) {
+    async loadTripParticipantsForDetail(tripId, organizerId) {
         try {
             const response = await fetch(`/api/trips/${tripId}/participants`, {
                 credentials: 'include'
@@ -4170,14 +4170,14 @@ class CampingApp {
 
             if (response.ok) {
                 const data = await response.json();
-                this.renderTripParticipantsForDetail(tripId, data.participants);
+                this.renderTripParticipantsForDetail(tripId, data.participants, organizerId);
             }
         } catch (error) {
             console.error('Error loading trip participants:', error);
         }
     }
 
-    renderTripParticipantsForDetail(tripId, participants) {
+    renderTripParticipantsForDetail(tripId, participants, organizerId) {
         const participantsDiv = document.getElementById(`trip-participants-${tripId}`);
         if (!participantsDiv) return;
         
@@ -4201,15 +4201,21 @@ class CampingApp {
                 
                 const status = participant.status || 'confirmed';
                 const joinedDate = participant.joined_at ? new Date(participant.joined_at).toLocaleDateString() : 'Recently';
+                const isOrganizer = organizerId && (participant.user_id === organizerId || participant.id === organizerId);
                 
                 return `
                     <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: var(--ios-blue); opacity: 0.2;">
-                            <span class="material-icons" style="font-size: 20px; color: var(--ios-blue);">person</span>
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: ${isOrganizer ? 'var(--ios-orange)' : 'var(--ios-blue)'}; opacity: 0.2;">
+                            <span class="material-icons" style="font-size: 20px; color: ${isOrganizer ? 'var(--ios-orange)' : 'var(--ios-blue)'};">${isOrganizer ? 'star' : 'person'}</span>
                         </div>
                         <div class="flex-1">
                             <div style="font-weight: 600; color: var(--text-primary); font-size: 16px;">${name}</div>
-                            <div style="font-size: 14px; color: var(--text-secondary);">joined ${joinedDate}</div>
+                            <div style="font-size: 14px; color: var(--text-secondary);">
+                                ${isOrganizer ? 
+                                    '<span style="color: var(--ios-orange); font-weight: 600;">Organizer</span>' : 
+                                    `joined ${joinedDate}`
+                                }
+                            </div>
                         </div>
                         ${status === 'confirmed' ? 
                             '<span class="material-icons" style="font-size: 18px; color: var(--ios-green);">check_circle</span>' : 
