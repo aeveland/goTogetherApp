@@ -1727,8 +1727,19 @@ class CampingApp {
 
             if (response.ok) {
                 this.showMessage('Logged out successfully!', 'success');
-                this.showAuthForms();
-                this.clearForms();
+                
+                // Clear user data
+                this.currentUser = null;
+                
+                // Small delay to show success message, then redirect
+                setTimeout(() => {
+                    // Redirect to landing page or refresh to show auth forms
+                    if (window.location.pathname === '/app') {
+                        window.location.href = '/';
+                    } else {
+                        window.location.reload();
+                    }
+                }, 1000);
             } else {
                 this.showMessage('Logout failed', 'error');
             }
