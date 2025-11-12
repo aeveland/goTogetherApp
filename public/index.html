@@ -485,6 +485,39 @@
             border-color: var(--ios-green) !important;
         }
         
+        /* CRITICAL FIX: Radio Button Assignment Section Contrast */
+        .border-gray-600 {
+            border-color: var(--border-secondary) !important;
+        }
+        
+        .border-blue-400 {
+            border-color: var(--ios-blue) !important;
+        }
+        
+        /* Radio Button Selected State Override */
+        input[type="radio"]:checked + span,
+        input[type="radio"]:checked ~ span {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Radio Button Labels - WCAG AA Compliant */
+        label[for] {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Assignment Section Specific Fixes */
+        .space-y-3 label {
+            color: var(--text-primary) !important;
+        }
+        
+        .space-y-3 label span {
+            color: var(--text-primary) !important;
+        }
+        
+        .space-y-3 label span.block {
+            color: var(--text-secondary) !important;
+        }
+        
         /* Fix radio button styling */
         input[type="radio"] {
             accent-color: var(--primary-green) !important;

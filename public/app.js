@@ -4016,28 +4016,37 @@ class CampingApp {
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-3">Assignment *</label>
                             <div class="space-y-3">
-                                <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 ${(!isEdit || task.assignment_type === 'everyone') ? 'bg-blue-50 border-blue-200' : ''}">
+                                <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(!isEdit || task.assignment_type === 'everyone') ? 'border-blue-400' : 'border-gray-600'}"
+                                       style="background: ${(!isEdit || task.assignment_type === 'everyone') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
+                                       onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
+                                       onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
                                     <input type="radio" name="assignmentType" value="everyone" ${(!isEdit || task.assignment_type === 'everyone') ? 'checked' : ''}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="ml-3">
-                                        <span class="font-medium text-gray-800">Everyone</span>
-                                        <span class="block text-sm text-gray-500">This task is for all trip participants</span>
+                                        <span class="font-medium" style="color: var(--text-primary)">Everyone</span>
+                                        <span class="block text-sm" style="color: var(--text-secondary)">This task is for all trip participants</span>
                                     </span>
                                 </label>
-                                <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 ${(isEdit && task.assignment_type === 'anyone') ? 'bg-blue-50 border-blue-200' : ''}">
+                                <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(isEdit && task.assignment_type === 'anyone') ? 'border-blue-400' : 'border-gray-600'}"
+                                       style="background: ${(isEdit && task.assignment_type === 'anyone') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
+                                       onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
+                                       onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
                                     <input type="radio" name="assignmentType" value="anyone" ${(isEdit && task.assignment_type === 'anyone') ? 'checked' : ''}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="ml-3">
-                                        <span class="font-medium text-gray-800">Anyone</span>
-                                        <span class="block text-sm text-gray-500">First person to volunteer can take this task</span>
+                                        <span class="font-medium" style="color: var(--text-primary)">Anyone</span>
+                                        <span class="block text-sm" style="color: var(--text-secondary)">First person to volunteer can take this task</span>
                                     </span>
                                 </label>
-                                <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 ${(isEdit && task.assignment_type === 'specific') ? 'bg-blue-50 border-blue-200' : ''}">
+                                <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(isEdit && task.assignment_type === 'specific') ? 'border-blue-400' : 'border-gray-600'}"
+                                       style="background: ${(isEdit && task.assignment_type === 'specific') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
+                                       onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
+                                       onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
                                     <input type="radio" name="assignmentType" value="specific" ${(isEdit && task.assignment_type === 'specific') ? 'checked' : ''}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="ml-3">
-                                        <span class="font-medium text-gray-800">Assign to specific person</span>
-                                        <span class="block text-sm text-gray-500">Choose a specific trip participant</span>
+                                        <span class="font-medium" style="color: var(--text-primary)">Assign to specific person</span>
+                                        <span class="block text-sm" style="color: var(--text-secondary)">Choose a specific trip participant</span>
                                     </span>
                                 </label>
                             </div>
