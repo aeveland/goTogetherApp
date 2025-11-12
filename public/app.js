@@ -1541,12 +1541,12 @@ class CampingApp {
                             <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                  style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                  onclick="this.querySelector('input').click()">
-                                <input type="radio" name="assignmentType" value="anyone" ${(!isEdit || editItem.assigned_to === 'anyone') ? 'checked' : ''}
+                                <input type="radio" name="assignmentType" value="me" ${(!isEdit || editItem.assigned_to === 'me') ? 'checked' : ''}
                                        class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
                                        style="accent-color: var(--ios-blue);">
                                 <div>
-                                    <div class="font-medium" style="color: var(--text-primary);">Anyone</div>
-                                    <div class="text-sm" style="color: var(--text-secondary);">Anyone can buy this item</div>
+                                    <div class="font-medium" style="color: var(--text-primary);">For me</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">I'll buy this item</div>
                                 </div>
                             </div>
                             
@@ -1557,41 +1557,12 @@ class CampingApp {
                                        class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
                                        style="accent-color: var(--ios-blue);">
                                 <div>
-                                    <div class="font-medium" style="color: var(--text-primary);">Everyone</div>
+                                    <div class="font-medium" style="color: var(--text-primary);">For everyone</div>
                                     <div class="text-sm" style="color: var(--text-secondary);">Everyone should buy this item</div>
                                 </div>
                             </div>
-                            
-                            ${trip ? `
-                            <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
-                                 style="background: var(--bg-secondary); border-color: var(--border-primary);"
-                                 onclick="this.querySelector('input').click()">
-                                <input type="radio" name="assignmentType" value="specific" ${(isEdit && typeof editItem.assigned_to === 'number') ? 'checked' : ''}
-                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
-                                       style="accent-color: var(--ios-blue);">
-                                <div>
-                                    <div class="font-medium" style="color: var(--text-primary);">Assign to specific person</div>
-                                    <div class="text-sm" style="color: var(--text-secondary);">Choose a specific trip participant</div>
-                                </div>
-                            </div>
-                            ` : ''}
                         </div>
                     </div>
-
-                    ${trip ? `
-                    <div id="specificShoppingAssigneeSection" class="form-group ${(!isEdit || typeof editItem.assigned_to !== 'number') ? 'hidden' : ''}">
-                        <label for="shoppingAssignedTo" class="block text-sm font-medium mb-2" style="color: var(--text-primary)">Assign to</label>
-                        <select id="shoppingAssignedTo" name="assignedTo"
-                                class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md appearance-none bg-no-repeat bg-right pr-10" 
-                                style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary); background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 5%22><path fill=%22%23666%22 d=%22M2 0L0 2h4zm0 5L0 3h4z%22/></svg>'); background-position: right 12px center; background-size: 12px;">
-                            <option value="">Select a person...</option>
-                            <option value="${trip.organizer_id}" ${(isEdit && editItem.assigned_to === trip.organizer_id) ? 'selected' : ''}>${trip.organizer_name} (Organizer)</option>
-                            ${trip.participants ? trip.participants.map(p => `
-                                <option value="${p.user_id}" ${(isEdit && editItem.assigned_to === p.user_id) ? 'selected' : ''}>${p.name}</option>
-                            `).join('') : ''}
-                        </select>
-                    </div>
-                    ` : ''}
                     
                     <!-- Hidden fields for removed features with default values -->
                     <input type="hidden" name="description" value="">
@@ -1616,9 +1587,6 @@ class CampingApp {
             const shoppingAssignmentRadios = document.querySelectorAll('input[name="assignmentType"]');
             shoppingAssignmentRadios.forEach(radio => {
                 radio.addEventListener('change', () => {
-                    const specificSection = document.getElementById('specificShoppingAssigneeSection');
-                    const assignedToSelect = document.getElementById('shoppingAssignedTo');
-                    
                     // Update visual states for all radio containers
                     const radioContainers = document.querySelectorAll('.space-y-2 > div');
                     radioContainers.forEach(container => {
@@ -1631,23 +1599,6 @@ class CampingApp {
                             container.style.borderColor = 'var(--border-primary)';
                         }
                     });
-                    
-                    if (radio.value === 'specific' && specificSection) {
-                        specificSection.classList.remove('hidden');
-                        // Auto-select the organizer if no selection has been made
-                        if (assignedToSelect && (!assignedToSelect.value || assignedToSelect.value === '')) {
-                            const organizerOption = assignedToSelect.querySelector('option[value]:not([value=""])');
-                            if (organizerOption) {
-                                assignedToSelect.value = organizerOption.value;
-                            }
-                        }
-                    } else if (specificSection) {
-                        specificSection.classList.add('hidden');
-                        // Reset the dropdown when hiding
-                        if (assignedToSelect) {
-                            assignedToSelect.value = '';
-                        }
-                    }
                 });
             });
 
@@ -1709,24 +1660,9 @@ class CampingApp {
             quantity: parseInt(formData.get('quantity')) || 1,
             estimated_cost: parseFloat(formData.get('estimatedCost')) || null,
             priority: formData.get('priority'),
-            assigned_to: assignmentType === 'specific' ? parseInt(formData.get('assignedTo')) : assignmentType,
+            assigned_to: assignmentType === 'me' ? 'me' : assignmentType,
             notes: formData.get('notes')
         };
-
-        // Validate specific assignment
-        if (assignmentType === 'specific') {
-            const assignedToValue = formData.get('assignedTo');
-            if (!assignedToValue || assignedToValue === '') {
-                this.showMessage('Please select a person when assigning to a specific user', 'error');
-                return;
-            }
-            const parsedAssignedTo = parseInt(assignedToValue);
-            if (isNaN(parsedAssignedTo) || parsedAssignedTo <= 0) {
-                this.showMessage('Please select a valid person from the dropdown', 'error');
-                return;
-            }
-            shoppingData.assigned_to = parsedAssignedTo;
-        }
 
         try {
             const url = isEdit ? `/api/shopping/${itemId}` : `/api/shopping/trip/${tripId}`;
@@ -4103,56 +4039,32 @@ class CampingApp {
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">Assignment *</label>
-                            <div class="space-y-3">
-                                <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(!isEdit || task.assignment_type === 'everyone') ? 'border-blue-400' : 'border-gray-600'}"
-                                       style="background: ${(!isEdit || task.assignment_type === 'everyone') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
-                                       onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
-                                       onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
-                                    <input type="radio" name="assignmentType" value="everyone" ${(!isEdit || task.assignment_type === 'everyone') ? 'checked' : ''}
-                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
-                                    <span class="ml-3">
-                                        <span class="font-medium" style="color: var(--text-primary)">Everyone</span>
-                                        <span class="block text-sm" style="color: var(--text-secondary)">This task is for all trip participants</span>
-                                    </span>
-                                </label>
-                                <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(isEdit && task.assignment_type === 'anyone') ? 'border-blue-400' : 'border-gray-600'}"
-                                       style="background: ${(isEdit && task.assignment_type === 'anyone') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
-                                       onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
-                                       onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
-                                    <input type="radio" name="assignmentType" value="anyone" ${(isEdit && task.assignment_type === 'anyone') ? 'checked' : ''}
-                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
-                                    <span class="ml-3">
-                                        <span class="font-medium" style="color: var(--text-primary)">Anyone</span>
-                                        <span class="block text-sm" style="color: var(--text-secondary)">First person to volunteer can take this task</span>
-                                    </span>
-                                </label>
-                                <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(isEdit && task.assignment_type === 'specific') ? 'border-blue-400' : 'border-gray-600'}"
-                                       style="background: ${(isEdit && task.assignment_type === 'specific') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
-                                       onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
-                                       onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
-                                    <input type="radio" name="assignmentType" value="specific" ${(isEdit && task.assignment_type === 'specific') ? 'checked' : ''}
-                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
-                                    <span class="ml-3">
-                                        <span class="font-medium" style="color: var(--text-primary)">Assign to specific person</span>
-                                        <span class="block text-sm" style="color: var(--text-secondary)">Choose a specific trip participant</span>
-                                    </span>
-                                </label>
+                            <label class="block text-sm font-medium mb-3" style="color: var(--text-primary)">Who should do this task? *</label>
+                            <div class="space-y-2">
+                                <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                                     style="background: var(--bg-secondary); border-color: var(--border-primary);"
+                                     onclick="this.querySelector('input').click()">
+                                    <input type="radio" name="assignmentType" value="me" ${(!isEdit || task.assignment_type === 'me') ? 'checked' : ''}
+                                           class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
+                                           style="accent-color: var(--ios-blue);">
+                                    <div>
+                                        <div class="font-medium" style="color: var(--text-primary);">For me</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">I'll take care of this task</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                                     style="background: var(--bg-secondary); border-color: var(--border-primary);"
+                                     onclick="this.querySelector('input').click()">
+                                    <input type="radio" name="assignmentType" value="everyone" ${(isEdit && task.assignment_type === 'everyone') ? 'checked' : ''}
+                                           class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
+                                           style="accent-color: var(--ios-blue);">
+                                    <div>
+                                        <div class="font-medium" style="color: var(--text-primary);">For everyone</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">All trip participants should do this</div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div id="specificAssigneeSection" class="mb-6 ${(!isEdit || task.assignment_type !== 'specific') ? 'hidden' : ''}">
-                            <label for="assignedTo" class="block text-sm font-medium text-gray-700 mb-2">Assign to</label>
-                            <select id="assignedTo" name="assignedTo"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:shadow-md appearance-none bg-no-repeat bg-right pr-10" 
-                                    style="background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 5%22><path fill=%22%23666%22 d=%22M2 0L0 2h4zm0 5L0 3h4z%22/></svg>'); background-position: right 12px center; background-size: 12px;">
-                                <option value="">Select a person...</option>
-                                <option value="${trip.organizer_id}" ${(isEdit && task.assigned_to === trip.organizer_id) ? 'selected' : ''}>${trip.organizer_name} (Organizer)</option>
-                                ${trip.participants ? trip.participants.map(p => `
-                                    <option value="${p.user_id}" ${(isEdit && task.assigned_to === p.user_id) ? 'selected' : ''}>${p.name}</option>
-                                `).join('') : ''}
-                                ${(!trip.participants || trip.participants.length === 0) ? '<option value="" disabled>No other participants yet</option>' : ''}
-                            </select>
                         </div>
 
                         <div class="mb-6">
@@ -4207,37 +4119,22 @@ class CampingApp {
             this.handleTaskSubmit(e, isEdit);
         });
 
-        // Handle assignment type changes
+        // Handle assignment type changes for visual feedback
         const assignmentRadios = document.querySelectorAll('input[name="assignmentType"]');
         assignmentRadios.forEach(radio => {
             radio.addEventListener('change', () => {
-                const specificSection = document.getElementById('specificAssigneeSection');
-                const assignedToSelect = document.getElementById('assignedTo');
-                
-                console.log('Assignment type changed to:', radio.value);
-                console.log('Specific section:', specificSection);
-                console.log('Assigned to select:', assignedToSelect);
-                
-                if (radio.value === 'specific') {
-                    specificSection.classList.remove('hidden');
-                    console.log('Showing specific section');
-                    
-                    // Auto-select the organizer if no selection has been made
-                    if (!assignedToSelect.value || assignedToSelect.value === '') {
-                        // Get organizer ID from the first option (which should be the organizer)
-                        const organizerOption = assignedToSelect.querySelector('option[value]:not([value=""])');
-                        console.log('Organizer option found:', organizerOption);
-                        if (organizerOption) {
-                            assignedToSelect.value = organizerOption.value;
-                            console.log('Auto-selected organizer with ID:', organizerOption.value);
-                        }
+                // Update visual states for all radio containers
+                const radioContainers = document.querySelectorAll('.space-y-2 > div');
+                radioContainers.forEach(container => {
+                    const radioInput = container.querySelector('input[type="radio"]');
+                    if (radioInput && radioInput.checked) {
+                        container.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                        container.style.borderColor = 'var(--ios-blue)';
+                    } else {
+                        container.style.backgroundColor = 'var(--bg-secondary)';
+                        container.style.borderColor = 'var(--border-primary)';
                     }
-                } else {
-                    specificSection.classList.add('hidden');
-                    console.log('Hiding specific section');
-                    // Reset the dropdown when hiding
-                    assignedToSelect.value = '';
-                }
+                });
             });
         });
 
@@ -4281,28 +4178,11 @@ class CampingApp {
         };
 
         // Handle assignedTo based on assignment type
-        if (assignmentType === 'specific') {
-            console.log('=== TASK ASSIGNMENT DEBUG ===');
-            console.log('Assignment type is specific, assignedToValue:', assignedToValue);
-            console.log('Assignment dropdown element:', document.getElementById('assignedTo'));
-            console.log('Assignment dropdown value:', document.getElementById('assignedTo')?.value);
-            console.log('Assignment dropdown selected index:', document.getElementById('assignedTo')?.selectedIndex);
-            console.log('Assignment dropdown options:', Array.from(document.getElementById('assignedTo')?.options || []).map(opt => ({value: opt.value, text: opt.text, selected: opt.selected})));
-            console.log('Form data entries:', Array.from(formData.entries()));
-            console.log('Specific section visible?', !document.getElementById('specificAssigneeSection')?.classList.contains('hidden'));
-            console.log('=== END DEBUG ===');
-            
-            if (!assignedToValue || assignedToValue === '' || assignedToValue === 'null' || assignedToValue === 'undefined') {
-                console.error('VALIDATION FAILED: assignedToValue is empty or invalid:', assignedToValue);
-                this.showMessage('Please select a person from the dropdown when assigning to a specific user', 'error');
-                return;
-            }
-            const parsedAssignedTo = parseInt(assignedToValue);
-            if (isNaN(parsedAssignedTo) || parsedAssignedTo <= 0) {
-                this.showMessage('Please select a valid person from the dropdown', 'error');
-                return;
-            }
-            taskData.assignedTo = parsedAssignedTo;
+        if (assignmentType === 'me') {
+            // For "me" assignments, we'll set it to the current user ID (handled by backend)
+            taskData.assignedTo = 'me';
+        } else if (assignmentType === 'everyone') {
+            taskData.assignedTo = null; // Everyone assignment
         }
 
         // Handle due date/time
