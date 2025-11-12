@@ -3119,11 +3119,16 @@ class CampingApp {
             </div>
         `;
     }
-    
+
     showEditProfile() {
         console.log('showEditProfile called from dashboard');
         
-        // If no currentProfileUser is set, use the current user (for dashboard calls)
+        // Set profile context if not already set (for dashboard calls)
+        if (!this.currentProfileUser) {
+            this.currentProfileUser = this.currentUser;
+            this.isOwnProfile = true;
+        }
+        
         const user = this.currentProfileUser || this.currentUser;
         
         if (!user) {
@@ -3132,127 +3137,9 @@ class CampingApp {
             return;
         }
         
-        // Set profile context if not already set (for dashboard calls)
-        if (!this.currentProfileUser) {
-            this.currentProfileUser = this.currentUser;
-            this.isOwnProfile = true;
-        }
-        
-        const editHTML = `
-            <div style="max-width: 800px; margin: 0 auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h1 style="font-size: 28px; font-weight: bold; color: #333;">Edit Profile</h1>
-                    <button onclick="app.showMyTripsView()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
-                </div>
-                
-                <form onsubmit="app.handleUpdateProfile(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                    <div>
-                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Personal Information</h3>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">First Name</label>
-                            <input type="text" name="firstName" value="${user.first_name || ''}" required
-                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Last Name</label>
-                            <input type="text" name="lastName" value="${user.last_name || ''}" required
-                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Bio</label>
-                            <textarea name="bio" rows="3" placeholder="Tell others about your camping experience..."
-                                      style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; resize: vertical;">${user.bio || ''}</textarea>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Phone</label>
-                            <input type="tel" name="phone" value="${user.phone || ''}" placeholder="(555) 123-4567"
-                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Home Address</label>
-                            <input type="text" id="homeAddressInput" name="homeAddress" value="${user.home_address || ''}" 
-                                   placeholder="123 Main Street"
-                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">City</label>
-                                <input type="text" name="homeCity" value="${user.home_city || ''}" placeholder="City"
-                                       style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">State</label>
-                                <input type="text" name="homeState" value="${user.home_state || ''}" placeholder="State"
-                                       style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">ZIP</label>
-                                <input type="text" name="homeZip" value="${user.home_zip || ''}" placeholder="12345"
-                                       style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #374151;">Camping Preferences</h3>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Camper Type</label>
-                            <select name="camperType" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                <option value="">Select camper type...</option>
-                                <option value="tent" ${user.camper_type === 'tent' ? 'selected' : ''}>Tent Camping</option>
-                                <option value="trailer" ${user.camper_type === 'trailer' ? 'selected' : ''}>Travel Trailer</option>
-                                <option value="rv" ${user.camper_type === 'rv' ? 'selected' : ''}>RV/Motorhome</option>
-                                <option value="van" ${user.camper_type === 'van' ? 'selected' : ''}>Van/Camper Van</option>
-                                <option value="fifth_wheel" ${user.camper_type === 'fifth_wheel' ? 'selected' : ''}>5th Wheel</option>
-                            </select>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Group Size</label>
-                            <input type="number" name="groupSize" value="${user.group_size || 1}" min="1" max="20"
-                                   style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 5px;">Dietary Restrictions</label>
-                            <select name="dietaryRestrictions" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                <option value="">None</option>
-                                <option value="vegetarian" ${user.dietary_restrictions === 'vegetarian' ? 'selected' : ''}>Vegetarian</option>
-                                <option value="vegan" ${user.dietary_restrictions === 'vegan' ? 'selected' : ''}>Vegan</option>
-                                <option value="gluten_free" ${user.dietary_restrictions === 'gluten_free' ? 'selected' : ''}>Gluten-Free</option>
-                                <option value="dairy_free" ${user.dietary_restrictions === 'dairy_free' ? 'selected' : ''}>Dairy-Free</option>
-                                <option value="nut_allergy" ${user.dietary_restrictions === 'nut_allergy' ? 'selected' : ''}>Nut Allergy</option>
-                                <option value="kosher" ${user.dietary_restrictions === 'kosher' ? 'selected' : ''}>Kosher</option>
-                                <option value="halal" ${user.dietary_restrictions === 'halal' ? 'selected' : ''}>Halal</option>
-                                <option value="other" ${user.dietary_restrictions === 'other' ? 'selected' : ''}>Other</option>
-                            </select>
-                        </div>
-                        
-                        <div style="margin-top: 30px;">
-                            <button type="submit" id="saveProfileBtn" 
-                                    style="background: #10b981; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; margin-right: 10px;">
-                                Save Changes
-                            </button>
-                            <button type="button" onclick="app.showMyTripsView()" 
-                                    style="background: #6b7280; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        `;
-        
-        // Check if we're on dashboard or profile page
+        // Hide dashboard and show profile container
+        document.getElementById('dashboardContainer').style.display = 'none';
         const profileContainer = document.getElementById('profileContainer');
-        console.log('Profile container found:', !!profileContainer);
         
         if (!profileContainer) {
             console.error('Profile container not found!');
@@ -3260,30 +3147,41 @@ class CampingApp {
             return;
         }
         
-        if (profileContainer && profileContainer.style.display !== 'none') {
-            // We're on the profile page
-            console.log('Already on profile page, updating content');
-            profileContainer.innerHTML = editHTML;
-        } else {
-            // We're on the dashboard - need to navigate to profile editing
-            console.log('Navigating from dashboard to profile editing');
-            
-            // Hide dashboard and show profile container
-            document.getElementById('dashboardContainer').style.display = 'none';
-            
-            // Show profile container
-            profileContainer.style.display = 'block';
-            profileContainer.innerHTML = editHTML;
-            
-            console.log('Profile editing form should now be visible');
-        }
+        // Show profile container
+        profileContainer.style.display = 'block';
         
-        // Form submission handler is now inline
+        // Hide profile view and show edit form
+        document.getElementById('profileView').style.display = 'none';
+        document.getElementById('profileEditForm').style.display = 'block';
+        
+        // Populate the existing form with user data
+        this.populateProfileEditForm(user);
+        
+        console.log('Profile editing form should now be visible');
     }
     
-    showProfileView() {
-        document.getElementById('profileEditForm').style.display = 'none';
-        document.getElementById('profileView').style.display = 'block';
+    populateProfileEditForm(user) {
+        // Populate all the form fields with user data
+        const setFieldValue = (id, value) => {
+            const field = document.getElementById(id);
+            if (field) {
+                field.value = value || '';
+                console.log(`Set ${id} to:`, value);
+            } else {
+                console.log(`Field ${id} not found`);
+            }
+        };
+        
+        // Only populate fields that actually exist in the HTML
+        setFieldValue('editFirstName', user.first_name);
+        setFieldValue('editLastName', user.last_name);
+        setFieldValue('editPhone', user.phone);
+        setFieldValue('editBio', user.bio);
+        setFieldValue('editCamperType', user.camper_type);
+        setFieldValue('editGroupSize', user.group_size || 1);
+        setFieldValue('editDietary', user.dietary_restrictions);
+        
+        console.log('Profile form populated with user data:', user);
     }
 
     async viewUserProfile(userId, userName) {
