@@ -714,8 +714,8 @@ class CampingApp {
                     <div class="space-y-3">
                         ${suggestions.map(suggestion => `
                             <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background: ${suggestion.color}; opacity: 0.2;">
-                                    <span class="material-icons" style="font-size: 18px; color: ${suggestion.color};">${suggestion.icon}</span>
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: ${suggestion.color};">
+                                    <span class="material-icons" style="font-size: 20px; color: white; font-weight: 500;">${suggestion.icon}</span>
                                 </div>
                                 <div class="flex-1">
                                     <div class="font-medium text-sm mb-1" style="color: var(--text-primary);">${suggestion.title}</div>
