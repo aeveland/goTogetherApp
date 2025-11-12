@@ -1013,14 +1013,14 @@ class CampingApp {
         // Rain/precipitation suggestions
         if (rainDays > 0 || weatherMain === 'Rain') {
             suggestions.push({
-                icon: 'umbrella',
+                icon: 'beach_access',
                 color: 'var(--ios-blue)',
                 title: 'Rain Gear Essential',
                 description: `${rainDays > 1 ? 'Multiple days' : 'Rain'} expected. Pack waterproof jackets, rain pants, and an umbrella.`
             });
             
             suggestions.push({
-                icon: 'water_drop_outline',
+                icon: 'water_drop',
                 color: 'var(--ios-indigo)',
                 title: 'Waterproof Everything',
                 description: 'Use waterproof bags for electronics and clothes. Consider a tarp over your tent for extra protection.'
@@ -3473,8 +3473,8 @@ class CampingApp {
                                 ${trip.current_participants}/${trip.max_participants} joined
                             </span>
                         </div>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                            <span class="material-icons text-sm mr-1">${typeIcons[trip.trip_type]}</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" style="background: var(--ios-green); color: white;">
+                            <span class="material-icons text-sm mr-1" style="font-size: 16px;">${typeIcons[trip.trip_type]}</span>
                             ${trip.trip_type.replace('_', ' ')}
                         </span>
                     </div>
