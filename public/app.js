@@ -4199,17 +4199,27 @@ class CampingApp {
                 const specificSection = document.getElementById('specificAssigneeSection');
                 const assignedToSelect = document.getElementById('assignedTo');
                 
+                console.log('Assignment type changed to:', radio.value);
+                console.log('Specific section:', specificSection);
+                console.log('Assigned to select:', assignedToSelect);
+                
                 if (radio.value === 'specific') {
                     specificSection.classList.remove('hidden');
+                    console.log('Showing specific section');
+                    
                     // Auto-select the organizer if no selection has been made
                     if (!assignedToSelect.value || assignedToSelect.value === '') {
-                        const organizerOption = assignedToSelect.querySelector(`option[value="${trip.organizer_id}"]`);
+                        // Get organizer ID from the first option (which should be the organizer)
+                        const organizerOption = assignedToSelect.querySelector('option[value]:not([value=""])');
+                        console.log('Organizer option found:', organizerOption);
                         if (organizerOption) {
-                            assignedToSelect.value = trip.organizer_id;
+                            assignedToSelect.value = organizerOption.value;
+                            console.log('Auto-selected organizer with ID:', organizerOption.value);
                         }
                     }
                 } else {
                     specificSection.classList.add('hidden');
+                    console.log('Hiding specific section');
                     // Reset the dropdown when hiding
                     assignedToSelect.value = '';
                 }
@@ -4235,7 +4245,16 @@ class CampingApp {
         
         // Prepare task data
         const assignmentType = formData.get('assignmentType');
-        const assignedToValue = formData.get('assignedTo');
+        let assignedToValue = formData.get('assignedTo');
+        
+        // Fallback: if FormData doesn't capture the dropdown value, get it directly
+        if (assignmentType === 'specific' && (!assignedToValue || assignedToValue === '')) {
+            const assignedToSelect = document.getElementById('assignedTo');
+            if (assignedToSelect) {
+                assignedToValue = assignedToSelect.value;
+                console.log('Fallback: Got assignedTo value directly from dropdown:', assignedToValue);
+            }
+        }
         
         const taskData = {
             title: formData.get('title'),
@@ -4248,12 +4267,18 @@ class CampingApp {
 
         // Handle assignedTo based on assignment type
         if (assignmentType === 'specific') {
+            console.log('=== TASK ASSIGNMENT DEBUG ===');
             console.log('Assignment type is specific, assignedToValue:', assignedToValue);
             console.log('Assignment dropdown element:', document.getElementById('assignedTo'));
             console.log('Assignment dropdown value:', document.getElementById('assignedTo')?.value);
+            console.log('Assignment dropdown selected index:', document.getElementById('assignedTo')?.selectedIndex);
             console.log('Assignment dropdown options:', Array.from(document.getElementById('assignedTo')?.options || []).map(opt => ({value: opt.value, text: opt.text, selected: opt.selected})));
+            console.log('Form data entries:', Array.from(formData.entries()));
+            console.log('Specific section visible?', !document.getElementById('specificAssigneeSection')?.classList.contains('hidden'));
+            console.log('=== END DEBUG ===');
             
             if (!assignedToValue || assignedToValue === '' || assignedToValue === 'null' || assignedToValue === 'undefined') {
+                console.error('VALIDATION FAILED: assignedToValue is empty or invalid:', assignedToValue);
                 this.showMessage('Please select a person from the dropdown when assigning to a specific user', 'error');
                 return;
             }
