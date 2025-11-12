@@ -539,21 +539,28 @@
             outline-offset: 2px !important;
         }
         
-        /* Radio Button Visual Enhancement */
+        /* Radio Button Visual Enhancement - Fixed */
         input[type="radio"] {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
             appearance: none !important;
             width: 20px !important;
             height: 20px !important;
-            border: 2px solid var(--border-secondary) !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            border: 2px solid #8E8E93 !important;
             border-radius: 50% !important;
-            background: var(--bg-primary) !important;
+            background: #FFFFFF !important;
             position: relative !important;
             cursor: pointer !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            flex-shrink: 0 !important;
         }
         
         input[type="radio"]:checked {
-            border-color: var(--ios-blue) !important;
-            background: var(--ios-blue) !important;
+            border-color: #007AFF !important;
+            background: #007AFF !important;
         }
         
         input[type="radio"]:checked::after {
@@ -565,13 +572,15 @@
             width: 8px !important;
             height: 8px !important;
             border-radius: 50% !important;
-            background: white !important;
+            background: #FFFFFF !important;
+            display: block !important;
         }
         
-        /* Fix radio button styling */
-        input[type="radio"] {
-            accent-color: var(--primary-green) !important;
+        input[type="radio"]:focus {
+            outline: 2px solid #34C759 !important;
+            outline-offset: 2px !important;
         }
+        
         
         /* Fix checkbox styling */
         input[type="checkbox"] {
