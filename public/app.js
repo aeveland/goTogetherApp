@@ -683,6 +683,9 @@ class CampingApp {
         // 7-day forecast
         const daily = weatherData.daily.slice(0, 7);
         
+        // Generate camping suggestions based on weather
+        const suggestions = this.generateCampingSuggestions(current, daily);
+        
         container.innerHTML = `
             <!-- Current Weather -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px; border-radius: 12px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start;">
@@ -699,6 +702,31 @@ class CampingApp {
                     <div>${new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
                 </div>
             </div>
+
+            <!-- Camping Suggestions -->
+            ${suggestions.length > 0 ? `
+            <div class="ios-card mb-6">
+                <div class="p-6">
+                    <h4 class="ios-callout font-medium mb-4" style="color: var(--text-primary); display: flex; align-items: center;">
+                        <span class="material-icons mr-2" style="font-size: 20px; color: var(--ios-orange);">lightbulb</span>
+                        Camping Suggestions
+                    </h4>
+                    <div class="space-y-3">
+                        ${suggestions.map(suggestion => `
+                            <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background: ${suggestion.color}; opacity: 0.2;">
+                                    <span class="material-icons" style="font-size: 18px; color: ${suggestion.color};">${suggestion.icon}</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-sm mb-1" style="color: var(--text-primary);">${suggestion.title}</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">${suggestion.description}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+            ` : ''}
 
             <!-- Weather Details -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
@@ -905,6 +933,152 @@ class CampingApp {
         if (uvIndex <= 7) return 'High';
         if (uvIndex <= 10) return 'Very High';
         return 'Extreme';
+    }
+
+    generateCampingSuggestions(current, daily) {
+        const suggestions = [];
+        const temp = current.temp || 70;
+        const feelsLike = current.feels_like || temp;
+        const windSpeed = current.wind_speed || 0;
+        const humidity = current.humidity || 50;
+        const uvIndex = current.uvi || 0;
+        const weatherMain = current.weather?.[0]?.main || 'Clear';
+        
+        // Check for rain in forecast
+        const rainDays = daily.filter(day => day.weather?.[0]?.main === 'Rain' || (day.pop && day.pop > 0.3)).length;
+        const maxRainChance = Math.max(...daily.map(day => day.pop || 0)) * 100;
+        
+        // Temperature-based suggestions
+        if (temp < 40) {
+            suggestions.push({
+                icon: 'ac_unit',
+                color: 'var(--ios-blue)',
+                title: 'Cold Weather Gear',
+                description: `Bring a 4-season sleeping bag rated for ${Math.round(temp - 10)}°F or lower. Pack thermal layers and insulated boots.`
+            });
+            
+            suggestions.push({
+                icon: 'local_fire_department',
+                color: 'var(--ios-red)',
+                title: 'Campfire Essential',
+                description: 'Cold conditions make a campfire crucial for warmth. Bring extra firewood and fire starters.'
+            });
+        } else if (temp < 60) {
+            suggestions.push({
+                icon: 'nightlight',
+                color: 'var(--ios-purple)',
+                title: 'Cool Weather Sleep',
+                description: `A 3-season sleeping bag rated for ${Math.round(temp - 15)}°F should keep you comfortable. Consider a sleeping pad for insulation.`
+            });
+            
+            suggestions.push({
+                icon: 'checkroom',
+                color: 'var(--ios-orange)',
+                title: 'Layer Up',
+                description: 'Pack layers including a warm jacket, fleece, and long pants. Mornings and evenings will be chilly.'
+            });
+        } else if (temp > 85) {
+            suggestions.push({
+                icon: 'wb_shade',
+                color: 'var(--ios-green)',
+                title: 'Stay Cool',
+                description: 'Bring a lightweight, well-ventilated tent. Consider a portable fan and extra water for cooling.'
+            });
+            
+            suggestions.push({
+                icon: 'water_drop',
+                color: 'var(--ios-blue)',
+                title: 'Hydration Critical',
+                description: `Hot weather increases dehydration risk. Bring 1+ gallons of water per person per day.`
+            });
+        }
+
+        // Wind-based suggestions
+        if (windSpeed > 15) {
+            suggestions.push({
+                icon: 'air',
+                color: 'var(--ios-gray)',
+                title: 'Windy Conditions',
+                description: `${Math.round(windSpeed)} mph winds expected. Secure all gear, use extra tent stakes, and consider a windbreaker.`
+            });
+            
+            suggestions.push({
+                icon: 'shield',
+                color: 'var(--ios-blue)',
+                title: 'Wind Protection',
+                description: 'Set up camp in a sheltered area if possible. Bring a tarp for additional wind protection.'
+            });
+        }
+
+        // Rain/precipitation suggestions
+        if (rainDays > 0 || weatherMain === 'Rain') {
+            suggestions.push({
+                icon: 'umbrella',
+                color: 'var(--ios-blue)',
+                title: 'Rain Gear Essential',
+                description: `${rainDays > 1 ? 'Multiple days' : 'Rain'} expected. Pack waterproof jackets, rain pants, and an umbrella.`
+            });
+            
+            suggestions.push({
+                icon: 'water_drop_outline',
+                color: 'var(--ios-indigo)',
+                title: 'Waterproof Everything',
+                description: 'Use waterproof bags for electronics and clothes. Consider a tarp over your tent for extra protection.'
+            });
+            
+            if (maxRainChance > 50) {
+                suggestions.push({
+                    icon: 'home',
+                    color: 'var(--ios-brown)',
+                    title: 'Shelter Planning',
+                    description: 'High rain chance. Bring a large tarp or canopy for a dry gathering space outside your tent.'
+                });
+            }
+        }
+
+        // UV/Sun protection
+        if (uvIndex > 6) {
+            suggestions.push({
+                icon: 'wb_sunny',
+                color: 'var(--ios-orange)',
+                title: 'Sun Protection',
+                description: `UV Index ${Math.round(uvIndex)} (${this.getUVLevel(uvIndex)}). Bring SPF 30+ sunscreen, hat, and sunglasses. Seek shade during midday.`
+            });
+        }
+
+        // Humidity suggestions
+        if (humidity > 80) {
+            suggestions.push({
+                icon: 'opacity',
+                color: 'var(--ios-teal)',
+                title: 'High Humidity',
+                description: 'Expect muggy conditions. Choose moisture-wicking clothing and ensure good tent ventilation.'
+            });
+        }
+
+        // Feels-like temperature adjustments
+        if (Math.abs(feelsLike - temp) > 10) {
+            const feeling = feelsLike > temp ? 'hotter' : 'colder';
+            suggestions.push({
+                icon: 'thermostat',
+                color: feelsLike > temp ? 'var(--ios-red)' : 'var(--ios-blue)',
+                title: 'Temperature Feels Different',
+                description: `Feels like ${Math.round(feelsLike)}°F (${Math.round(Math.abs(feelsLike - temp))}° ${feeling}). Plan clothing accordingly.`
+            });
+        }
+
+        // General camping suggestions based on conditions
+        if (weatherMain === 'Clear' && temp >= 60 && temp <= 80 && windSpeed < 10) {
+            suggestions.push({
+                icon: 'celebration',
+                color: 'var(--ios-green)',
+                title: 'Perfect Camping Weather',
+                description: 'Ideal conditions! Great for outdoor activities, stargazing, and campfire gatherings.'
+            });
+        }
+
+        // Limit to most important suggestions (max 6)
+        return suggestions.slice(0, 6);
     }
 
     // Collapsible sections management with persistent state
