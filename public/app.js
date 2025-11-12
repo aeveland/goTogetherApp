@@ -1957,9 +1957,6 @@ class CampingApp {
                 const dest = encodeURIComponent(destination);
                 const googleMapsUrl = `https://www.google.com/maps/dir/${origin}/${dest}`;
                 
-                // Calculate and display travel time
-                this.calculateTravelTime(userAddress, destination, tripTitle);
-                
                 window.open(googleMapsUrl, '_blank');
             } else {
                 // Fallback: Just open destination in Google Maps
@@ -1968,7 +1965,7 @@ class CampingApp {
                 window.open(googleMapsUrl, '_blank');
                 
                 // Show message about adding address for directions
-                this.showNotification('Add your address in profile settings to get personalized directions!', 'info');
+                this.showMessage('Add your address in profile settings to get personalized directions!', 'info');
             }
         } catch (error) {
             console.error('Error opening Google Maps:', error);
@@ -3392,40 +3389,29 @@ class CampingApp {
                 </div>
             </div>
 
-            <!-- Trip Details (Collapsible) -->
+            <!-- Map Section -->
             <div class="ios-card mb-6">
                 <div class="p-6">
-                    <button id="toggleTripDetails-${trip.id}" class="w-full flex items-center justify-between text-left ios-callout font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                    <button id="toggleTripDetails-${trip.id}" class="w-full flex items-center justify-between text-left ios-callout font-medium" style="color: var(--text-primary);">
                         <span class="flex items-center">
-                            <span class="material-icons mr-3" style="font-size: 20px;">info</span>
-                            Trip Details & Map
+                            <span class="material-icons mr-3" style="font-size: 20px;">map</span>
+                            Map
                         </span>
                         <span class="material-icons transition-transform map-chevron-${trip.id}" style="font-size: 20px; transition: transform 0.2s ease;">expand_less</span>
                     </button>
                     
                     <div id="tripDetailsContent-${trip.id}" class="map-section mt-6">
-
-                        <!-- Location Map -->
-                        <div class="mb-6">
-                            <h4 class="ios-callout font-medium text-gray-800 mb-3">Location</h4>
-                            <div class="map-container" style="position: relative; margin-bottom: 16px;">
-                                <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 12px; background: var(--ios-gray-6); position: relative; z-index: 1;"></div>
-                            </div>
-                            
-                            <!-- Google Maps Route Button -->
-                            <div class="button-group" style="position: relative; z-index: 2; clear: both;">
-                                <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}'', '${trip.title.replace(/'/g, "\\'")}')" 
-                                        class="ios-button-secondary">
-                                    <span class="material-icons mr-2">directions</span>Get Directions
-                                </button>
-                                <div id="travelTimeCallout-${trip.id}" class="flex items-center justify-center px-3 py-2 rounded-lg" 
-                                     style="background: var(--bg-tertiary); color: var(--text-secondary); min-height: 44px;">
-                                    <span class="material-icons mr-1" style="font-size: 16px;">schedule</span>
-                                    <span class="text-sm">Calculating route...</span>
-                                </div>
-                            </div>
+                        <div class="map-container" style="position: relative; margin-bottom: 16px;">
+                            <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 12px; background: var(--ios-gray-6); position: relative; z-index: 1;"></div>
                         </div>
-
+                        
+                        <!-- Directions Button -->
+                        <div style="position: relative; z-index: 2;">
+                            <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}'', '${trip.title.replace(/'/g, "\\'")}')" 
+                                    class="ios-button-secondary w-full">
+                                <span class="material-icons mr-2">directions</span>Get Directions
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
