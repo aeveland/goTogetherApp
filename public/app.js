@@ -872,8 +872,8 @@ class CampingApp {
         
         return `
             <span class="px-3 py-1 text-xs rounded-full font-medium flex items-center" 
-                  style="background: ${config.background}; color: ${config.color};">
-                <span class="material-icons mr-1" style="font-size: 14px;">${config.icon}</span>
+                  style="background: ${config.background} !important; color: ${config.color} !important; border: none !important;">
+                <span class="material-icons mr-1" style="font-size: 14px !important; color: ${config.color} !important;">${config.icon}</span>
                 ${config.text}
             </span>
         `;
