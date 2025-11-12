@@ -518,6 +518,56 @@
             color: var(--text-secondary) !important;
         }
         
+        /* ACCESSIBLE RADIO BUTTON STYLING */
+        .space-y-2 > div {
+            transition: all 0.2s ease !important;
+        }
+        
+        .space-y-2 > div:hover {
+            background-color: var(--bg-hover) !important;
+            border-color: var(--ios-blue) !important;
+        }
+        
+        .space-y-2 input[type="radio"]:checked + div,
+        .space-y-2 input[type="radio"]:checked ~ div {
+            background-color: rgba(59, 130, 246, 0.1) !important;
+            border-color: var(--ios-blue) !important;
+        }
+        
+        .space-y-2 input[type="radio"]:focus {
+            outline: 3px solid var(--primary-green) !important;
+            outline-offset: 2px !important;
+        }
+        
+        /* Radio Button Visual Enhancement */
+        input[type="radio"] {
+            appearance: none !important;
+            width: 20px !important;
+            height: 20px !important;
+            border: 2px solid var(--border-secondary) !important;
+            border-radius: 50% !important;
+            background: var(--bg-primary) !important;
+            position: relative !important;
+            cursor: pointer !important;
+        }
+        
+        input[type="radio"]:checked {
+            border-color: var(--ios-blue) !important;
+            background: var(--ios-blue) !important;
+        }
+        
+        input[type="radio"]:checked::after {
+            content: '' !important;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 8px !important;
+            height: 8px !important;
+            border-radius: 50% !important;
+            background: white !important;
+        }
+        
         /* Fix radio button styling */
         input[type="radio"] {
             accent-color: var(--primary-green) !important;
