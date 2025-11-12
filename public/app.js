@@ -2915,8 +2915,19 @@ class CampingApp {
     }
 
     showOwnProfileModal(profile, userName) {
+        // Helper function to get full address
+        const getFullAddress = () => {
+            const parts = [
+                profile.home_address,
+                profile.home_city,
+                profile.home_state,
+                profile.home_zip
+            ].filter(part => part && part.trim());
+            return parts.length > 0 ? parts.join(', ') : null;
+        };
+
         const modalContent = `
-            <div class="max-w-md mx-auto">
+            <div class="max-w-lg mx-auto">
                 <div class="text-center mb-6">
                     <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: var(--ios-blue); opacity: 0.2;">
                         <span class="material-icons" style="font-size: 40px; color: var(--ios-blue);">person</span>
@@ -2926,6 +2937,31 @@ class CampingApp {
                 </div>
 
                 <div class="space-y-4">
+                    <!-- Email -->
+                    ${profile.email ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Email</h4>
+                            <p class="text-sm" style="color: var(--text-secondary);">📧 ${profile.email}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Phone -->
+                    ${profile.phone ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Phone</h4>
+                            <p class="text-sm" style="color: var(--text-secondary);">📞 ${profile.phone}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Home Address -->
+                    ${getFullAddress() ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Home Address</h4>
+                            <p class="text-sm" style="color: var(--text-secondary);">🏠 ${getFullAddress()}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Bio -->
                     ${profile.bio ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">About</h4>
@@ -2933,42 +2969,39 @@ class CampingApp {
                         </div>
                     ` : ''}
 
+                    <!-- Camping Style -->
                     ${profile.camper_type ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Camping Style</h4>
                             <div class="inline-flex items-center px-3 py-1 rounded-full text-sm" style="background: var(--ios-blue); color: white;">
                                 <span class="material-icons mr-1" style="font-size: 16px;">
                                     ${profile.camper_type === 'tent' ? 'nature' : 
-                                      profile.camper_type === 'rv' ? 'rv_hookup' : 
-                                      profile.camper_type === 'cabin' ? 'cabin' : 'hotel'}
+                                      profile.camper_type === 'rv' || profile.camper_type === 'trailer' ? 'rv_hookup' : 
+                                      profile.camper_type === 'cabin' ? 'cabin' : 
+                                      profile.camper_type === 'glamping' ? 'hotel' : 'nature'}
                                 </span>
-                                ${profile.camper_type.charAt(0).toUpperCase() + profile.camper_type.slice(1)} Camper
+                                ${profile.camper_type.charAt(0).toUpperCase() + profile.camper_type.slice(1).replace('_', ' ')} Camper
                             </div>
                         </div>
                     ` : ''}
 
+                    <!-- Group Size -->
                     ${profile.group_size ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Typical Group Size</h4>
-                            <p class="text-sm" style="color: var(--text-secondary);">${profile.group_size} ${profile.group_size === 1 ? 'person' : 'people'}</p>
+                            <p class="text-sm" style="color: var(--text-secondary);">👥 ${profile.group_size} ${profile.group_size === 1 ? 'person' : 'people'}</p>
                         </div>
                     ` : ''}
 
+                    <!-- Dietary Restrictions -->
                     ${profile.dietary_restrictions ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Dietary Restrictions</h4>
                             <div class="flex flex-wrap gap-2">
                                 <span class="inline-flex items-center px-2 py-1 rounded text-xs" style="background: var(--ios-orange); color: white;">
-                                    ${profile.dietary_restrictions}
+                                    🍽️ ${profile.dietary_restrictions.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </span>
                             </div>
-                        </div>
-                    ` : ''}
-
-                    ${profile.phone ? `
-                        <div>
-                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Contact</h4>
-                            <p class="text-sm" style="color: var(--text-secondary);">📞 ${profile.phone}</p>
                         </div>
                     ` : ''}
                 </div>
@@ -3248,7 +3281,7 @@ class CampingApp {
 
     showUserProfileModal(profile, userName) {
         const modalContent = `
-            <div class="max-w-md mx-auto">
+            <div class="max-w-lg mx-auto">
                 <div class="text-center mb-6">
                     <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: var(--ios-blue); opacity: 0.2;">
                         <span class="material-icons" style="font-size: 40px; color: var(--ios-blue);">person</span>
@@ -3258,6 +3291,7 @@ class CampingApp {
                 </div>
 
                 <div class="space-y-4">
+                    <!-- Bio -->
                     ${profile.bio ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">About</h4>
@@ -3265,40 +3299,43 @@ class CampingApp {
                         </div>
                     ` : ''}
 
+                    <!-- Camping Style -->
                     ${profile.camper_type ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Camping Style</h4>
                             <div class="inline-flex items-center px-3 py-1 rounded-full text-sm" style="background: var(--ios-blue); color: white;">
                                 <span class="material-icons mr-1" style="font-size: 16px;">
                                     ${profile.camper_type === 'tent' ? 'nature' : 
-                                      profile.camper_type === 'rv' ? 'rv_hookup' : 
-                                      profile.camper_type === 'cabin' ? 'cabin' : 'hotel'}
+                                      profile.camper_type === 'rv' || profile.camper_type === 'trailer' ? 'rv_hookup' : 
+                                      profile.camper_type === 'cabin' ? 'cabin' : 
+                                      profile.camper_type === 'glamping' ? 'hotel' : 'nature'}
                                 </span>
-                                ${profile.camper_type.charAt(0).toUpperCase() + profile.camper_type.slice(1)} Camper
+                                ${profile.camper_type.charAt(0).toUpperCase() + profile.camper_type.slice(1).replace('_', ' ')} Camper
                             </div>
                         </div>
                     ` : ''}
 
+                    <!-- Group Size -->
                     ${profile.group_size ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Typical Group Size</h4>
-                            <p class="text-sm" style="color: var(--text-secondary);">${profile.group_size} ${profile.group_size === 1 ? 'person' : 'people'}</p>
+                            <p class="text-sm" style="color: var(--text-secondary);">👥 ${profile.group_size} ${profile.group_size === 1 ? 'person' : 'people'}</p>
                         </div>
                     ` : ''}
 
+                    <!-- Dietary Restrictions -->
                     ${profile.dietary_restrictions ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Dietary Restrictions</h4>
                             <div class="flex flex-wrap gap-2">
-                                ${profile.dietary_restrictions.split(',').map(restriction => `
-                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs" style="background: var(--ios-orange); color: white;">
-                                        ${restriction.trim()}
-                                    </span>
-                                `).join('')}
+                                <span class="inline-flex items-center px-2 py-1 rounded text-xs" style="background: var(--ios-orange); color: white;">
+                                    🍽️ ${profile.dietary_restrictions.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </span>
                             </div>
                         </div>
                     ` : ''}
 
+                    <!-- Contact (only if available - for public profiles this won't show) -->
                     ${profile.phone ? `
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Contact</h4>
@@ -3323,79 +3360,83 @@ class CampingApp {
 
         const modalContent = `
             <form id="modalProfileForm" class="modal-form">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Personal Information -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold flex items-center" style="color: var(--text-primary);">
+                <div class="space-y-6">
+                    <!-- Personal Information Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold flex items-center mb-4" style="color: var(--text-primary);">
                             <span class="material-icons mr-2" style="font-size: 20px;">person</span>
                             Personal Information
                         </h3>
                         
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="form-group">
-                                <label for="modalFirstName">First Name *</label>
-                                <input type="text" id="modalFirstName" name="firstName" required 
-                                       value="${profileUser.first_name || ''}" maxlength="100">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="form-group">
+                                    <label for="modalFirstName">First Name *</label>
+                                    <input type="text" id="modalFirstName" name="firstName" required 
+                                           value="${profileUser.first_name || ''}" maxlength="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="modalLastName">Last Name *</label>
+                                    <input type="text" id="modalLastName" name="lastName" required 
+                                           value="${profileUser.last_name || ''}" maxlength="100">
+                                </div>
                             </div>
+
                             <div class="form-group">
-                                <label for="modalLastName">Last Name *</label>
-                                <input type="text" id="modalLastName" name="lastName" required 
-                                       value="${profileUser.last_name || ''}" maxlength="100">
+                                <label for="modalPhone">Phone</label>
+                                <input type="tel" id="modalPhone" name="phone" 
+                                       value="${profileUser.phone || ''}" placeholder="(555) 123-4567" maxlength="20">
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="modalPhone">Phone</label>
-                            <input type="tel" id="modalPhone" name="phone" 
-                                   value="${profileUser.phone || ''}" placeholder="(555) 123-4567" maxlength="20">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="modalBio">Bio</label>
-                            <textarea id="modalBio" name="bio" rows="3" maxlength="1000"
-                                      placeholder="Tell other campers about yourself...">${profileUser.bio || ''}</textarea>
+                            <div class="form-group">
+                                <label for="modalBio">Bio</label>
+                                <textarea id="modalBio" name="bio" rows="3" maxlength="1000"
+                                          placeholder="Tell other campers about yourself...">${profileUser.bio || ''}</textarea>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Camping Preferences -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold flex items-center" style="color: var(--text-primary);">
+                    <!-- Camping Preferences Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold flex items-center mb-4" style="color: var(--text-primary);">
                             <span class="material-icons mr-2" style="font-size: 20px;">nature</span>
                             Camping Preferences
                         </h3>
                         
-                        <div class="form-group">
-                            <label for="modalCamperType">Camping Style</label>
-                            <select id="modalCamperType" name="camperType">
-                                <option value="">Select your style</option>
-                                <option value="tent" ${profileUser.camper_type === 'tent' ? 'selected' : ''}>Tent Camping</option>
-                                <option value="trailer" ${profileUser.camper_type === 'trailer' ? 'selected' : ''}>Travel Trailer</option>
-                                <option value="rv" ${profileUser.camper_type === 'rv' ? 'selected' : ''}>RV/Motorhome</option>
-                                <option value="cabin" ${profileUser.camper_type === 'cabin' ? 'selected' : ''}>Cabin</option>
-                                <option value="glamping" ${profileUser.camper_type === 'glamping' ? 'selected' : ''}>Glamping</option>
-                                <option value="backpacking" ${profileUser.camper_type === 'backpacking' ? 'selected' : ''}>Backpacking</option>
-                            </select>
-                        </div>
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label for="modalCamperType">Camping Style</label>
+                                <select id="modalCamperType" name="camperType">
+                                    <option value="">Select your style</option>
+                                    <option value="tent" ${profileUser.camper_type === 'tent' ? 'selected' : ''}>Tent Camping</option>
+                                    <option value="trailer" ${profileUser.camper_type === 'trailer' ? 'selected' : ''}>Travel Trailer</option>
+                                    <option value="rv" ${profileUser.camper_type === 'rv' ? 'selected' : ''}>RV/Motorhome</option>
+                                    <option value="cabin" ${profileUser.camper_type === 'cabin' ? 'selected' : ''}>Cabin</option>
+                                    <option value="glamping" ${profileUser.camper_type === 'glamping' ? 'selected' : ''}>Glamping</option>
+                                    <option value="backpacking" ${profileUser.camper_type === 'backpacking' ? 'selected' : ''}>Backpacking</option>
+                                </select>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="modalGroupSize">Typical Group Size</label>
-                            <input type="number" id="modalGroupSize" name="groupSize" min="1" max="20" 
-                                   value="${profileUser.group_size || 1}">
-                        </div>
+                            <div class="form-group">
+                                <label for="modalGroupSize">Typical Group Size</label>
+                                <input type="number" id="modalGroupSize" name="groupSize" min="1" max="20" 
+                                       value="${profileUser.group_size || 1}">
+                            </div>
 
-                        <div class="form-group">
-                            <label for="modalDietary">Dietary Restrictions</label>
-                            <select id="modalDietary" name="dietaryRestrictions">
-                                <option value="">No restrictions</option>
-                                <option value="vegetarian" ${profileUser.dietary_restrictions === 'vegetarian' ? 'selected' : ''}>Vegetarian</option>
-                                <option value="vegan" ${profileUser.dietary_restrictions === 'vegan' ? 'selected' : ''}>Vegan</option>
-                                <option value="gluten_free" ${profileUser.dietary_restrictions === 'gluten_free' ? 'selected' : ''}>Gluten-Free</option>
-                                <option value="dairy_free" ${profileUser.dietary_restrictions === 'dairy_free' ? 'selected' : ''}>Dairy-Free</option>
-                                <option value="nut_allergy" ${profileUser.dietary_restrictions === 'nut_allergy' ? 'selected' : ''}>Nut Allergy</option>
-                                <option value="kosher" ${profileUser.dietary_restrictions === 'kosher' ? 'selected' : ''}>Kosher</option>
-                                <option value="halal" ${profileUser.dietary_restrictions === 'halal' ? 'selected' : ''}>Halal</option>
-                                <option value="other" ${profileUser.dietary_restrictions === 'other' ? 'selected' : ''}>Other</option>
-                            </select>
+                            <div class="form-group">
+                                <label for="modalDietary">Dietary Restrictions</label>
+                                <select id="modalDietary" name="dietaryRestrictions">
+                                    <option value="">No restrictions</option>
+                                    <option value="vegetarian" ${profileUser.dietary_restrictions === 'vegetarian' ? 'selected' : ''}>Vegetarian</option>
+                                    <option value="vegan" ${profileUser.dietary_restrictions === 'vegan' ? 'selected' : ''}>Vegan</option>
+                                    <option value="gluten_free" ${profileUser.dietary_restrictions === 'gluten_free' ? 'selected' : ''}>Gluten-Free</option>
+                                    <option value="dairy_free" ${profileUser.dietary_restrictions === 'dairy_free' ? 'selected' : ''}>Dairy-Free</option>
+                                    <option value="nut_allergy" ${profileUser.dietary_restrictions === 'nut_allergy' ? 'selected' : ''}>Nut Allergy</option>
+                                    <option value="kosher" ${profileUser.dietary_restrictions === 'kosher' ? 'selected' : ''}>Kosher</option>
+                                    <option value="halal" ${profileUser.dietary_restrictions === 'halal' ? 'selected' : ''}>Halal</option>
+                                    <option value="other" ${profileUser.dietary_restrictions === 'other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
