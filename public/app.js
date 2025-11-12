@@ -909,26 +909,8 @@ class CampingApp {
 
     // Collapsible sections management with persistent state
     initializeCollapsibleSections(tripId) {
-        // Get saved states from localStorage
-        const savedStates = JSON.parse(localStorage.getItem('sectionStates') || '{}');
-        
-        // Initialize map section (if it exists)
-        const mapToggle = document.getElementById(`toggleTripDetails-${tripId}`);
-        const mapContent = document.getElementById(`tripDetailsContent-${tripId}`);
-        const mapChevron = document.querySelector(`.map-chevron-${tripId}`);
-        
-        if (mapToggle && mapContent && mapChevron) {
-            // Default to open, but respect saved state
-            const isMapOpen = savedStates[`map-${tripId}`] !== false;
-            this.setCollapsibleState(mapContent, mapChevron, isMapOpen);
-            
-            mapToggle.addEventListener('click', () => {
-                const isCurrentlyOpen = !mapContent.classList.contains('collapsed');
-                const newState = !isCurrentlyOpen;
-                this.setCollapsibleState(mapContent, mapChevron, newState);
-                this.saveCollapsibleState(`map-${tripId}`, newState);
-            });
-        }
+        // Map section is no longer collapsible - it's always visible
+        // This method is kept for potential future collapsible sections
     }
 
     setCollapsibleState(content, chevron, isOpen) {
@@ -3389,31 +3371,17 @@ class CampingApp {
                 </div>
             </div>
 
-            <!-- Map Section -->
-            <div class="ios-card mb-6">
-                <div class="p-6">
-                    <button id="toggleTripDetails-${trip.id}" class="w-full flex items-center justify-between text-left ios-callout font-medium" style="color: var(--text-primary);">
-                        <span class="flex items-center">
-                            <span class="material-icons mr-3" style="font-size: 20px;">map</span>
-                            Map
-                        </span>
-                        <span class="material-icons transition-transform map-chevron-${trip.id}" style="font-size: 20px; transition: transform 0.2s ease;">expand_less</span>
-                    </button>
-                    
-                    <div id="tripDetailsContent-${trip.id}" class="map-section mt-6">
-                        <div class="map-container" style="position: relative; margin-bottom: 16px;">
-                            <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 12px; background: var(--ios-gray-6); position: relative; z-index: 1;"></div>
-                        </div>
-                        
-                        <!-- Directions Button -->
-                        <div style="position: relative; z-index: 2;">
-                            <button onclick="app.openGoogleMapsRoute('${trip.location.replace(/'/g, "\\'")}'', '${trip.title.replace(/'/g, "\\'")}')" 
-                                    class="ios-button-secondary w-full">
-                                <span class="material-icons mr-2">directions</span>Get Directions
-                            </button>
-                        </div>
-                    </div>
+            <!-- Map -->
+            <div class="mb-6">
+                <div class="map-container" style="position: relative; margin-bottom: 16px;">
+                    <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 12px; background: var(--ios-gray-6); position: relative; z-index: 1;"></div>
                 </div>
+                
+                <!-- Directions Button -->
+                <button onclick="window.open('https://www.google.com/maps/search/' + encodeURIComponent('${trip.location.replace(/'/g, "\\'")}'), '_blank')" 
+                        class="ios-button-secondary w-full">
+                    <span class="material-icons mr-2">directions</span>Get Directions
+                </button>
             </div>
 
             <!-- Trip Actions -->
