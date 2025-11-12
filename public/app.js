@@ -245,7 +245,10 @@ class CampingApp {
                         ` : ''}
                     </div>
                     <button onclick="app.toggleTaskCompletion(${task.id}, ${task.trip_id})" 
-                            class="ml-3 p-2 rounded-full hover:bg-gray-200 transition-colors">
+                            class="ml-3 p-2 rounded-full transition-colors"
+                            style="min-height: 44px; min-width: 44px;"
+                            onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
+                            onmouseout="this.style.backgroundColor=''; this.style.color=''">
                         <span class="material-icons text-gray-400">radio_button_unchecked</span>
                     </button>
                 </div>
@@ -449,7 +452,10 @@ class CampingApp {
                         ${item.estimated_cost ? `<p class="ios-caption text-gray-500">~$${item.estimated_cost}</p>` : ''}
                     </div>
                     <button onclick="app.toggleShoppingItemPurchased(${item.id})" 
-                            class="ml-3 p-2 rounded-full hover:bg-gray-200 transition-colors">
+                            class="ml-3 p-2 rounded-full transition-colors"
+                            style="min-height: 44px; min-width: 44px;"
+                            onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
+                            onmouseout="this.style.backgroundColor=''; this.style.color=''">
                         <span class="material-icons text-gray-400">radio_button_unchecked</span>
                     </button>
                 </div>
@@ -587,13 +593,19 @@ class CampingApp {
                         </div>
                         <div class="flex items-center gap-2 ml-3">
                             <button onclick="app.toggleShoppingItemPurchased(${item.id})" 
-                                    class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                                    class="p-2 rounded-full transition-colors"
+                                    style="min-height: 44px; min-width: 44px;"
+                                    onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
+                                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
                                 <span class="material-icons ${isCompleted ? 'text-green-600' : 'text-gray-400'}">
                                     ${isCompleted ? 'check_circle' : 'radio_button_unchecked'}
                                 </span>
                             </button>
                             <button onclick="app.editShoppingItem(${item.id})" 
-                                    class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                                    class="p-2 rounded-full transition-colors"
+                                    style="min-height: 44px; min-width: 44px;"
+                                    onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
+                                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
                                 <span class="material-icons text-gray-400">edit</span>
                             </button>
                         </div>
@@ -3637,7 +3649,10 @@ class CampingApp {
                             </div>
                             <!-- Delete button separate row -->
                             <button type="button" id="deleteEditTripBtn" data-trip-id="${trip.id}"
-                                    class="w-full px-4 py-3 border border-red-300 text-red-700 bg-white rounded-xl hover:bg-red-50 hover:border-red-400 transition-all duration-200 flex items-center justify-center font-medium">
+                                    class="w-full px-4 py-3 border border-red-300 text-red-700 rounded-xl transition-all duration-200 flex items-center justify-center font-medium"
+                                    style="background: var(--bg-card); min-height: 44px;"
+                                    onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.1)'; this.style.borderColor='var(--ios-red)'; this.style.color='var(--ios-red)'"
+                                    onmouseout="this.style.backgroundColor='var(--bg-card)'; this.style.borderColor=''; this.style.color=''">
                                 <span class="material-icons mr-2" style="font-size: 16px;">delete</span>Delete Trip
                             </button>
                         </div>
