@@ -1448,8 +1448,9 @@ class CampingApp {
         }
     }
 
-    async showAddShoppingModal(tripId) {
+    async showAddShoppingModal(tripId, editItem = null) {
         // Get shopping categories and dietary restrictions
+        const isEdit = editItem !== null;
         try {
             const [categoriesResponse, shoppingResponse] = await Promise.all([
                 fetch('/api/shopping/categories', { credentials: 'include' }),
@@ -1497,13 +1498,13 @@ class CampingApp {
                     <div class="form-group">
                         <label for="modalItemName">Item Name *</label>
                         <input type="text" id="modalItemName" name="itemName" required 
-                               placeholder="Enter item name">
+                               placeholder="Enter item name" value="${isEdit ? editItem.item_name || '' : ''}">
                     </div>
                     
                     <div class="form-group">
                         <label for="modalItemDescription">Description</label>
                         <textarea id="modalItemDescription" name="description" rows="2"
-                                  placeholder="Additional details about the item"></textarea>
+                                  placeholder="Additional details about the item">${isEdit ? editItem.description || '' : ''}</textarea>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1511,14 +1512,14 @@ class CampingApp {
                             <label for="modalItemCategory">Category</label>
                             <select id="modalItemCategory" name="category">
                                 ${categories.map(cat => `
-                                    <option value="${cat.name}">${cat.name}</option>
+                                    <option value="${cat.name}" ${isEdit && editItem.category === cat.name ? 'selected' : ''}>${cat.name}</option>
                                 `).join('')}
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="modalItemQuantity">Quantity</label>
                             <input type="number" id="modalItemQuantity" name="quantity" 
-                                   min="1" value="1" placeholder="1">
+                                   min="1" value="${isEdit ? editItem.quantity || 1 : 1}" placeholder="1">
                         </div>
                     </div>
                     
@@ -1526,14 +1527,15 @@ class CampingApp {
                         <div class="form-group">
                             <label for="modalItemCost">Estimated Cost ($) <span class="text-gray-500 text-sm">(optional)</span></label>
                             <input type="number" id="modalItemCost" name="estimatedCost" 
-                                   step="0.01" min="0" placeholder="Leave blank if unknown">
+                                   step="0.01" min="0" placeholder="Leave blank if unknown" 
+                                   value="${isEdit && editItem.estimated_cost ? editItem.estimated_cost : ''}">
                         </div>
                         <div class="form-group">
                             <label for="modalItemPriority">Priority</label>
                             <select id="modalItemPriority" name="priority">
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
-                                <option value="low">Low</option>
+                                <option value="medium" ${isEdit && editItem.priority === 'medium' ? 'selected' : (!isEdit ? 'selected' : '')}>Medium</option>
+                                <option value="high" ${isEdit && editItem.priority === 'high' ? 'selected' : ''}>High</option>
+                                <option value="low" ${isEdit && editItem.priority === 'low' ? 'selected' : ''}>Low</option>
                             </select>
                         </div>
                     </div>
@@ -1541,20 +1543,20 @@ class CampingApp {
                     <div class="form-group">
                         <label for="modalItemAssignment">Assign To</label>
                         <select id="modalItemAssignment" name="assignedTo">
-                            <option value="anyone" selected>Anyone can buy this</option>
-                            <option value="everyone">Everyone should buy this</option>
+                            <option value="anyone" ${isEdit && editItem.assigned_to === 'anyone' ? 'selected' : (!isEdit ? 'selected' : '')}>Anyone can buy this</option>
+                            <option value="everyone" ${isEdit && editItem.assigned_to === 'everyone' ? 'selected' : ''}>Everyone should buy this</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="modalItemNotes">Notes</label>
                         <textarea id="modalItemNotes" name="notes" rows="2"
-                                  placeholder="Special instructions, brand preferences, etc."></textarea>
+                                  placeholder="Special instructions, brand preferences, etc.">${isEdit ? editItem.notes || '' : ''}</textarea>
                     </div>
                     
                     <div class="modal-actions">
                         <button type="submit" class="ios-button-primary flex-1">
-                            <span class="material-icons mr-2" style="font-size: 16px;">add_shopping_cart</span>Add Item
+                            <span class="material-icons mr-2" style="font-size: 16px;">${isEdit ? 'save' : 'add_shopping_cart'}</span>${isEdit ? 'Update Item' : 'Add Item'}
                         </button>
                         <button type="button" onclick="app.closeModal()" class="ios-button-secondary">
                             Cancel
@@ -1563,12 +1565,12 @@ class CampingApp {
                 </form>
             `;
             
-            this.showModal('Add Shopping Item', modalContent);
+            this.showModal(isEdit ? 'Edit Shopping Item' : 'Add Shopping Item', modalContent);
             
             // Handle form submission
             document.getElementById('modalAddShoppingForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.handleModalAddShopping(e, tripId);
+                this.handleModalAddShopping(e, tripId, isEdit, isEdit ? editItem.id : null);
             });
             
             // Focus first input
@@ -1582,7 +1584,35 @@ class CampingApp {
         }
     }
 
-    async handleModalAddShopping(e, tripId) {
+    async editShoppingItem(itemId) {
+        try {
+            // First, get the current item data
+            const response = await fetch(`/api/shopping/trip/${this.getCurrentTripId()}`, {
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                this.showMessage('Failed to load shopping items', 'error');
+                return;
+            }
+
+            const data = await response.json();
+            const item = data.items.find(i => i.id === itemId);
+
+            if (!item) {
+                this.showMessage('Shopping item not found', 'error');
+                return;
+            }
+
+            // Show the shopping modal with item data pre-filled
+            await this.showAddShoppingModal(this.getCurrentTripId(), item);
+        } catch (error) {
+            console.error('Error loading shopping item for edit:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
+    }
+
+    async handleModalAddShopping(e, tripId, isEdit = false, itemId = null) {
         e.preventDefault();
         
         const formData = new FormData(e.target);
@@ -1598,8 +1628,11 @@ class CampingApp {
         };
 
         try {
-            const response = await fetch(`/api/shopping/trip/${tripId}`, {
-                method: 'POST',
+            const url = isEdit ? `/api/shopping/${itemId}` : `/api/shopping/trip/${tripId}`;
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -1610,7 +1643,7 @@ class CampingApp {
             const data = await response.json();
 
             if (response.ok) {
-                this.showMessage('Shopping item added successfully!', 'success');
+                this.showMessage(`Shopping item ${isEdit ? 'updated' : 'added'} successfully!`, 'success');
                 this.closeModal();
                 this.loadTripShopping(tripId);
                 this.loadDashboardShopping(); // Refresh dashboard
@@ -1619,11 +1652,11 @@ class CampingApp {
                     const errorMessages = data.errors.map(err => err.msg).join(', ');
                     this.showMessage(errorMessages, 'error');
                 } else {
-                    this.showMessage(data.error || 'Failed to add shopping item', 'error');
+                    this.showMessage(data.error || `Failed to ${isEdit ? 'update' : 'add'} shopping item`, 'error');
                 }
             }
         } catch (error) {
-            console.error('Error adding shopping item:', error);
+            console.error(`Error ${isEdit ? 'updating' : 'adding'} shopping item:`, error);
             this.showMessage('Network error. Please try again.', 'error');
         }
     }
