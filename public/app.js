@@ -2644,6 +2644,90 @@ class CampingApp {
         document.getElementById('profileEditForm').style.display = 'none';
         document.getElementById('profileView').style.display = 'block';
     }
+
+    async viewUserProfile(userId, userName) {
+        try {
+            const response = await fetch(`/api/profile/${userId}`, {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.showUserProfileModal(data.user, userName);
+            } else {
+                this.showMessage('Unable to load profile', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+            this.showMessage('Network error loading profile', 'error');
+        }
+    }
+
+    showUserProfileModal(profile, userName) {
+        const modalContent = `
+            <div class="max-w-md mx-auto">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: var(--ios-blue); opacity: 0.2;">
+                        <span class="material-icons" style="font-size: 40px; color: var(--ios-blue);">person</span>
+                    </div>
+                    <h3 class="text-xl font-semibold" style="color: var(--text-primary);">${userName}</h3>
+                    <p class="text-sm" style="color: var(--text-secondary);">Member since ${new Date(profile.created_at).toLocaleDateString()}</p>
+                </div>
+
+                <div class="space-y-4">
+                    ${profile.bio ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">About</h4>
+                            <p class="text-sm" style="color: var(--text-secondary);">${profile.bio}</p>
+                        </div>
+                    ` : ''}
+
+                    ${profile.camper_type ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Camping Style</h4>
+                            <div class="inline-flex items-center px-3 py-1 rounded-full text-sm" style="background: var(--ios-blue); color: white;">
+                                <span class="material-icons mr-1" style="font-size: 16px;">
+                                    ${profile.camper_type === 'tent' ? 'nature' : 
+                                      profile.camper_type === 'rv' ? 'rv_hookup' : 
+                                      profile.camper_type === 'cabin' ? 'cabin' : 'hotel'}
+                                </span>
+                                ${profile.camper_type.charAt(0).toUpperCase() + profile.camper_type.slice(1)} Camper
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${profile.group_size ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Typical Group Size</h4>
+                            <p class="text-sm" style="color: var(--text-secondary);">${profile.group_size} ${profile.group_size === 1 ? 'person' : 'people'}</p>
+                        </div>
+                    ` : ''}
+
+                    ${profile.dietary_restrictions ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Dietary Restrictions</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${profile.dietary_restrictions.split(',').map(restriction => `
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs" style="background: var(--ios-orange); color: white;">
+                                        ${restriction.trim()}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${profile.phone ? `
+                        <div>
+                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Contact</h4>
+                            <p class="text-sm" style="color: var(--text-secondary);">📞 ${profile.phone}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        this.showModal(`${userName}'s Profile`, modalContent);
+    }
     
     async handleUpdateProfile(e) {
         e.preventDefault();
@@ -4264,8 +4348,12 @@ class CampingApp {
                 const joinedDate = participant.joined_at ? new Date(participant.joined_at).toLocaleDateString() : 'Recently';
                 const isOrganizer = organizerId && (participant.user_id === organizerId || participant.id === organizerId);
                 
+                const userId = participant.user_id || participant.id;
+                
                 return `
-                    <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
+                    <div class="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-opacity-80 transition-all duration-200" 
+                         style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);"
+                         onclick="app.viewUserProfile(${userId}, '${name.replace(/'/g, "\\'")}')">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: ${isOrganizer ? 'var(--ios-orange)' : 'var(--ios-blue)'}; opacity: 0.2;">
                             <span class="material-icons" style="font-size: 20px; color: ${isOrganizer ? 'var(--ios-orange)' : 'var(--ios-blue)'};">${isOrganizer ? 'star' : 'person'}</span>
                         </div>
@@ -4278,10 +4366,13 @@ class CampingApp {
                                 }
                             </div>
                         </div>
-                        ${status === 'confirmed' ? 
-                            '<span class="material-icons" style="font-size: 18px; color: var(--ios-green);">check_circle</span>' : 
-                            '<span class="material-icons" style="font-size: 18px; color: var(--ios-orange);">schedule</span>'
-                        }
+                        <div class="flex items-center gap-2">
+                            ${status === 'confirmed' ? 
+                                '<span class="material-icons" style="font-size: 18px; color: var(--ios-green);">check_circle</span>' : 
+                                '<span class="material-icons" style="font-size: 18px; color: var(--ios-orange);">schedule</span>'
+                            }
+                            <span class="material-icons" style="font-size: 16px; color: var(--text-secondary);">chevron_right</span>
+                        </div>
                     </div>
                 `;
             }).join('');
