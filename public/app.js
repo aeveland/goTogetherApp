@@ -849,20 +849,20 @@ class CampingApp {
     getStatusBadge(status) {
         const statusConfig = {
             'planning': {
-                color: '#007AFF',
-                background: '#E6F2FF',
+                color: '#FFFFFF',
+                background: '#007AFF',
                 text: 'Planning',
                 icon: 'schedule'
             },
             'active': {
-                color: '#34C759',
-                background: '#E8F5E8',
+                color: '#FFFFFF',
+                background: '#34C759',
                 text: 'Active',
                 icon: 'play_circle'
             },
             'completed': {
-                color: '#8E8E93',
-                background: '#F2F2F7',
+                color: '#FFFFFF',
+                background: '#8E8E93',
                 text: 'Completed',
                 icon: 'check_circle'
             }
