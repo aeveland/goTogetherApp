@@ -1461,16 +1461,18 @@ class CampingApp {
     }
 
     async showAddShoppingModal(tripId, editItem = null) {
-        // Get shopping categories and dietary restrictions
+        // Get shopping categories, dietary restrictions, and trip data
         const isEdit = editItem !== null;
         try {
-            const [categoriesResponse, shoppingResponse] = await Promise.all([
+            const [categoriesResponse, shoppingResponse, tripResponse] = await Promise.all([
                 fetch('/api/shopping/categories', { credentials: 'include' }),
-                fetch(`/api/shopping/trip/${tripId}`, { credentials: 'include' })
+                fetch(`/api/shopping/trip/${tripId}`, { credentials: 'include' }),
+                fetch(`/api/trips/${tripId}`, { credentials: 'include' })
             ]);
 
             let categories = [];
             let dietaryRestrictions = [];
+            let trip = null;
             
             if (categoriesResponse.ok) {
                 const data = await categoriesResponse.json();
@@ -1480,6 +1482,10 @@ class CampingApp {
             if (shoppingResponse.ok) {
                 const data = await shoppingResponse.json();
                 dietaryRestrictions = data.dietary_restrictions || [];
+            }
+            
+            if (tripResponse.ok) {
+                trip = await tripResponse.json();
             }
 
             // Create dietary restrictions info for modal
@@ -1513,12 +1519,6 @@ class CampingApp {
                                placeholder="Enter item name" value="${isEdit ? editItem.item_name || '' : ''}">
                     </div>
                     
-                    <div class="form-group">
-                        <label for="modalItemDescription">Description</label>
-                        <textarea id="modalItemDescription" name="description" rows="2"
-                                  placeholder="Additional details about the item">${isEdit ? editItem.description || '' : ''}</textarea>
-                    </div>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group">
                             <label for="modalItemCategory">Category</label>
@@ -1535,36 +1535,67 @@ class CampingApp {
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="modalItemCost">Estimated Cost ($) <span class="text-gray-500 text-sm">(optional)</span></label>
-                            <input type="number" id="modalItemCost" name="estimatedCost" 
-                                   step="0.01" min="0" placeholder="Leave blank if unknown" 
-                                   value="${isEdit && editItem.estimated_cost ? editItem.estimated_cost : ''}">
-                        </div>
-                        <div class="form-group">
-                            <label for="modalItemPriority">Priority</label>
-                            <select id="modalItemPriority" name="priority">
-                                <option value="medium" ${isEdit && editItem.priority === 'medium' ? 'selected' : (!isEdit ? 'selected' : '')}>Medium</option>
-                                <option value="high" ${isEdit && editItem.priority === 'high' ? 'selected' : ''}>High</option>
-                                <option value="low" ${isEdit && editItem.priority === 'low' ? 'selected' : ''}>Low</option>
-                            </select>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-3" style="color: var(--text-primary)">Assignment *</label>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(!isEdit || editItem.assigned_to === 'anyone') ? 'border-blue-400' : 'border-gray-600'}"
+                                   style="background: ${(!isEdit || editItem.assigned_to === 'anyone') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
+                                   onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
+                                   onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
+                                <input type="radio" name="assignmentType" value="anyone" ${(!isEdit || editItem.assigned_to === 'anyone') ? 'checked' : ''}
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                <span class="ml-3">
+                                    <span class="font-medium" style="color: var(--text-primary)">Anyone</span>
+                                    <span class="block text-sm" style="color: var(--text-secondary)">Anyone can buy this item</span>
+                                </span>
+                            </label>
+                            <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(isEdit && editItem.assigned_to === 'everyone') ? 'border-blue-400' : 'border-gray-600'}"
+                                   style="background: ${(isEdit && editItem.assigned_to === 'everyone') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
+                                   onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
+                                   onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
+                                <input type="radio" name="assignmentType" value="everyone" ${(isEdit && editItem.assigned_to === 'everyone') ? 'checked' : ''}
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                <span class="ml-3">
+                                    <span class="font-medium" style="color: var(--text-primary)">Everyone</span>
+                                    <span class="block text-sm" style="color: var(--text-secondary)">Everyone should buy this item</span>
+                                </span>
+                            </label>
+                            ${trip ? `
+                            <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${(isEdit && typeof editItem.assigned_to === 'number') ? 'border-blue-400' : 'border-gray-600'}"
+                                   style="background: ${(isEdit && typeof editItem.assigned_to === 'number') ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-secondary)'}"
+                                   onmouseover="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-hover)'; }"
+                                   onmouseout="if (!this.querySelector('input').checked) { this.style.background = 'var(--bg-secondary)'; }">
+                                <input type="radio" name="assignmentType" value="specific" ${(isEdit && typeof editItem.assigned_to === 'number') ? 'checked' : ''}
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                <span class="ml-3">
+                                    <span class="font-medium" style="color: var(--text-primary)">Assign to specific person</span>
+                                    <span class="block text-sm" style="color: var(--text-secondary)">Choose a specific trip participant</span>
+                                </span>
+                            </label>
+                            ` : ''}
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="modalItemAssignment">Assign To</label>
-                        <select id="modalItemAssignment" name="assignedTo">
-                            <option value="anyone" ${isEdit && editItem.assigned_to === 'anyone' ? 'selected' : (!isEdit ? 'selected' : '')}>Anyone can buy this</option>
-                            <option value="everyone" ${isEdit && editItem.assigned_to === 'everyone' ? 'selected' : ''}>Everyone should buy this</option>
+
+                    ${trip ? `
+                    <div id="specificShoppingAssigneeSection" class="form-group ${(!isEdit || typeof editItem.assigned_to !== 'number') ? 'hidden' : ''}">
+                        <label for="shoppingAssignedTo" class="block text-sm font-medium mb-2" style="color: var(--text-primary)">Assign to</label>
+                        <select id="shoppingAssignedTo" name="assignedTo"
+                                class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md appearance-none bg-no-repeat bg-right pr-10" 
+                                style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary); background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 5%22><path fill=%22%23666%22 d=%22M2 0L0 2h4zm0 5L0 3h4z%22/></svg>'); background-position: right 12px center; background-size: 12px;">
+                            <option value="">Select a person...</option>
+                            <option value="${trip.organizer_id}" ${(isEdit && editItem.assigned_to === trip.organizer_id) ? 'selected' : ''}>${trip.organizer_name} (Organizer)</option>
+                            ${trip.participants ? trip.participants.map(p => `
+                                <option value="${p.user_id}" ${(isEdit && editItem.assigned_to === p.user_id) ? 'selected' : ''}>${p.name}</option>
+                            `).join('') : ''}
                         </select>
                     </div>
+                    ` : ''}
                     
-                    <div class="form-group">
-                        <label for="modalItemNotes">Notes</label>
-                        <textarea id="modalItemNotes" name="notes" rows="2"
-                                  placeholder="Special instructions, brand preferences, etc.">${isEdit ? editItem.notes || '' : ''}</textarea>
-                    </div>
+                    <!-- Hidden fields for removed features with default values -->
+                    <input type="hidden" name="description" value="">
+                    <input type="hidden" name="estimatedCost" value="">
+                    <input type="hidden" name="priority" value="medium">
+                    <input type="hidden" name="notes" value="">
                     
                     <div class="modal-actions">
                         <button type="submit" class="ios-button-primary flex-1">
@@ -1579,6 +1610,32 @@ class CampingApp {
             
             this.showModal(isEdit ? 'Edit Shopping Item' : 'Add Shopping Item', modalContent);
             
+            // Handle assignment type changes for shopping items
+            const shoppingAssignmentRadios = document.querySelectorAll('input[name="assignmentType"]');
+            shoppingAssignmentRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const specificSection = document.getElementById('specificShoppingAssigneeSection');
+                    const assignedToSelect = document.getElementById('shoppingAssignedTo');
+                    
+                    if (radio.value === 'specific' && specificSection) {
+                        specificSection.classList.remove('hidden');
+                        // Auto-select the organizer if no selection has been made
+                        if (assignedToSelect && (!assignedToSelect.value || assignedToSelect.value === '')) {
+                            const organizerOption = assignedToSelect.querySelector(`option[value="${trip?.organizer_id}"]`);
+                            if (organizerOption) {
+                                assignedToSelect.value = trip.organizer_id;
+                            }
+                        }
+                    } else if (specificSection) {
+                        specificSection.classList.add('hidden');
+                        // Reset the dropdown when hiding
+                        if (assignedToSelect) {
+                            assignedToSelect.value = '';
+                        }
+                    }
+                });
+            });
+
             // Handle form submission
             document.getElementById('modalAddShoppingForm').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -1628,6 +1685,8 @@ class CampingApp {
         e.preventDefault();
         
         const formData = new FormData(e.target);
+        const assignmentType = formData.get('assignmentType');
+        
         const shoppingData = {
             item_name: formData.get('itemName'),
             description: formData.get('description'),
@@ -1635,9 +1694,24 @@ class CampingApp {
             quantity: parseInt(formData.get('quantity')) || 1,
             estimated_cost: parseFloat(formData.get('estimatedCost')) || null,
             priority: formData.get('priority'),
-            assigned_to: formData.get('assignedTo'),
+            assigned_to: assignmentType === 'specific' ? parseInt(formData.get('assignedTo')) : assignmentType,
             notes: formData.get('notes')
         };
+
+        // Validate specific assignment
+        if (assignmentType === 'specific') {
+            const assignedToValue = formData.get('assignedTo');
+            if (!assignedToValue || assignedToValue === '') {
+                this.showMessage('Please select a person when assigning to a specific user', 'error');
+                return;
+            }
+            const parsedAssignedTo = parseInt(assignedToValue);
+            if (isNaN(parsedAssignedTo) || parsedAssignedTo <= 0) {
+                this.showMessage('Please select a valid person from the dropdown', 'error');
+                return;
+            }
+            shoppingData.assigned_to = parsedAssignedTo;
+        }
 
         try {
             const url = isEdit ? `/api/shopping/${itemId}` : `/api/shopping/trip/${tripId}`;
