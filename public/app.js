@@ -3251,20 +3251,31 @@ class CampingApp {
         `;
         
         // Check if we're on dashboard or profile page
-        const profileContainer = document.getElementById('simpleProfileContainer');
+        const profileContainer = document.getElementById('profileContainer');
+        console.log('Profile container found:', !!profileContainer);
+        
+        if (!profileContainer) {
+            console.error('Profile container not found!');
+            this.showMessage('Unable to load profile editor', 'error');
+            return;
+        }
+        
         if (profileContainer && profileContainer.style.display !== 'none') {
             // We're on the profile page
+            console.log('Already on profile page, updating content');
             profileContainer.innerHTML = editHTML;
         } else {
             // We're on the dashboard - need to navigate to profile editing
+            console.log('Navigating from dashboard to profile editing');
+            
             // Hide dashboard and show profile container
             document.getElementById('dashboardContainer').style.display = 'none';
             
             // Show profile container
-            if (profileContainer) {
-                profileContainer.style.display = 'block';
-                profileContainer.innerHTML = editHTML;
-            }
+            profileContainer.style.display = 'block';
+            profileContainer.innerHTML = editHTML;
+            
+            console.log('Profile editing form should now be visible');
         }
         
         // Form submission handler is now inline
