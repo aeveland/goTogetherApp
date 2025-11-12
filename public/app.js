@@ -141,12 +141,12 @@ class CampingApp {
 
     async loadDashboardData() {
         try {
-            // Load all user's trips and tasks in parallel with better error handling
+            // Load all necessary data in parallel
             const results = await Promise.allSettled([
                 this.loadMyTrips(),
                 this.loadDashboardTasks(),
                 this.loadDashboardShopping(),
-                this.loadTripStatistics()
+                this.loadUserProfile()
             ]);
             
             // Check for any failed requests
@@ -157,7 +157,10 @@ class CampingApp {
             
             // Update dashboard sections
             this.updateDashboardUpcomingTrips();
+            this.updateDashboardStats();
             this.updateRecentActivity();
+            this.updateWeatherInsights();
+            this.updateProfileCompleteness();
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             this.showMessage('Failed to load dashboard data', 'error');
@@ -620,6 +623,152 @@ class CampingApp {
         });
         
         container.innerHTML = dietaryInfo + progressHtml + html;
+    }
+
+    updateDashboardStats() {
+        if (!this.myTrips) return;
+        
+        // Calculate statistics
+        const totalTrips = this.myTrips.length;
+        const organizedTrips = this.myTrips.filter(trip => 
+            this.currentUser && trip.organizer_id === this.currentUser.id
+        ).length;
+        const joinedTrips = totalTrips - organizedTrips;
+        
+        // Calculate completed tasks
+        const completedTasks = this.userTasks ? 
+            this.userTasks.filter(task => task.is_completed).length : 0;
+        
+        // Update DOM elements
+        document.getElementById('totalTrips').textContent = totalTrips;
+        document.getElementById('organizedTrips').textContent = organizedTrips;
+        document.getElementById('joinedTrips').textContent = joinedTrips;
+        document.getElementById('completedTasks').textContent = completedTasks;
+    }
+
+    updateWeatherInsights() {
+        const container = document.getElementById('weatherInsights');
+        if (!container) return;
+        
+        if (!this.myTrips || this.myTrips.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-gray-500">
+                    <span class="material-icons text-3xl mb-2 opacity-50">wb_cloudy</span>
+                    <p class="ios-footnote">No upcoming trips for weather insights</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Find next upcoming trip
+        const now = new Date();
+        const upcomingTrips = this.myTrips
+            .filter(trip => new Date(trip.start_date) > now)
+            .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+        
+        if (upcomingTrips.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-gray-500">
+                    <span class="material-icons text-3xl mb-2 opacity-50">wb_sunny</span>
+                    <p class="ios-footnote">No upcoming trips</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const nextTrip = upcomingTrips[0];
+        const daysUntil = Math.ceil((new Date(nextTrip.start_date) - now) / (1000 * 60 * 60 * 24));
+        
+        container.innerHTML = `
+            <div class="p-4 rounded-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-medium">${nextTrip.title}</h4>
+                    <span class="text-xs opacity-80">${daysUntil} days</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="material-icons" style="font-size: 16px;">location_on</span>
+                    <span class="truncate">${nextTrip.location}</span>
+                </div>
+                <div class="mt-3 pt-3 border-t border-white border-opacity-20">
+                    <button onclick="app.loadTripWeather(${nextTrip.id}); app.showTripDetails(${nextTrip.id})" 
+                            class="text-xs text-white opacity-80 hover:opacity-100 flex items-center gap-1">
+                        <span class="material-icons" style="font-size: 14px;">wb_cloudy</span>
+                        View Weather Forecast
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    updateProfileCompleteness() {
+        const container = document.getElementById('profileCompleteness');
+        if (!container || !this.currentUser) return;
+        
+        // Calculate profile completeness
+        const fields = [
+            this.currentUser.firstName,
+            this.currentUser.lastName,
+            this.currentUser.email,
+            this.currentUser.bio,
+            this.currentUser.camperType,
+            this.currentUser.phone,
+            this.currentUser.homeAddress
+        ];
+        
+        const completedFields = fields.filter(field => field && field.trim()).length;
+        const totalFields = fields.length;
+        const percentage = Math.round((completedFields / totalFields) * 100);
+        
+        let statusColor = 'var(--ios-red)';
+        let statusText = 'Incomplete';
+        let suggestion = 'Complete your profile for better trip matching';
+        
+        if (percentage >= 80) {
+            statusColor = 'var(--ios-green)';
+            statusText = 'Complete';
+            suggestion = 'Your profile looks great!';
+        } else if (percentage >= 60) {
+            statusColor = 'var(--ios-orange)';
+            statusText = 'Good';
+            suggestion = 'Add a few more details to improve your profile';
+        }
+        
+        container.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <span class="ios-callout">Profile Completeness</span>
+                <span class="text-sm font-medium" style="color: ${statusColor};">${percentage}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                <div class="h-2 rounded-full transition-all duration-300" 
+                     style="width: ${percentage}%; background: ${statusColor};"></div>
+            </div>
+            <p class="ios-footnote text-gray-600 mb-3">${suggestion}</p>
+            ${percentage < 80 ? `
+                <button onclick="app.showEditProfile()" 
+                        class="ios-button-secondary ios-button-compact w-full">
+                    <span class="material-icons mr-1" style="font-size: 14px;">edit</span>
+                    Complete Profile
+                </button>
+            ` : ''}
+        `;
+    }
+
+    async loadUserProfile() {
+        if (!this.currentUser) return;
+        
+        try {
+            const response = await fetch(`/api/profile/${this.currentUser.id}`, {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                // Merge profile data with current user
+                this.currentUser = { ...this.currentUser, ...data.user };
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
     }
 
     async loadTripWeather(tripId) {
