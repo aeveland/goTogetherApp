@@ -54,7 +54,7 @@ class CampingApp {
         
         // Main action buttons
         document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripModal());
-        document.getElementById('joinTripBtn').addEventListener('click', () => this.showJoinTripsView());
+        document.getElementById('joinTripBtn').addEventListener('click', () => this.showJoinTripModal());
         document.getElementById('browseTripsBtn').addEventListener('click', () => this.showBrowseTripsView());
         document.getElementById('browseTripsBtn-mobile').addEventListener('click', () => this.showBrowseTripsView());
         document.getElementById('backToMyTripsBtn').addEventListener('click', () => this.showMyTripsView());
@@ -1337,6 +1337,9 @@ class CampingApp {
             });
 
             if (response.ok) {
+                const data = await response.json();
+                this.showMessage(data.message || 'Shopping item updated!', 'success');
+                
                 // Reload shopping data
                 this.loadDashboardShopping();
                 // If we're on a trip details page, reload that too
@@ -1345,7 +1348,9 @@ class CampingApp {
                     this.loadTripShopping(currentTripId);
                 }
             } else {
-                this.showMessage('Failed to update shopping item', 'error');
+                const errorData = await response.json();
+                console.error('Shopping toggle error:', errorData);
+                this.showMessage(errorData.error || 'Failed to update shopping item', 'error');
             }
         } catch (error) {
             console.error('Error toggling shopping item:', error);
@@ -1531,6 +1536,103 @@ class CampingApp {
             // Initialize Places autocomplete for the modal
             this.initPlacesAutocomplete();
         }, 100);
+    }
+
+    showJoinTripModal() {
+        const modalContent = `
+            <div class="space-y-6">
+                <div class="text-center mb-6">
+                    <span class="material-icons text-4xl mb-3 block" style="color: var(--ios-blue);">search</span>
+                    <p class="text-gray-600">Enter a trip code or search for public trips to join</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modalTripCode">Trip Code</label>
+                    <div class="flex gap-3">
+                        <input type="text" id="modalTripCode" placeholder="Enter trip code (e.g., CAMP2024)"
+                               class="flex-1 form-input">
+                        <button id="modalJoinByCodeBtn" class="ios-button-primary">
+                            Join
+                        </button>
+                    </div>
+                    <small class="text-gray-500">Ask the trip organizer for the trip code</small>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-gray-400 mb-4">or</div>
+                    <button id="modalSearchTripsBtn" class="ios-button-secondary w-full">
+                        <span class="material-icons mr-2" style="font-size: 16px;">public</span>
+                        Browse Public Trips
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        this.showModal('Join a Trip', modalContent);
+        
+        // Handle join by code
+        document.getElementById('modalJoinByCodeBtn').addEventListener('click', () => {
+            this.handleModalJoinByCode();
+        });
+        
+        // Handle enter key in trip code input
+        document.getElementById('modalTripCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('modalJoinByCodeBtn').click();
+            }
+        });
+        
+        // Handle browse public trips
+        document.getElementById('modalSearchTripsBtn').addEventListener('click', () => {
+            this.closeModal();
+            this.showBrowseTripsView();
+        });
+        
+        // Focus the trip code input
+        setTimeout(() => {
+            document.getElementById('modalTripCode').focus();
+        }, 100);
+    }
+
+    async handleModalJoinByCode() {
+        const tripCode = document.getElementById('modalTripCode').value.trim();
+        if (!tripCode) {
+            this.showMessage('Please enter a trip code', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/trips/join-by-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ tripCode })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage(`Successfully joined "${data.trip.title}"!`, 'success');
+                this.closeModal();
+                // Refresh user's trips and dashboard data
+                setTimeout(() => {
+                    this.loadMyTrips();
+                    this.loadDashboardData();
+                }, 1000);
+            } else {
+                if (data.errors) {
+                    const errorMessages = data.errors.map(err => err.msg).join(', ');
+                    this.showMessage(errorMessages, 'error');
+                } else {
+                    this.showMessage(data.error || 'Failed to join trip', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error joining trip:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
     }
 
     async handleModalCreateTrip(e) {
@@ -2843,13 +2945,20 @@ class CampingApp {
     }
     
     showEditProfile() {
-        const user = this.currentProfileUser;
+        // If no currentProfileUser is set, use the current user (for dashboard calls)
+        const user = this.currentProfileUser || this.currentUser;
+        
+        // Set profile context if not already set (for dashboard calls)
+        if (!this.currentProfileUser) {
+            this.currentProfileUser = this.currentUser;
+            this.isOwnProfile = true;
+        }
         
         const editHTML = `
             <div style="max-width: 800px; margin: 0 auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                     <h1 style="font-size: 28px; font-weight: bold; color: #333;">Edit Profile</h1>
-                    <button onclick="app.displayProfile(app.currentProfileUser, app.isOwnProfile)" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    <button onclick="app.showMyTripsView()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
                 </div>
                 
                 <form onsubmit="app.handleUpdateProfile(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
@@ -2947,7 +3056,7 @@ class CampingApp {
                                     style="background: #10b981; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; margin-right: 10px;">
                                 Save Changes
                             </button>
-                            <button type="button" onclick="app.displayProfile(app.currentProfileUser, app.isOwnProfile)" 
+                            <button type="button" onclick="app.showMyTripsView()" 
                                     style="background: #6b7280; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
                                 Cancel
                             </button>
