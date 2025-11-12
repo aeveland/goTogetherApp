@@ -2555,6 +2555,182 @@ class CampingApp {
         }
     }
 
+    getUserFullAddress() {
+        if (!this.currentUser) return null;
+        
+        // Build full address from user profile fields
+        const addressParts = [];
+        
+        if (this.currentUser.home_address) {
+            addressParts.push(this.currentUser.home_address);
+        }
+        
+        if (this.currentUser.home_city) {
+            let cityLine = this.currentUser.home_city;
+            if (this.currentUser.home_state) {
+                cityLine += `, ${this.currentUser.home_state}`;
+            }
+            if (this.currentUser.home_zip) {
+                cityLine += ` ${this.currentUser.home_zip}`;
+            }
+            addressParts.push(cityLine);
+        }
+        
+        return addressParts.length > 0 ? addressParts.join(', ') : null;
+    }
+
+    async updateDirectionsButton(trip) {
+        try {
+            // Check if user has a valid address
+            const userAddress = this.getUserFullAddress();
+            if (!userAddress) {
+                return; // Keep default "Get Directions" button
+            }
+            const tripLocation = trip.location;
+
+            // Calculate distance and drive time
+            const routeInfo = await this.calculateRouteInfo(userAddress, tripLocation);
+            
+            if (routeInfo) {
+                // Update the directions button with distance and time
+                const directionsBtn = document.querySelector('button[onclick*="google.com/maps"]');
+                if (directionsBtn) {
+                    const { distance, duration } = routeInfo;
+                    directionsBtn.innerHTML = `
+                        <span class="material-icons mr-2">directions</span>
+                        ${distance} - ${duration}
+                    `;
+                    
+                    // Update onclick to include both addresses for better directions
+                    const encodedOrigin = encodeURIComponent(userAddress);
+                    const encodedDestination = encodeURIComponent(tripLocation);
+                    directionsBtn.onclick = () => {
+                        window.open(`https://www.google.com/maps/dir/${encodedOrigin}/${encodedDestination}`, '_blank');
+                    };
+                }
+
+                // Optionally show route on map
+                await this.showRouteOnMap(trip, userAddress, tripLocation);
+            }
+        } catch (error) {
+            console.error('Error updating directions button:', error);
+            // Keep default button if there's an error
+        }
+    }
+
+    async calculateRouteInfo(origin, destination) {
+        try {
+            // Use a routing service to get distance and time
+            // For now, we'll use a simple distance calculation and estimate
+            const originCoords = await this.geocodeLocation(origin);
+            const destCoords = await this.geocodeLocation(destination);
+            
+            if (!originCoords || !destCoords) {
+                return null;
+            }
+
+            // Calculate straight-line distance
+            const distance = this.calculateDistance(
+                originCoords.lat, originCoords.lon,
+                destCoords.lat, destCoords.lon
+            );
+
+            // Estimate driving time (assuming average 45 mph with traffic/roads)
+            const estimatedDriveTimeHours = distance / 45;
+            const hours = Math.floor(estimatedDriveTimeHours);
+            const minutes = Math.round((estimatedDriveTimeHours - hours) * 60);
+
+            let durationText;
+            if (hours > 0) {
+                durationText = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+            } else {
+                durationText = `${minutes}m`;
+            }
+
+            return {
+                distance: `${Math.round(distance)} mi`,
+                duration: durationText,
+                originCoords,
+                destCoords
+            };
+        } catch (error) {
+            console.error('Error calculating route info:', error);
+            return null;
+        }
+    }
+
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        // Haversine formula to calculate distance between two points
+        const R = 3959; // Earth's radius in miles
+        const dLat = this.toRadians(lat2 - lat1);
+        const dLon = this.toRadians(lon2 - lon1);
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    toRadians(degrees) {
+        return degrees * (Math.PI/180);
+    }
+
+    async showRouteOnMap(trip, userAddress, tripLocation) {
+        try {
+            const mapContainer = document.getElementById('trip-detail-map');
+            const map = mapContainer?._leaflet_map;
+            
+            if (!map) return;
+
+            const originCoords = await this.geocodeLocation(userAddress);
+            const destCoords = await this.geocodeLocation(tripLocation);
+            
+            if (!originCoords || !destCoords) return;
+
+            // Add origin marker (user's location)
+            const originMarker = L.marker([originCoords.lat, originCoords.lon], {
+                icon: L.divIcon({
+                    className: 'custom-marker origin-marker',
+                    html: '<div style="background: #007AFF; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">A</div>',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                })
+            }).addTo(map);
+            
+            originMarker.bindPopup(`<b>Your Location</b><br>${userAddress}`);
+
+            // Update destination marker
+            const destMarker = L.marker([destCoords.lat, destCoords.lon], {
+                icon: L.divIcon({
+                    className: 'custom-marker dest-marker',
+                    html: '<div style="background: #34C759; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">B</div>',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                })
+            }).addTo(map);
+            
+            destMarker.bindPopup(`<b>${trip.title}</b><br>${tripLocation}`);
+
+            // Draw a simple line between points (for a more accurate route, you'd use a routing service)
+            const routeLine = L.polyline([
+                [originCoords.lat, originCoords.lon],
+                [destCoords.lat, destCoords.lon]
+            ], {
+                color: '#007AFF',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '10, 10'
+            }).addTo(map);
+
+            // Fit map to show both points
+            const group = new L.featureGroup([originMarker, destMarker, routeLine]);
+            map.fitBounds(group.getBounds().pad(0.1));
+
+        } catch (error) {
+            console.error('Error showing route on map:', error);
+        }
+    }
 
     // Dashboard Navigation Methods
     showMyTripsView() {
@@ -4006,6 +4182,8 @@ class CampingApp {
             const coords = await this.geocodeLocation(trip.location);
             if (coords) {
                 this.createFullMap('trip-detail-map', coords.lat, coords.lon, trip.location);
+                // Calculate and display directions if user has address
+                await this.updateDirectionsButton(trip);
             }
         }, 100);
     }
