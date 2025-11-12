@@ -744,7 +744,7 @@ class CampingApp {
             </div>
             <p class="ios-footnote text-gray-600 mb-3">${suggestion}</p>
             ${percentage < 80 ? `
-                <button onclick="app.showEditProfile()" 
+                <button onclick="console.log('Complete Profile button clicked'); app.showEditProfile();" 
                         class="ios-button-secondary ios-button-compact w-full">
                     <span class="material-icons mr-1" style="font-size: 14px;">edit</span>
                     Complete Profile
@@ -3121,8 +3121,16 @@ class CampingApp {
     }
     
     showEditProfile() {
+        console.log('showEditProfile called from dashboard');
+        
         // If no currentProfileUser is set, use the current user (for dashboard calls)
         const user = this.currentProfileUser || this.currentUser;
+        
+        if (!user) {
+            console.error('No user data available for profile editing');
+            this.showMessage('Unable to load profile data', 'error');
+            return;
+        }
         
         // Set profile context if not already set (for dashboard calls)
         if (!this.currentProfileUser) {
@@ -3242,8 +3250,22 @@ class CampingApp {
             </div>
         `;
         
+        // Check if we're on dashboard or profile page
         const profileContainer = document.getElementById('simpleProfileContainer');
-        profileContainer.innerHTML = editHTML;
+        if (profileContainer && profileContainer.style.display !== 'none') {
+            // We're on the profile page
+            profileContainer.innerHTML = editHTML;
+        } else {
+            // We're on the dashboard - need to navigate to profile editing
+            // Hide dashboard and show profile container
+            document.getElementById('dashboardContainer').style.display = 'none';
+            
+            // Show profile container
+            if (profileContainer) {
+                profileContainer.style.display = 'block';
+                profileContainer.innerHTML = editHTML;
+            }
+        }
         
         // Form submission handler is now inline
     }
