@@ -4091,23 +4091,38 @@ class CampingApp {
         const formData = new FormData(e.target);
         
         // Prepare task data
+        const assignmentType = formData.get('assignmentType');
+        const assignedToValue = formData.get('assignedTo');
+        
         const taskData = {
             title: formData.get('title'),
             description: formData.get('description'),
-            assignmentType: formData.get('assignmentType'),
-            assignedTo: formData.get('assignedTo') || null,
+            assignmentType: assignmentType,
+            assignedTo: null,
             hasDueDate: document.getElementById('hasDueDate').checked,
             dueDate: null
         };
+
+        // Handle assignedTo based on assignment type
+        if (assignmentType === 'specific') {
+            if (!assignedToValue || assignedToValue === '') {
+                this.showMessage('Please select a person when assigning to a specific user', 'error');
+                return;
+            }
+            taskData.assignedTo = parseInt(assignedToValue);
+        }
 
         // Handle due date/time
         if (taskData.hasDueDate) {
             const dueDate = formData.get('dueDate');
             const dueTime = formData.get('dueTime');
             
-            if (dueDate) {
-                taskData.dueDate = dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T23:59:00`;
+            if (!dueDate) {
+                this.showMessage('Please select a due date when setting a due date', 'error');
+                return;
             }
+            
+            taskData.dueDate = dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T23:59:00`;
         }
 
         try {
