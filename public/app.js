@@ -4057,7 +4057,7 @@ class CampingApp {
                             <select id="assignedTo" name="assignedTo"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:shadow-md appearance-none bg-no-repeat bg-right pr-10" 
                                     style="background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 5%22><path fill=%22%23666%22 d=%22M2 0L0 2h4zm0 5L0 3h4z%22/></svg>'); background-position: right 12px center; background-size: 12px;">
-                                <option value="" disabled>Select a person...</option>
+                                <option value="">Select a person...</option>
                                 <option value="${trip.organizer_id}" ${(isEdit && task.assigned_to === trip.organizer_id) ? 'selected' : ''}>${trip.organizer_name} (Organizer)</option>
                                 ${trip.participants ? trip.participants.map(p => `
                                     <option value="${p.user_id}" ${(isEdit && task.assigned_to === p.user_id) ? 'selected' : ''}>${p.name}</option>
@@ -4123,10 +4123,21 @@ class CampingApp {
         assignmentRadios.forEach(radio => {
             radio.addEventListener('change', () => {
                 const specificSection = document.getElementById('specificAssigneeSection');
+                const assignedToSelect = document.getElementById('assignedTo');
+                
                 if (radio.value === 'specific') {
                     specificSection.classList.remove('hidden');
+                    // Auto-select the organizer if no selection has been made
+                    if (!assignedToSelect.value || assignedToSelect.value === '') {
+                        const organizerOption = assignedToSelect.querySelector(`option[value="${trip.organizer_id}"]`);
+                        if (organizerOption) {
+                            assignedToSelect.value = trip.organizer_id;
+                        }
+                    }
                 } else {
                     specificSection.classList.add('hidden');
+                    // Reset the dropdown when hiding
+                    assignedToSelect.value = '';
                 }
             });
         });
@@ -4164,8 +4175,12 @@ class CampingApp {
         // Handle assignedTo based on assignment type
         if (assignmentType === 'specific') {
             console.log('Assignment type is specific, assignedToValue:', assignedToValue);
+            console.log('Assignment dropdown element:', document.getElementById('assignedTo'));
+            console.log('Assignment dropdown value:', document.getElementById('assignedTo')?.value);
+            console.log('Assignment dropdown options:', Array.from(document.getElementById('assignedTo')?.options || []).map(opt => ({value: opt.value, text: opt.text, selected: opt.selected})));
+            
             if (!assignedToValue || assignedToValue === '' || assignedToValue === 'null' || assignedToValue === 'undefined') {
-                this.showMessage('Please select a person when assigning to a specific user', 'error');
+                this.showMessage('Please select a person from the dropdown when assigning to a specific user', 'error');
                 return;
             }
             const parsedAssignedTo = parseInt(assignedToValue);
