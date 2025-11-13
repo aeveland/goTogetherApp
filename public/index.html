@@ -923,10 +923,14 @@
         }
         
         .modal-header {
-            padding: 24px 24px 0 24px;
+            padding: 24px 24px 20px 24px;
             border-bottom: 1px solid var(--border-primary);
             background: var(--bg-modal);
             border-radius: 16px 16px 0 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         
         .modal-title {
@@ -934,17 +938,16 @@
             font-weight: 600;
             color: var(--text-primary);
             margin: 0;
-            padding-right: 40px;
+            padding-right: 16px;
+            flex: 1;
+            line-height: 1.3;
         }
         
         .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             background: var(--ios-gray-5);
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -952,6 +955,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             color: var(--ios-gray-1);
+            flex-shrink: 0;
         }
         
         .modal-close:hover {
@@ -1163,11 +1167,24 @@
                 border-radius: 12px;
             }
             
-            .modal-header,
+            .modal-header {
+                padding: 20px 16px 16px 16px;
+            }
+            
             .modal-body,
             .modal-footer {
                 padding-left: 16px;
                 padding-right: 16px;
+            }
+            
+            .modal-close {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .modal-title {
+                font-size: 18px;
+                padding-right: 12px;
             }
             
             .modal-actions {
