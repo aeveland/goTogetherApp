@@ -1844,8 +1844,35 @@
                 
                 /* FIX: Map pin aspect ratio */
                 .leaflet-marker-icon {
-                    width: 25px !important;
-                    height: 41px !important;
+                    width: auto !important;
+                    height: auto !important;
+                    max-width: none !important;
+                    max-height: none !important;
+                    transform: none !important;
+                }
+                
+                /* Ensure Leaflet default marker maintains proper proportions */
+                .leaflet-div-icon {
+                    background: transparent !important;
+                    border: none !important;
+                    width: auto !important;
+                    height: auto !important;
+                }
+                
+                /* Fix map container to prevent pin distortion */
+                #trip-detail-map {
+                    width: 100% !important;
+                    height: 250px !important;
+                    min-height: 250px !important;
+                }
+                
+                /* Ensure map tiles and overlays don't distort */
+                .leaflet-container {
+                    font-size: 12px !important;
+                }
+                
+                .leaflet-popup-content-wrapper {
+                    border-radius: 8px !important;
                 }
                 
                 /* FIX: Priority dots - make them smaller */
