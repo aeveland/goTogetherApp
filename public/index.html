@@ -1736,6 +1736,36 @@
                     max-width: 100% !important;
                     overflow: hidden !important;
                 }
+                
+                /* Specific progress bar container fixes */
+                .progress-bar-container {
+                    max-width: 100% !important;
+                    overflow: hidden !important;
+                    box-sizing: border-box !important;
+                }
+                
+                .progress-bar-container > div {
+                    max-width: 100% !important;
+                    overflow: hidden !important;
+                    box-sizing: border-box !important;
+                }
+                
+                /* Force all shopping/task containers to be properly contained */
+                #userShoppingContainer,
+                #userTasksContainer,
+                [id^="shoppingList-"],
+                [id^="tasksList-"] {
+                    overflow: hidden !important;
+                    box-sizing: border-box !important;
+                    max-width: 100% !important;
+                }
+                
+                /* Shopping and task cards */
+                .ios-card {
+                    overflow: hidden !important;
+                    box-sizing: border-box !important;
+                    max-width: 100% !important;
+                }
             }
 
             /* Weather Forecast Mobile Improvements */

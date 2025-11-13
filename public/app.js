@@ -1050,21 +1050,20 @@ class CampingApp {
         const color = colors[type] || colors.default;
         
         return `
-            <div class="flex items-center gap-3" style="width: 100%; min-width: 0;">
-                <span class="material-icons flex-shrink-0" style="font-size: 16px; color: ${color.fill};">${color.icon}</span>
-                <div class="flex-1" style="min-width: 0; overflow: hidden;">
-                    <div class="flex justify-between items-center mb-1" style="width: 100%;">
-                        <span class="text-sm font-medium truncate" style="color: ${isComplete ? color.fill : '#333'}; max-width: 70%;">
+            <div class="progress-bar-container" style="display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; overflow: hidden; box-sizing: border-box;">
+                <span class="material-icons" style="font-size: 16px; color: ${color.fill}; flex-shrink: 0;">${color.icon}</span>
+                <div style="flex: 1; min-width: 0; overflow: hidden; box-sizing: border-box;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; width: 100%; box-sizing: border-box;">
+                        <span style="font-size: 12px; font-weight: 500; color: ${isComplete ? color.fill : '#333'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; box-sizing: border-box;">
                             ${completed}/${total} ${type}${completed === 1 ? '' : 's'} ${type === 'shopping' ? 'purchased' : 'completed'}
                         </span>
-                        <span class="text-xs text-gray-500 flex-shrink-0 ml-2">${percentage}%</span>
+                        <span style="font-size: 10px; color: #666; flex-shrink: 0; margin-left: 8px;">${percentage}%</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2" style="overflow: hidden;">
-                        <div class="h-2 rounded-full transition-all duration-300" 
-                             style="width: ${percentage}%; background: ${color.fill}; max-width: 100%;"></div>
+                    <div style="width: 100%; height: 8px; background-color: #e5e5e5; border-radius: 4px; overflow: hidden; position: relative; box-sizing: border-box;">
+                        <div style="height: 100%; background: ${color.fill}; border-radius: 4px; transition: width 0.3s ease; width: ${percentage}%; max-width: 100%; position: absolute; top: 0; left: 0; box-sizing: border-box;"></div>
                     </div>
                 </div>
-                ${isComplete ? `<span class="material-icons text-green-600 flex-shrink-0" style="font-size: 18px;">check_circle</span>` : ''}
+                ${isComplete ? `<span class="material-icons" style="font-size: 18px; color: #34C759; flex-shrink: 0;">check_circle</span>` : ''}
             </div>
         `;
     }
