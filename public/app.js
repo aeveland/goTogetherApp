@@ -901,18 +901,18 @@ class CampingApp {
             </div>
             <!-- Camping Tips -->
             ${this.getCampingTips(current, daily[0], windSpeed).length > 0 ? `
-            <div style="background: #E6FFFA; border: 1px solid #10B981; border-radius: 16px; padding: 20px;">
-                <h3 style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 16px 0; display: flex; align-items: center;">
+            <div style="background: #1d283a; border-radius: 16px; padding: 20px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: white; margin: 0 0 16px 0; display: flex; align-items: center;">
                     <span class="material-icons" style="font-size: 20px; color: #10B981; margin-right: 8px;">outdoor_grill</span>
                     Camping Tips
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${this.getCampingTips(current, daily[0], windSpeed).map(tip => `
-                        <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px;">
+                        <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px;">
                             <span class="material-icons" style="font-size: 20px; color: ${tip.color}; margin-top: 2px;">${tip.icon}</span>
                             <div>
-                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px;">${tip.title}</div>
-                                <div style="font-size: 13px; color: #666; line-height: 1.4;">${tip.description}</div>
+                                <div style="font-size: 14px; font-weight: 600; color: white; margin-bottom: 4px;">${tip.title}</div>
+                                <div style="font-size: 13px; color: rgba(255, 255, 255, 0.8); line-height: 1.4;">${tip.description}</div>
                             </div>
                         </div>
                     `).join('')}
