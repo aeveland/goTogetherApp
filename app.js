@@ -24,7 +24,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Enable gzip compression - reduces file sizes by 60-80%
-app.use(compression());
+app.use(compression({
+  threshold: 1024, // Only compress files larger than 1KB
+  level: 6, // Compression level (1-9, 6 is good balance)
+  filter: (req, res) => {
+    // Compress all compressible content
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
