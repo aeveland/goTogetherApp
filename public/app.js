@@ -1958,13 +1958,13 @@ class CampingApp {
                     </div>
                     
                     <div class="form-group">
-                        <label class="block text-sm font-medium mb-3" style="color: var(--text-primary)">Who should buy this item? *</label>
-                        <div class="space-y-2">
-                            <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                        <label class="block text-sm font-medium mb-3" style="color: var(--text-primary)">Who should buy this item?</label>
+                        <div class="space-y-3">
+                            <div class="flex items-center p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                  style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                  onclick="this.querySelector('input').click()">
                                 <input type="radio" name="assignmentType" value="me" ${(!isEdit || editItem.assigned_to === 'me') ? 'checked' : ''}
-                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
+                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-4"
                                        style="accent-color: var(--ios-blue);">
                                 <div>
                                     <div class="font-medium" style="color: var(--text-primary);">For me</div>
@@ -1972,11 +1972,11 @@ class CampingApp {
                                 </div>
                             </div>
                             
-                            <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                            <div class="flex items-center p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                  style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                  onclick="this.querySelector('input').click()">
                                 <input type="radio" name="assignmentType" value="everyone" ${(isEdit && editItem.assigned_to === 'everyone') ? 'checked' : ''}
-                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
+                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-4"
                                        style="accent-color: var(--ios-blue);">
                                 <div>
                                     <div class="font-medium" style="color: var(--text-primary);">For everyone</div>
