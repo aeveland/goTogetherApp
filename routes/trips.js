@@ -92,6 +92,7 @@ router.get('/:id', [
     // Get participants
     const participantsResult = await pool.query(`
       SELECT 
+        u.id as user_id,
         u.first_name || ' ' || u.last_name as name,
         tp.joined_at,
         tp.status
@@ -109,6 +110,41 @@ router.get('/:id', [
   } catch (error) {
     console.error('Error fetching trip details:', error);
     res.status(500).json({ error: 'Failed to fetch trip details' });
+  }
+});
+
+// Get trip participants
+router.get('/:id/participants', [
+  param('id').isInt().withMessage('Trip ID must be a number')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const tripId = req.params.id;
+
+    // Get participants
+    const participantsResult = await pool.query(`
+      SELECT 
+        u.id as user_id,
+        u.first_name || ' ' || u.last_name as name,
+        u.email,
+        tp.joined_at,
+        tp.status
+      FROM trip_participants tp
+      JOIN users u ON tp.user_id = u.id
+      WHERE tp.trip_id = $1 AND tp.status = 'confirmed'
+      ORDER BY tp.joined_at ASC
+    `, [tripId]);
+
+    res.json({ 
+      participants: participantsResult.rows 
+    });
+  } catch (error) {
+    console.error('Error fetching trip participants:', error);
+    res.status(500).json({ error: 'Failed to fetch trip participants' });
   }
 });
 
