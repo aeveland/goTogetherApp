@@ -472,9 +472,21 @@
         }
         
         /* Form Validation States - WCAG Compliant */
-        input:invalid,
-        textarea:invalid,
-        select:invalid {
+        /* Only show validation errors after user interaction or form submission */
+        input.error,
+        textarea.error,
+        select.error,
+        input:invalid:not(:placeholder-shown):not(:focus),
+        textarea:invalid:not(:placeholder-shown):not(:focus),
+        select:invalid:not(:focus) {
+            border-color: var(--ios-red) !important;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+        }
+        
+        /* Show validation errors on form submission attempt */
+        form.submitted input:invalid,
+        form.submitted textarea:invalid,
+        form.submitted select:invalid {
             border-color: var(--ios-red) !important;
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
         }

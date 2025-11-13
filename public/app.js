@@ -41,6 +41,9 @@ class CampingApp {
         document.getElementById('loginFormElement').addEventListener('submit', (e) => this.handleLogin(e));
         document.getElementById('registerFormElement').addEventListener('submit', (e) => this.handleRegister(e));
         
+        // Universal form validation handler
+        this.initFormValidation();
+        
         // Header actions (available when logged in)
         document.getElementById('headerLogoutBtn').addEventListener('click', () => this.handleLogout());
         document.getElementById('headerUserProfileBtn').addEventListener('click', () => this.showUserProfile(this.currentUser.id));
@@ -5645,6 +5648,46 @@ class CampingApp {
             button.style.display = isMobile ? 'block' : 'none';
         });
     }
+    
+    // Universal form validation handler
+    initFormValidation() {
+        // Add event listeners to all forms to handle validation styling
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            if (form.tagName === 'FORM') {
+                // Add submitted class to show validation errors
+                form.classList.add('submitted');
+                
+                // Check if form is valid
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    
+                    // Focus on first invalid field
+                    const firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                    }
+                }
+            }
+        });
+        
+        // Remove validation styling when user starts typing in a field
+        document.addEventListener('input', (e) => {
+            const input = e.target;
+            if (input.matches('input, textarea, select')) {
+                // Remove error class when user starts fixing the field
+                input.classList.remove('error');
+                
+                // If field becomes valid, remove submitted class from form to reset styling
+                if (input.checkValidity()) {
+                    const form = input.closest('form');
+                    if (form && form.checkValidity()) {
+                        form.classList.remove('submitted');
+                    }
+                }
+            }
+        });
+    }
 }
 
 // Google Places API initialization callback
@@ -5654,9 +5697,6 @@ window.initGooglePlaces = function() {
         window.app.initPlacesAutocomplete();
     }
 };
-
-// Global app instance for onclick handlers
-let app;
 
 // iOS toggle switch function
 window.togglePublicTrip = function() {
@@ -5669,11 +5709,11 @@ window.togglePublicTrip = function() {
     
     // Update visual state of the switch
     if (checkbox.checked) {
-        toggleSwitch.style.background = '#34C759'; // iOS green
         thumb.style.transform = 'translateX(20px)';
+        toggleSwitch.style.backgroundColor = 'var(--ios-blue)';
     } else {
-        toggleSwitch.style.background = '#E5E5EA'; // iOS gray
-        thumb.style.transform = 'translateX(0px)';
+        thumb.style.transform = 'translateX(2px)';
+        toggleSwitch.style.backgroundColor = 'var(--ios-gray-4)';
     }
     
     // Trigger the existing public/private toggle logic
@@ -5687,6 +5727,17 @@ window.togglePublicTrip = function() {
         }
     }
 };
+
+// Google Places API initialization callback
+window.initGooglePlaces = function() {
+    console.log('Google Places API loaded');
+    if (window.app) {
+        window.app.initPlacesAutocomplete();
+    }
+};
+
+// Global app instance for onclick handlers
+let app;
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
