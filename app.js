@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const compression = require('compression');
 const path = require('path');
 require('dotenv').config();
 
@@ -21,6 +22,9 @@ const fixShoppingColumnsRoutes = require('./routes/fix-shopping-columns');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Enable gzip compression - reduces file sizes by 60-80%
+app.use(compression());
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
@@ -57,8 +61,10 @@ app.get('/app', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files with basic caching
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1h' // Cache for 1 hour - safe and improves repeat visits
+}));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -66,4 +72,5 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Performance optimizations: Gzip compression enabled, 1h static file caching`);
 });
