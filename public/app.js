@@ -4378,18 +4378,32 @@ class CampingApp {
                 </div>
             </div>
 
-            <!-- Map -->
-            <div class="mb-6">
-                <div class="map-container" style="position: relative; margin-bottom: 16px;">
-                    <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 12px; background: var(--ios-gray-6); position: relative; z-index: 1;"></div>
+            <!-- Simple Location Display -->
+            <div style="background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h3 style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 16px 0; display: flex; align-items: center;">
+                    <span class="material-icons" style="font-size: 20px; color: #34C759; margin-right: 8px;">location_on</span>
+                    Location
+                </h3>
+                
+                <!-- Location Card -->
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px; background: #34C759; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <span class="material-icons" style="font-size: 24px; color: white;">place</span>
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 4px;">${trip.location}</div>
+                            <div style="font-size: 14px; color: #666;">Camping destination</div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Directions Button -->
                 <button onclick="window.open('https://www.google.com/maps/search/' + encodeURIComponent('${trip.location.replace(/'/g, "\\'")}'), '_blank')" 
-                        class="ios-button-secondary w-full" id="directionsButton">
-                    <span class="material-icons mr-2">directions</span>Get Directions
+                        style="width: 100%; padding: 14px; background: #34C759; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span class="material-icons" style="font-size: 20px;">directions</span>
+                    Get Directions
                 </button>
-                
             </div>
 
             <!-- Trip Actions -->
@@ -4493,16 +4507,7 @@ class CampingApp {
             this.loadTripParticipantsForDetail(trip.id, trip.organizer_id);
         }
 
-        // Initialize full map for trip location
-        setTimeout(async () => {
-            const coords = await this.geocodeLocation(trip.location);
-            if (coords) {
-                this.createFullMap('trip-detail-map', coords.lat, coords.lon, trip.location);
-                // Calculate and display directions - always try this
-                console.log('🚀 Calling updateDirectionsButton for trip:', trip.title);
-                await this.updateDirectionsButton(trip);
-            }
-        }, 500); // Increased timeout to ensure DOM is ready
+        // Simple location display - no complex map needed
     }
 
     async showEditTrip(tripId) {
