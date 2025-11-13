@@ -3566,6 +3566,15 @@ class CampingApp {
 
     async viewUserProfile(userId, userName) {
         try {
+            // Add validation for userId
+            if (!userId || userId === 'undefined' || userId === 'null') {
+                console.error('Invalid userId:', userId);
+                this.showMessage('Invalid user ID', 'error');
+                return;
+            }
+
+            console.log('Loading profile for userId:', userId, 'userName:', userName);
+            
             const response = await fetch(`/api/profile/${userId}`, {
                 credentials: 'include'
             });
@@ -3574,7 +3583,9 @@ class CampingApp {
                 const data = await response.json();
                 this.showUserProfileModal(data.user, userName);
             } else {
-                this.showMessage('Unable to load profile', 'error');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Profile API error:', response.status, errorData);
+                this.showMessage(`Unable to load profile: ${errorData.error || 'Unknown error'}`, 'error');
             }
         } catch (error) {
             console.error('Error loading user profile:', error);
@@ -5276,6 +5287,11 @@ class CampingApp {
                 const isOrganizer = organizerId && (participant.user_id === organizerId || participant.id === organizerId);
                 
                 const userId = participant.user_id || participant.id;
+                
+                // Debug logging
+                if (!userId) {
+                    console.error('Missing userId for participant:', participant);
+                }
                 
                 return `
                     <div class="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-opacity-80 transition-all duration-200" 
