@@ -274,17 +274,30 @@ router.patch('/:itemId/purchase', authenticateToken, async (req, res) => {
     const currentStatus = accessCheck.rows[0].is_purchased;
     const newStatus = !currentStatus;
 
-    const result = await pool.query(`
-      UPDATE trip_shopping_items 
-      SET 
-        is_purchased = $1,
-        purchased_by = CASE WHEN $1 THEN $2 ELSE NULL END,
-        purchased_at = CASE WHEN $1 THEN CURRENT_TIMESTAMP ELSE NULL END,
-        updated_by = $2,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $3
-      RETURNING *
-    `, [newStatus, userId, itemId]);
+    // Try the full update first, fall back to simple update if columns don't exist
+    let result;
+    try {
+      result = await pool.query(`
+        UPDATE trip_shopping_items 
+        SET 
+          is_purchased = $1,
+          purchased_by = CASE WHEN $1 THEN $2 ELSE NULL END,
+          purchased_at = CASE WHEN $1 THEN CURRENT_TIMESTAMP ELSE NULL END,
+          updated_by = $2,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $3
+        RETURNING *
+      `, [newStatus, userId, itemId]);
+    } catch (columnError) {
+      console.log('Full update failed, trying simple update:', columnError.message);
+      // Fallback to simple update if some columns don't exist
+      result = await pool.query(`
+        UPDATE trip_shopping_items 
+        SET is_purchased = $1
+        WHERE id = $2
+        RETURNING *
+      `, [newStatus, itemId]);
+    }
 
     res.json({
       message: `Item marked as ${newStatus ? 'purchased' : 'not purchased'}`,

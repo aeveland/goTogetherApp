@@ -17,6 +17,7 @@ const testRoutes = require('./routes/test');
 const weatherTestRoutes = require('./routes/weather-test');
 const fixAllTablesRoutes = require('./routes/fix-all-tables');
 const debugRoutes = require('./routes/debug');
+const fixShoppingColumnsRoutes = require('./routes/fix-shopping-columns');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use('/api/test-system', testRoutes);
 app.use('/api/weather-test', weatherTestRoutes);
 app.use('/api/fix-all', fixAllTablesRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/fix-shopping', fixShoppingColumnsRoutes);
 
 // Landing page route
 app.get('/', (req, res) => {
