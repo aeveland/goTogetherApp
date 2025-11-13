@@ -172,7 +172,7 @@ class CampingApp {
 
     async loadDashboardTasks() {
         try {
-            // Get tasks assigned to current user across all trips
+            // Get tasks created by current user across all trips
             const response = await fetch('/api/tasks/my-tasks', {
                 credentials: 'include'
             });
@@ -201,7 +201,7 @@ class CampingApp {
             container.innerHTML = `
                 <div class="text-center py-8 text-gray-500">
                     <span class="material-icons text-4xl mb-2 opacity-50">task_alt</span>
-                    <p class="ios-callout">No tasks assigned yet</p>
+                    <p class="ios-callout">No tasks created yet</p>
                 </div>
             `;
             taskCount.textContent = '0';

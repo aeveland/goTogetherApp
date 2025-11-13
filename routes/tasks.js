@@ -320,7 +320,7 @@ router.delete('/:taskId', authenticateToken, async (req, res) => {
   }
 });
 
-// Get tasks assigned to current user across all trips
+// Get tasks created by current user across all their trips
 router.get('/my-tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -332,21 +332,20 @@ router.get('/my-tasks', authenticateToken, async (req, res) => {
         ct.start_date as trip_start_date
       FROM trip_tasks tt
       JOIN camping_trips ct ON tt.trip_id = ct.id
-      LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
       WHERE (
-        -- Tasks assigned to everyone
-        tt.assigned_to = 'Everyone'
-        -- Tasks assigned to anyone (user is participant)
-        OR (tt.assigned_to = 'Anyone' AND (ct.organizer_id = $1 OR tp.user_id = $1))
-        -- Tasks assigned specifically to this user by name
-        OR tt.assigned_to = $2
+        -- Tasks from trips where user is organizer
+        ct.organizer_id = $1
+        -- Or tasks from trips where user is participant
+        OR EXISTS (
+          SELECT 1 FROM trip_participants tp 
+          WHERE tp.trip_id = ct.id AND tp.user_id = $1
+        )
       )
-      AND (ct.organizer_id = $1 OR tp.user_id = $1)
       ORDER BY 
         CASE WHEN tt.due_date IS NULL THEN 1 ELSE 0 END,
         tt.due_date ASC,
         tt.created_at DESC
-    `, [userId, `${req.user.firstName} ${req.user.lastName}`]);
+    `, [userId]);
     
     res.json({ tasks: result.rows });
   } catch (error) {
