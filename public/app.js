@@ -1050,21 +1050,21 @@ class CampingApp {
         const color = colors[type] || colors.default;
         
         return `
-            <div class="flex items-center gap-3">
-                <span class="material-icons" style="font-size: 16px; color: ${color.fill};">${color.icon}</span>
-                <div class="flex-1">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm font-medium" style="color: ${isComplete ? color.fill : '#333'};">
+            <div class="flex items-center gap-3" style="width: 100%; min-width: 0;">
+                <span class="material-icons flex-shrink-0" style="font-size: 16px; color: ${color.fill};">${color.icon}</span>
+                <div class="flex-1" style="min-width: 0; overflow: hidden;">
+                    <div class="flex justify-between items-center mb-1" style="width: 100%;">
+                        <span class="text-sm font-medium truncate" style="color: ${isComplete ? color.fill : '#333'}; max-width: 70%;">
                             ${completed}/${total} ${type}${completed === 1 ? '' : 's'} ${type === 'shopping' ? 'purchased' : 'completed'}
                         </span>
-                        <span class="text-xs text-gray-500">${percentage}%</span>
+                        <span class="text-xs text-gray-500 flex-shrink-0 ml-2">${percentage}%</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="w-full bg-gray-200 rounded-full h-2" style="overflow: hidden;">
                         <div class="h-2 rounded-full transition-all duration-300" 
-                             style="width: ${percentage}%; background: ${color.fill};"></div>
+                             style="width: ${percentage}%; background: ${color.fill}; max-width: 100%;"></div>
                     </div>
                 </div>
-                ${isComplete ? `<span class="material-icons text-green-600" style="font-size: 18px;">check_circle</span>` : ''}
+                ${isComplete ? `<span class="material-icons text-green-600 flex-shrink-0" style="font-size: 18px;">check_circle</span>` : ''}
             </div>
         `;
     }
