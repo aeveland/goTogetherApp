@@ -887,7 +887,7 @@ class CampingApp {
                                     <div style="font-size: 13px; color: #666;">${monthDay}</div>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    ${rainChance > 10 ? `<div style="font-size: 12px; color: #4A90E2; font-weight: 500; display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 14px;">water_drop</span>${rainChance}%</div>` : ''}
+                                    ${rainChance > 10 ? `<div style="font-size: 12px; color: #00BFFF; font-weight: 600; display: flex; align-items: center; gap: 4px; background: rgba(0, 191, 255, 0.15); padding: 2px 6px; border-radius: 4px;"><span class="material-icons" style="font-size: 14px;">water_drop</span>${rainChance}%</div>` : ''}
                                     <span class="material-icons" style="font-size: 24px; color: #4A90E2;">${this.getWeatherIcon(weatherMain)}</span>
                                     <div style="text-align: right; min-width: 60px;">
                                         <div style="font-size: 16px; font-weight: 600; color: #333;">${high}°</div>
