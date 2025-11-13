@@ -4627,9 +4627,9 @@ class CampingApp {
                         </div>
 
                         <!-- Mobile: Stack buttons vertically, Desktop: 2+1 layout -->
-                        <div class="space-y-3 md:space-y-0">
+                        <div class="space-y-4 pt-6">
                             <!-- Primary actions row -->
-                            <div class="flex flex-col md:flex-row gap-3">
+                            <div class="flex flex-col md:flex-row gap-4">
                                 <button type="submit" class="ios-button-primary w-full md:flex-1">
                                     <span class="material-icons mr-2" style="font-size: 16px;">save</span>Update Trip
                                 </button>
