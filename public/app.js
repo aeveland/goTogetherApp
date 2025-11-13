@@ -4828,8 +4828,8 @@ class CampingApp {
                 <div class="flex items-start justify-between">
                     <div class="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
                         <button id="completeTask-${task.id}" 
-                                class="mt-1 w-6 h-6 sm:w-5 sm:h-5 rounded border-2 border-gray-300 flex items-center justify-center hover:border-green-500 transition-colors flex-shrink-0 ${task.is_completed ? 'bg-green-500 border-green-500' : ''}">
-                            ${task.is_completed ? '<span class="material-icons text-white text-sm">check</span>' : ''}
+                                class="task-checkbox" style="margin-top: 4px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; ${task.is_completed ? 'background: #34C759; border-color: #34C759;' : 'background: white;'}">
+                            ${task.is_completed ? '<span class="material-icons" style="font-size: 14px; color: white;">check</span>' : ''}
                         </button>
                         <div class="flex-1 min-w-0">
                             <h4 class="font-medium text-sm sm:text-base text-gray-900 ${task.is_completed ? 'line-through text-gray-500' : ''} truncate-2">${task.title}</h4>
