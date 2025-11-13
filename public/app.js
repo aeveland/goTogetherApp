@@ -901,7 +901,7 @@ class CampingApp {
             </div>
             <!-- Camping Tips -->
             ${this.getCampingTips(current, daily[0], windSpeed).length > 0 ? `
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px;">
+            <div style="background: #E6FFFA; border: 1px solid #10B981; border-radius: 16px; padding: 20px;">
                 <h3 style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 16px 0; display: flex; align-items: center;">
                     <span class="material-icons" style="font-size: 20px; color: #10B981; margin-right: 8px;">outdoor_grill</span>
                     Camping Tips
