@@ -2598,12 +2598,14 @@ class CampingApp {
                 }
             }
         }
-        console.log('🔍 Button search results:', {
-            byId: !!document.getElementById('directionsButton'),
-            byOnclick: !!document.querySelector('button[onclick*="google.com/maps"]'),
-            byText: !!Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.includes('Get Directions')),
-            found: !!directionsBtn
-        });
+        // Reduced logging - only log if button not found
+        if (!directionsBtn) {
+            console.log('🔍 Button search failed:', {
+                byId: !!document.getElementById('directionsButton'),
+                byOnclick: !!document.querySelector('button[onclick*="google.com/maps"]'),
+                byText: !!Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.includes('Get Directions'))
+            });
+        }
         return directionsBtn;
     }
 
@@ -4374,11 +4376,6 @@ class CampingApp {
                     <span class="material-icons mr-2">directions</span>Get Directions
                 </button>
                 
-                <!-- Debug Button (temporary) -->
-                <button onclick="app.debugDirections(); app.updateDirectionsButton({location: '${trip.location.replace(/'/g, "\\'")}', title: '${trip.title.replace(/'/g, "\\'")}'});" 
-                        class="ios-button-secondary w-full mt-2" style="background: #ff9500; border-color: #ff9500;">
-                    <span class="material-icons mr-2">bug_report</span>Debug Directions
-                </button>
             </div>
 
             <!-- Trip Actions -->
