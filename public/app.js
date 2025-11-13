@@ -835,131 +835,90 @@ class CampingApp {
         const suggestions = this.generateCampingSuggestions(current, daily);
         
         container.innerHTML = `
-            <!-- Current Weather -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px; border-radius: 12px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start;">
-                <div style="display: flex; align-items: center;">
-                    <span class="material-icons" style="font-size: 48px; margin-right: 20px;">${this.getWeatherIcon(current.weather[0].main)}</span>
+            <!-- Today's Weather Hero -->
+            <div style="background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%); color: white; padding: 24px; border-radius: 16px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
                     <div>
-                        <div style="font-size: 36px; font-weight: 300; line-height: 1;">${currentTemp}°F</div>
-                        <div style="font-size: 14px; opacity: 0.9; margin-top: 4px;">Feels like ${feelsLike}°F</div>
-                        <div style="font-size: 14px; opacity: 0.8; margin-top: 2px; text-transform: capitalize;">${current.weather[0].description}</div>
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">Today</div>
+                        <div style="font-size: 32px; font-weight: 600; line-height: 1;">${currentTemp}°F</div>
+                        <div style="font-size: 14px; opacity: 0.8; text-transform: capitalize;">${current.weather[0].description}</div>
                     </div>
+                    <span class="material-icons" style="font-size: 64px; opacity: 0.9;">${this.getWeatherIcon(current.weather[0].main)}</span>
                 </div>
-                <div style="text-align: right; font-size: 14px; opacity: 0.9;">
-                    <div style="margin-bottom: 4px;">Now</div>
-                    <div>${new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
-                </div>
-            </div>
-
-            <!-- Camping Suggestions -->
-            ${suggestions.length > 0 ? `
-            <div class="ios-card mb-6">
-                <div class="p-6">
-                    <h4 class="ios-callout font-medium mb-4" style="color: var(--text-primary); display: flex; align-items: center;">
-                        <span class="material-icons mr-2" style="font-size: 20px; color: var(--ios-orange);">lightbulb</span>
-                        Camping Suggestions
-                    </h4>
-                    <div class="space-y-3">
-                        ${suggestions.map(suggestion => `
-                            <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: ${suggestion.color};">
-                                    <span class="material-icons" style="font-size: 20px; color: white; font-weight: 500;">${suggestion.icon}</span>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-sm mb-1" style="color: var(--text-primary);">${suggestion.title}</div>
-                                    <div class="text-sm" style="color: var(--text-secondary);">${suggestion.description}</div>
-                                </div>
-                            </div>
-                        `).join('')}
+                
+                <!-- Key Details Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2);">
+                    <div style="text-align: center; flex: 1;">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 2px;">Feels Like</div>
+                        <div style="font-size: 16px; font-weight: 600;">${feelsLike}°</div>
                     </div>
-                </div>
-            </div>
-            ` : ''}
-
-            <!-- Weather Details -->
-            <div class="weather-details" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 32px; overflow-x: auto; padding: 0 4px;">
-                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
-                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">air</span>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Wind</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">${windSpeed < 1 ? 'Calm' : `${windSpeed} mph ${windDirection}`}</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
-                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">water_drop</span>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Humidity</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">${humidity !== '--' ? `${humidity}%` : 'N/A'}</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
-                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">wb_sunny</span>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">UV Index</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">${uvIndex !== undefined ? `${uvIndex} ${this.getUVLevel(uvIndex)}` : 'N/A'}</div>
-                </div>
-                <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
-                    <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">visibility</span>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Visibility</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">10 km</div>
+                    <div style="text-align: center; flex: 1;">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 2px;">Wind</div>
+                        <div style="font-size: 16px; font-weight: 600;">${windSpeed < 1 ? 'Calm' : `${windSpeed} mph`}</div>
+                    </div>
+                    <div style="text-align: center; flex: 1;">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 2px;">Humidity</div>
+                        <div style="font-size: 16px; font-weight: 600;">${humidity}%</div>
+                    </div>
+                    <div style="text-align: center; flex: 1;">
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 2px;">UV Index</div>
+                        <div style="font-size: 16px; font-weight: 600;">${uvIndex}</div>
+                    </div>
                 </div>
             </div>
 
             <!-- 7-Day Forecast -->
-            <div class="weather-forecast-container" style="margin-bottom: 32px;">
-                <div style="margin-bottom: 16px;">
-                    <h4 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">7-Day Forecast</h4>
-                </div>
-                <div class="weather-forecast-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; max-width: 100%;">
-                    ${daily.map((day, index) => {
+            <div style="background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h3 style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 16px 0;">7-Day Forecast</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${daily.slice(0, 7).map((day, index) => {
                         const date = new Date(day.dt * 1000);
-                        const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+                        const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'long' });
                         const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        
-                        // Handle missing temperature data properly
-                        const high = day.temp && day.temp.max ? Math.round(day.temp.max) : (day.temp ? Math.round(day.temp) : '--');
+                        const high = day.temp && day.temp.max ? Math.round(day.temp.max) : '--';
                         const low = day.temp && day.temp.min ? Math.round(day.temp.min) : '--';
                         const rainChance = day.pop ? Math.round(day.pop * 100) : 0;
                         const weatherMain = day.weather && day.weather[0] ? day.weather[0].main : 'Clear';
                         
                         return `
-                            <div class="weather-day-card" style="text-align: center; padding: 16px 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; backdrop-filter: blur(10px); ${index === 0 ? 'background: rgba(0, 122, 255, 0.2); border-color: #007AFF;' : ''}">
-                                <div style="font-size: 13px; font-weight: 700; color: ${index === 0 ? '#87CEEB' : '#ffffff'}; margin-bottom: 4px;">${dayName}</div>
-                                <div style="font-size: 11px; color: #cccccc; margin-bottom: 8px; font-weight: 500;">${monthDay}</div>
-                                <span class="material-icons" style="font-size: 28px; color: #87CEEB; margin-bottom: 8px; display: block;">${this.getWeatherIcon(weatherMain)}</span>
-                                <div style="font-size: 16px; font-weight: bold; color: #ffffff; margin-bottom: 2px;">${high}°</div>
-                                <div style="font-size: 13px; color: #cccccc; margin-bottom: 4px; font-weight: 500;">${low}°</div>
-                                ${rainChance > 10 ? `<div style="font-size: 11px; color: #87CEEB; font-weight: 600;">💧${rainChance}%</div>` : ''}
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; ${index !== daily.length - 1 ? 'border-bottom: 1px solid #f0f0f0;' : ''}">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size: 16px; font-weight: ${index === 0 ? '600' : '500'}; color: ${index === 0 ? '#4A90E2' : '#333'}; margin-bottom: 2px;">${dayName}</div>
+                                    <div style="font-size: 13px; color: #666;">${monthDay}</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    ${rainChance > 10 ? `<div style="font-size: 12px; color: #4A90E2; font-weight: 500; display: flex; align-items: center; gap: 4px;"><span class="material-icons" style="font-size: 14px;">water_drop</span>${rainChance}%</div>` : ''}
+                                    <span class="material-icons" style="font-size: 24px; color: #4A90E2;">${this.getWeatherIcon(weatherMain)}</span>
+                                    <div style="text-align: right; min-width: 60px;">
+                                        <div style="font-size: 16px; font-weight: 600; color: #333;">${high}°</div>
+                                        <div style="font-size: 14px; color: #666;">${low}°</div>
+                                    </div>
+                                </div>
                             </div>
                         `;
                     }).join('')}
                 </div>
             </div>
-            
-            <!-- Camping Conditions -->
-            <div style="background: #F0F9FF; border: 1px solid #0EA5E9; border-radius: 12px; padding: 24px;">
-                <h4 style="font-size: 18px; font-weight: 600; color: #0F172A; margin: 0 0 20px 0; display: flex; align-items: center;">
-                    <span class="material-icons" style="font-size: 24px; color: #0EA5E9; margin-right: 12px;">outdoor_grill</span>
-                    Camping Conditions
-                </h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                    <div style="display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 20px; color: #0EA5E9; margin-right: 12px;">nights_stay</span>
-                        <span style="font-size: 16px; color: #334155;">Night low: ${Math.round(daily[0].temp.min)}°F</span>
-                    </div>
-                    <div style="display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 20px; color: #0EA5E9; margin-right: 12px;">wb_twilight</span>
-                        <span style="font-size: 16px; color: #334155;">Morning: ${Math.round(daily[0].temp.max)}°F</span>
-                    </div>
-                    ${windSpeed > 15 ? `
-                    <div style="display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 20px; color: #F59E0B; margin-right: 12px;">warning</span>
-                        <span style="font-size: 16px; color: #334155;">Windy conditions - secure gear</span>
-                    </div>
-                    ` : ''}
-                    ${daily[0].pop > 0.3 ? `
-                    <div style="display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 20px; color: #3B82F6; margin-right: 12px;">umbrella</span>
-                        <span style="font-size: 16px; color: #334155;">Rain likely - waterproof setup</span>
-                    </div>
-                    ` : ''}
+            <!-- Camping Tips -->
+            ${this.getCampingTips(current, daily[0], windSpeed).length > 0 ? `
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 16px 0; display: flex; align-items: center;">
+                    <span class="material-icons" style="font-size: 20px; color: #10B981; margin-right: 8px;">outdoor_grill</span>
+                    Camping Tips
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${this.getCampingTips(current, daily[0], windSpeed).map(tip => `
+                        <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: white; border-radius: 8px;">
+                            <span class="material-icons" style="font-size: 20px; color: ${tip.color}; margin-top: 2px;">${tip.icon}</span>
+                            <div>
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px;">${tip.title}</div>
+                                <div style="font-size: 13px; color: #666; line-height: 1.4;">${tip.description}</div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
+            ` : ''}
         `;
 
         // Add refresh button event listener
@@ -969,14 +928,72 @@ class CampingApp {
                 this.loadTripWeather(tripId);
             });
         }
+    }
 
-        // Add mobile refresh button event listener
-        const refreshBtnMobile = document.getElementById(`refreshWeatherBtn-mobile-${tripId}`);
-        if (refreshBtnMobile) {
-            refreshBtnMobile.addEventListener('click', () => {
-                this.loadTripWeather(tripId);
+    getCampingTips(current, todayForecast, windSpeed) {
+        const tips = [];
+        const temp = current.temp;
+        const rainChance = todayForecast.pop || 0;
+        const nightLow = todayForecast.temp.min;
+        
+        // Temperature-based tips
+        if (nightLow < 40) {
+            tips.push({
+                icon: 'ac_unit',
+                color: '#3B82F6',
+                title: 'Cold Night Ahead',
+                description: `Tonight's low: ${Math.round(nightLow)}°F. Bring warm sleeping bags and extra layers.`
+            });
+        } else if (nightLow > 75) {
+            tips.push({
+                icon: 'wb_sunny',
+                color: '#F59E0B',
+                title: 'Warm Night',
+                description: `Tonight's low: ${Math.round(nightLow)}°F. Light sleeping gear and good ventilation recommended.`
             });
         }
+        
+        // Rain tips
+        if (rainChance > 0.3) {
+            tips.push({
+                icon: 'umbrella',
+                color: '#06B6D4',
+                title: 'Rain Expected',
+                description: `${Math.round(rainChance * 100)}% chance of rain. Waterproof your gear and choose elevated camping spots.`
+            });
+        }
+        
+        // Wind tips
+        if (windSpeed > 15) {
+            tips.push({
+                icon: 'air',
+                color: '#EF4444',
+                title: 'Windy Conditions',
+                description: `${windSpeed} mph winds expected. Secure all gear and consider wind-resistant tent setup.`
+            });
+        }
+        
+        // UV tips
+        if (current.uvi > 6) {
+            tips.push({
+                icon: 'wb_sunny',
+                color: '#F59E0B',
+                title: 'High UV Index',
+                description: `UV Index: ${Math.round(current.uvi)}. Use sunscreen, seek shade during midday, and wear protective clothing.`
+            });
+        }
+        
+        // General comfort tip
+        if (tips.length === 0) {
+            tips.push({
+                icon: 'outdoor_grill',
+                color: '#10B981',
+                title: 'Great Camping Weather',
+                description: 'Conditions look favorable for outdoor activities. Enjoy your camping trip!'
+            });
+        }
+        
+        return tips.slice(0, 3); // Limit to 3 tips max
     }
 
     getWeatherIcon(weatherMain) {
