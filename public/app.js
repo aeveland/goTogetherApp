@@ -2579,23 +2579,62 @@ class CampingApp {
         return addressParts.length > 0 ? addressParts.join(', ') : null;
     }
 
+    findDirectionsButton() {
+        // Find the directions button - try multiple selectors
+        let directionsBtn = document.querySelector('button[onclick*="google.com/maps"]');
+        if (!directionsBtn) {
+            directionsBtn = document.querySelector('button[onclick*="maps/search"]');
+        }
+        if (!directionsBtn) {
+            // Look for button containing "Get Directions" text
+            const buttons = document.querySelectorAll('button');
+            for (const btn of buttons) {
+                if (btn.textContent.includes('Get Directions') || btn.textContent.includes('directions')) {
+                    directionsBtn = btn;
+                    break;
+                }
+            }
+        }
+        return directionsBtn;
+    }
+
     async updateDirectionsButton(trip) {
         try {
+            console.log('🗺️ Updating directions button for trip:', trip.title);
+            
             // Check if user has a valid address
             const userAddress = this.getUserFullAddress();
+            console.log('📍 User address:', userAddress);
+            
             if (!userAddress) {
-                return; // Keep default "Get Directions" button
+                console.log('⚠️ No user address found, will show basic directions button');
+                // Still try to update button with basic functionality
+                const directionsBtn = this.findDirectionsButton();
+                if (directionsBtn) {
+                    directionsBtn.innerHTML = `
+                        <span class="material-icons mr-2">directions</span>Get Directions
+                    `;
+                    console.log('ℹ️ Updated button to basic "Get Directions"');
+                }
+                return;
             }
+            
             const tripLocation = trip.location;
+            console.log('🎯 Trip location:', tripLocation);
 
             // Calculate distance and drive time
+            console.log('🔄 Calculating route info...');
             const routeInfo = await this.calculateRouteInfo(userAddress, tripLocation);
+            console.log('📊 Route info:', routeInfo);
             
             if (routeInfo) {
-                // Update the directions button with distance and time
-                const directionsBtn = document.querySelector('button[onclick*="google.com/maps"]');
+                const directionsBtn = this.findDirectionsButton();
+                console.log('🔍 Found directions button:', !!directionsBtn);
+                
                 if (directionsBtn) {
                     const { distance, duration } = routeInfo;
+                    console.log(`✅ Updating button with: ${distance} - ${duration}`);
+                    
                     directionsBtn.innerHTML = `
                         <span class="material-icons mr-2">directions</span>
                         ${distance} - ${duration}
@@ -2607,13 +2646,19 @@ class CampingApp {
                     directionsBtn.onclick = () => {
                         window.open(`https://www.google.com/maps/dir/${encodedOrigin}/${encodedDestination}`, '_blank');
                     };
+                    
+                    console.log('🎉 Directions button updated successfully!');
+                } else {
+                    console.log('❌ Could not find directions button to update');
                 }
 
                 // Optionally show route on map
                 await this.showRouteOnMap(trip, userAddress, tripLocation);
+            } else {
+                console.log('❌ Could not calculate route info');
             }
         } catch (error) {
-            console.error('Error updating directions button:', error);
+            console.error('❌ Error updating directions button:', error);
             // Keep default button if there's an error
         }
     }
@@ -4397,10 +4442,11 @@ class CampingApp {
             const coords = await this.geocodeLocation(trip.location);
             if (coords) {
                 this.createFullMap('trip-detail-map', coords.lat, coords.lon, trip.location);
-                // Calculate and display directions if user has address
+                // Calculate and display directions - always try this
+                console.log('🚀 Calling updateDirectionsButton for trip:', trip.title);
                 await this.updateDirectionsButton(trip);
             }
-        }, 100);
+        }, 500); // Increased timeout to ensure DOM is ready
     }
 
     async showEditTrip(tripId) {
