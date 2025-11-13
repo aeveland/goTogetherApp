@@ -1481,16 +1481,26 @@ class CampingApp {
                 </div>
                 
                 <div id="modalTripCodeSection" class="form-group">
-                    <label>Trip Code</label>
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
-                        <span class="material-icons text-gray-500">lock</span>
-                        <div class="flex-1">
-                            <div class="font-mono text-lg font-bold text-blue-600" id="modalGeneratedTripCode"></div>
-                            <small class="text-gray-500">Share this code with others to let them join your private trip</small>
+                    <label class="block text-sm font-medium mb-3" style="color: var(--text-primary);">Trip Code</label>
+                    <div class="p-4 rounded-lg border-2" style="background: var(--bg-secondary); border-color: var(--ios-blue); box-shadow: 0 2px 8px rgba(0, 122, 255, 0.1);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="material-icons" style="color: var(--ios-blue); font-size: 20px;">lock</span>
+                            <div class="flex-1">
+                                <div class="font-mono text-xl font-bold" style="color: var(--ios-blue); letter-spacing: 1px;" id="modalGeneratedTripCode"></div>
+                            </div>
+                            <button type="button" id="modalRegenerateTripCode" class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200" 
+                                    style="background: var(--ios-blue); color: white; border: none;">
+                                <span class="material-icons mr-1" style="font-size: 16px;">refresh</span>New Code
+                            </button>
                         </div>
-                        <button type="button" id="modalRegenerateTripCode" class="ios-button-secondary ios-button-compact">
-                            <span class="material-icons mr-1" style="font-size: 14px;">refresh</span>New Code
-                        </button>
+                        <div class="p-3 rounded-lg" style="background: rgba(0, 122, 255, 0.1); border: 1px solid rgba(0, 122, 255, 0.2);">
+                            <div class="flex items-start gap-2">
+                                <span class="material-icons" style="color: var(--ios-blue); font-size: 16px; margin-top: 1px;">info</span>
+                                <p class="text-sm" style="color: var(--text-secondary); line-height: 1.4; margin: 0;">
+                                    Share this code with others to let them join your private trip
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
