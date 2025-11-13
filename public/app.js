@@ -590,7 +590,7 @@ class CampingApp {
                             ${item.description ? `<p class="ios-footnote text-gray-600 truncate">${item.description}</p>` : ''}
                             <div class="flex items-center gap-4 mt-1">
                                 ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
-                                ${item.assigned_to !== 'anyone' ? `<span class="ios-caption text-blue-600">${this.getAssignmentText(item.assigned_to)}</span>` : ''}
+                                ${item.assigned_to !== 'anyone' ? `<span class="ios-caption" style="color: #00BFFF; font-weight: 600; background: rgba(0, 191, 255, 0.15); padding: 2px 6px; border-radius: 4px;">${this.getAssignmentText(item.assigned_to)}</span>` : ''}
                                 ${isCompleted ? `<span class="ios-caption text-green-600">✓ Purchased by ${item.purchaser_first_name || 'someone'}</span>` : ''}
                             </div>
                         </div>
@@ -1042,7 +1042,7 @@ class CampingApp {
         
         const colors = {
             tasks: { bg: '#E8F5E8', fill: '#34C759', icon: 'task_alt' },
-            shopping: { bg: '#E6F2FF', fill: '#007AFF', icon: 'shopping_cart' },
+            shopping: { bg: '#E6F2FF', fill: '#00BFFF', icon: 'shopping_cart' },
             default: { bg: '#F2F2F7', fill: '#8E8E93', icon: 'analytics' }
         };
         

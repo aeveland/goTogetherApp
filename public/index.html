@@ -1893,6 +1893,21 @@
                     font-weight: 600 !important;
                     line-height: 1 !important;
                 }
+                
+                /* FIX: Blue text contrast issues */
+                .text-blue-600, .text-blue-500 {
+                    color: #00BFFF !important;
+                    font-weight: 600 !important;
+                    background: rgba(0, 191, 255, 0.15) !important;
+                    padding: 2px 6px !important;
+                    border-radius: 4px !important;
+                }
+                
+                /* FIX: Blue icons contrast */
+                .material-icons[style*="color: #007AFF"],
+                .material-icons[style*="color: var(--ios-blue)"] {
+                    color: #00BFFF !important;
+                }
             }
 
             /* Weather Forecast Mobile Improvements */
