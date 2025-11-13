@@ -2581,7 +2581,10 @@ class CampingApp {
 
     findDirectionsButton() {
         // Find the directions button - try multiple selectors
-        let directionsBtn = document.querySelector('button[onclick*="google.com/maps"]');
+        let directionsBtn = document.getElementById('directionsButton');
+        if (!directionsBtn) {
+            directionsBtn = document.querySelector('button[onclick*="google.com/maps"]');
+        }
         if (!directionsBtn) {
             directionsBtn = document.querySelector('button[onclick*="maps/search"]');
         }
@@ -2595,7 +2598,43 @@ class CampingApp {
                 }
             }
         }
+        console.log('🔍 Button search results:', {
+            byId: !!document.getElementById('directionsButton'),
+            byOnclick: !!document.querySelector('button[onclick*="google.com/maps"]'),
+            byText: !!Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.includes('Get Directions')),
+            found: !!directionsBtn
+        });
         return directionsBtn;
+    }
+
+    // Debug function - call this from console: app.debugDirections()
+    debugDirections() {
+        console.log('🔧 DEBUGGING DIRECTIONS BUTTON');
+        console.log('📍 Current user:', this.currentUser);
+        console.log('🏠 User address:', this.getUserFullAddress());
+        
+        const directionsBtn = this.findDirectionsButton();
+        console.log('🔍 Found directions button:', directionsBtn);
+        
+        if (directionsBtn) {
+            console.log('📝 Button HTML:', directionsBtn.outerHTML);
+            console.log('📝 Button text:', directionsBtn.textContent);
+        }
+        
+        // Try to manually update the button
+        if (directionsBtn) {
+            directionsBtn.innerHTML = `
+                <span class="material-icons mr-2">directions</span>
+                TEST - 25 mi - 1h 30m
+            `;
+            console.log('✅ Manually updated button for testing');
+        }
+        
+        return {
+            user: this.currentUser,
+            address: this.getUserFullAddress(),
+            button: directionsBtn
+        };
     }
 
     async updateDirectionsButton(trip) {
@@ -4331,8 +4370,14 @@ class CampingApp {
                 
                 <!-- Directions Button -->
                 <button onclick="window.open('https://www.google.com/maps/search/' + encodeURIComponent('${trip.location.replace(/'/g, "\\'")}'), '_blank')" 
-                        class="ios-button-secondary w-full">
+                        class="ios-button-secondary w-full" id="directionsButton">
                     <span class="material-icons mr-2">directions</span>Get Directions
+                </button>
+                
+                <!-- Debug Button (temporary) -->
+                <button onclick="app.debugDirections(); app.updateDirectionsButton({location: '${trip.location.replace(/'/g, "\\'")}', title: '${trip.title.replace(/'/g, "\\'")}'});" 
+                        class="ios-button-secondary w-full mt-2" style="background: #ff9500; border-color: #ff9500;">
+                    <span class="material-icons mr-2">bug_report</span>Debug Directions
                 </button>
             </div>
 
