@@ -472,13 +472,10 @@
         }
         
         /* Form Validation States - WCAG Compliant */
-        /* Only show validation errors after user interaction or form submission */
+        /* Only show validation errors when explicitly marked with error class or after form submission */
         input.error,
         textarea.error,
-        select.error,
-        input:invalid:not(:placeholder-shown):not(:focus),
-        textarea:invalid:not(:placeholder-shown):not(:focus),
-        select:invalid:not(:focus) {
+        select.error {
             border-color: var(--ios-red) !important;
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
         }
@@ -491,11 +488,14 @@
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
         }
         
-        input:valid,
-        textarea:valid,
-        select:valid {
-            border-color: var(--ios-green) !important;
+        /* Remove default browser validation styling */
+        input:invalid,
+        textarea:invalid,
+        select:invalid {
+            box-shadow: none;
         }
+        
+        /* No automatic green borders for valid fields */
         
         /* CRITICAL FIX: Radio Button Assignment Section Contrast */
         .border-gray-600 {
