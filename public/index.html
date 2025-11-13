@@ -1766,6 +1766,96 @@
                     box-sizing: border-box !important;
                     max-width: 100% !important;
                 }
+                
+                /* FIX: Large orange circles in shopping items */
+                .material-icons {
+                    font-size: 16px !important;
+                    width: 16px !important;
+                    height: 16px !important;
+                    line-height: 16px !important;
+                    overflow: hidden !important;
+                }
+                
+                /* FIX: Organizer chip padding */
+                .px-2.py-1.rounded-full {
+                    padding: 4px 8px !important;
+                    font-size: 10px !important;
+                    line-height: 1.2 !important;
+                }
+                
+                /* FIX: Checkbox appearance - make them circular */
+                .material-icons[onclick*="toggle"] {
+                    font-size: 20px !important;
+                    width: 20px !important;
+                    height: 20px !important;
+                    border-radius: 50% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                
+                /* FIX: Shopping list assignee text contrast */
+                .ios-caption.text-blue-600 {
+                    color: #0066CC !important;
+                    font-weight: 600 !important;
+                    background: rgba(0, 122, 255, 0.1) !important;
+                    padding: 2px 6px !important;
+                    border-radius: 4px !important;
+                }
+                
+                /* FIX: Food allergy tags formatting */
+                .dietary-tag {
+                    font-size: 10px !important;
+                    padding: 2px 6px !important;
+                    margin: 1px !important;
+                    border-radius: 4px !important;
+                    display: inline-block !important;
+                    line-height: 1.2 !important;
+                }
+                
+                /* FIX: Trip code visibility */
+                .trip-code {
+                    font-size: 12px !important;
+                    padding: 8px 12px !important;
+                    margin: 8px 0 !important;
+                    background: rgba(0, 122, 255, 0.1) !important;
+                    border: 1px solid #007AFF !important;
+                    border-radius: 8px !important;
+                    text-align: center !important;
+                    font-weight: 600 !important;
+                    color: #007AFF !important;
+                }
+                
+                /* FIX: Weather details container */
+                .weather-details {
+                    overflow-x: auto !important;
+                    white-space: nowrap !important;
+                    padding: 8px 0 !important;
+                }
+                
+                .weather-details > div {
+                    display: inline-block !important;
+                    min-width: 80px !important;
+                    margin-right: 12px !important;
+                    text-align: center !important;
+                    vertical-align: top !important;
+                    white-space: normal !important;
+                }
+                
+                /* FIX: Map pin aspect ratio */
+                .leaflet-marker-icon {
+                    width: 25px !important;
+                    height: 41px !important;
+                }
+                
+                /* FIX: Priority dots - make them smaller */
+                .w-2.h-2.rounded-full {
+                    width: 6px !important;
+                    height: 6px !important;
+                    min-width: 6px !important;
+                    min-height: 6px !important;
+                    flex-shrink: 0 !important;
+                }
             }
 
             /* Weather Forecast Mobile Improvements */

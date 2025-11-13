@@ -734,15 +734,14 @@ class CampingApp {
         }
         
         container.innerHTML = `
-            <div class="flex items-center justify-between mb-3">
-                <span class="ios-callout">Profile Completeness</span>
-                <span class="text-sm font-medium" style="color: ${statusColor};">${percentage}%</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
+                <span style="font-size: 14px; font-weight: 500;">Profile Completeness</span>
+                <span style="font-size: 12px; font-weight: 600; color: ${statusColor};">${percentage}%</span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
-                <div class="h-2 rounded-full transition-all duration-300" 
-                     style="width: ${percentage}%; background: ${statusColor};"></div>
+            <div style="width: 100%; height: 8px; background-color: #e5e5e5; border-radius: 4px; overflow: hidden; position: relative; margin-bottom: 12px; box-sizing: border-box;">
+                <div style="height: 100%; background: ${statusColor}; border-radius: 4px; transition: width 0.3s ease; width: ${percentage}%; max-width: 100%; position: absolute; top: 0; left: 0; box-sizing: border-box;"></div>
             </div>
-            <p class="ios-footnote text-gray-600 mb-3">${suggestion}</p>
+            <p style="font-size: 12px; color: #666; margin-bottom: 12px; line-height: 1.3;">${suggestion}</p>
             ${percentage < 80 ? `
                 <button onclick="console.log('Complete Profile button clicked'); app.showEditProfile();" 
                         class="ios-button-secondary ios-button-compact w-full">
@@ -878,7 +877,7 @@ class CampingApp {
             ` : ''}
 
             <!-- Weather Details -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
+            <div class="weather-details" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 32px; overflow-x: auto; padding: 0 4px;">
                 <div style="text-align: center; padding: 16px; background: white; border-radius: 8px; border: 1px solid #E5E5EA;">
                     <span class="material-icons" style="font-size: 24px; color: #007AFF; margin-bottom: 8px; display: block;">air</span>
                     <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Wind</div>
@@ -4231,22 +4230,22 @@ class CampingApp {
 
                     <!-- Trip Code -->
                     ${trip.trip_code ? `
-                        <div class="mb-6 p-4 rounded-lg" style="background: var(--ios-secondary-grouped-background); border: 1px solid var(--border-secondary);">
-                            <h4 class="mb-3 flex items-center" style="color: var(--text-primary); font-weight: 600; font-size: 16px;">
-                                <span class="material-icons mr-2" style="font-size: 18px; color: var(--ios-blue);">share</span>
+                        <div class="trip-code mb-6" style="padding: 16px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); border: 2px solid #007AFF; margin: 16px 0;">
+                            <h4 style="margin-bottom: 12px; display: flex; align-items: center; color: #007AFF; font-weight: 600; font-size: 16px;">
+                                <span class="material-icons" style="font-size: 18px; color: #007AFF; margin-right: 8px;">share</span>
                                 Trip Code
                             </h4>
-                            <div class="flex items-center gap-3">
-                                <div class="flex-1 p-3 rounded-lg font-mono text-lg font-bold text-center" style="background: var(--bg-tertiary); border: 1px solid var(--border-secondary); color: var(--text-primary);">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="padding: 16px; border-radius: 8px; font-family: monospace; font-size: 24px; font-weight: bold; text-align: center; background: white; border: 2px solid #007AFF; color: #007AFF; letter-spacing: 2px;">
                                     ${trip.trip_code}
                                 </div>
                                 <button onclick="app.copyTripCode('${trip.trip_code}')" 
-                                        class="ios-button-secondary ios-button-compact">
-                                    <span class="material-icons mr-1" style="font-size: 16px;">content_copy</span>
-                                    Copy
+                                        class="ios-button-secondary" style="width: 100%; padding: 12px; font-size: 16px;">
+                                    <span class="material-icons" style="font-size: 16px; margin-right: 8px;">content_copy</span>
+                                    Copy Code
                                 </button>
                             </div>
-                            <p class="text-sm mt-2" style="color: var(--text-secondary);">Share this code with friends so they can join your trip</p>
+                            <p style="font-size: 12px; margin-top: 8px; color: #007AFF; text-align: center; line-height: 1.3;">Share this code with friends so they can join your trip</p>
                         </div>
                     ` : ''}
                     
