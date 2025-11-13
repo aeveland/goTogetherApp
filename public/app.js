@@ -3596,31 +3596,47 @@ class CampingApp {
     showUserProfileModal(profile, userName) {
         const modalContent = `
             <div class="max-w-lg mx-auto">
-                <div class="text-center mb-6">
-                    <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: var(--ios-blue); opacity: 0.2;">
-                        <span class="material-icons" style="font-size: 40px; color: var(--ios-blue);">person</span>
+                <!-- Header with better padding -->
+                <div class="text-center mb-8 px-6 pt-6">
+                    <div class="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: var(--ios-blue); opacity: 0.2;">
+                        <span class="material-icons" style="font-size: 48px; color: var(--ios-blue);">person</span>
                     </div>
-                    <h3 class="text-xl font-semibold" style="color: var(--text-primary);">${userName}</h3>
+                    <h2 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">${userName}</h2>
                     <p class="text-sm" style="color: var(--text-secondary);">Member since ${new Date(profile.created_at).toLocaleDateString()}</p>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-6 px-6 pb-6">
                     <!-- Bio -->
                     ${profile.bio ? `
                         <div>
-                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">About</h4>
-                            <p class="text-sm" style="color: var(--text-secondary);">${profile.bio}</p>
+                            <h4 class="font-semibold mb-3 text-lg" style="color: var(--text-primary);">About</h4>
+                            <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">${profile.bio}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Location -->
+                    ${profile.home_city || profile.home_state ? `
+                        <div>
+                            <h4 class="font-semibold mb-3 text-lg" style="color: var(--text-primary);">Location</h4>
+                            <div class="flex items-center">
+                                <span class="material-icons mr-2" style="font-size: 20px; color: var(--ios-blue);">location_on</span>
+                                <span class="text-sm" style="color: var(--text-secondary);">
+                                    ${profile.home_city ? profile.home_city : ''}${profile.home_city && profile.home_state ? ', ' : ''}${profile.home_state ? profile.home_state : ''}
+                                </span>
+                            </div>
                         </div>
                     ` : ''}
 
                     <!-- Camping Style -->
                     ${profile.camper_type ? `
                         <div>
-                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Camping Style</h4>
-                            <div class="inline-flex items-center px-3 py-1 rounded-full text-sm" style="background: var(--ios-blue); color: white;">
-                                <span class="material-icons mr-1" style="font-size: 16px;">
+                            <h4 class="font-semibold mb-3 text-lg" style="color: var(--text-primary);">Camping Style</h4>
+                            <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium" style="background: var(--ios-blue); color: white;">
+                                <span class="material-icons mr-2" style="font-size: 18px;">
                                     ${profile.camper_type === 'tent' ? 'nature' : 
                                       profile.camper_type === 'rv' || profile.camper_type === 'trailer' ? 'rv_hookup' : 
+                                      profile.camper_type === 'fifth_wheel' ? 'rv_hookup' :
+                                      profile.camper_type === 'van' ? 'directions_car' :
                                       profile.camper_type === 'cabin' ? 'cabin' : 
                                       profile.camper_type === 'glamping' ? 'hotel' : 'nature'}
                                 </span>
@@ -3632,18 +3648,22 @@ class CampingApp {
                     <!-- Group Size -->
                     ${profile.group_size ? `
                         <div>
-                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Typical Group Size</h4>
-                            <p class="text-sm" style="color: var(--text-secondary);">👥 ${profile.group_size} ${profile.group_size === 1 ? 'person' : 'people'}</p>
+                            <h4 class="font-semibold mb-3 text-lg" style="color: var(--text-primary);">Typical Group Size</h4>
+                            <div class="flex items-center">
+                                <span class="material-icons mr-2" style="font-size: 20px; color: var(--ios-blue);">group</span>
+                                <span class="text-sm" style="color: var(--text-secondary);">${profile.group_size} ${profile.group_size === 1 ? 'person' : 'people'}</span>
+                            </div>
                         </div>
                     ` : ''}
 
                     <!-- Dietary Restrictions -->
                     ${profile.dietary_restrictions ? `
                         <div>
-                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Dietary Restrictions</h4>
+                            <h4 class="font-semibold mb-3 text-lg" style="color: var(--text-primary);">Dietary Restrictions</h4>
                             <div class="flex flex-wrap gap-2">
-                                <span class="dietary-tag" style="display: inline-block; padding: 4px 8px; font-size: 10px; border-radius: 12px; margin: 2px; background: #FF9500; color: white; font-weight: 500; line-height: 1.2; white-space: nowrap;">
-                                    🍽️ ${profile.dietary_restrictions.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                <span class="dietary-tag" style="display: inline-flex; align-items: center; padding: 6px 12px; font-size: 12px; border-radius: 16px; background: #FF9500; color: white; font-weight: 600; white-space: nowrap;">
+                                    <span class="material-icons mr-1" style="font-size: 14px;">restaurant</span>
+                                    ${profile.dietary_restrictions.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </span>
                             </div>
                         </div>
@@ -3652,15 +3672,18 @@ class CampingApp {
                     <!-- Contact (only if available - for public profiles this won't show) -->
                     ${profile.phone ? `
                         <div>
-                            <h4 class="font-medium mb-2" style="color: var(--text-primary);">Contact</h4>
-                            <p class="text-sm" style="color: var(--text-secondary);">📞 ${profile.phone}</p>
+                            <h4 class="font-semibold mb-3 text-lg" style="color: var(--text-primary);">Contact</h4>
+                            <div class="flex items-center">
+                                <span class="material-icons mr-2" style="font-size: 20px; color: var(--ios-blue);">phone</span>
+                                <span class="text-sm" style="color: var(--text-secondary);">${profile.phone}</span>
+                            </div>
                         </div>
                     ` : ''}
                 </div>
             </div>
         `;
 
-        this.showModal(`${userName}'s Profile`, modalContent);
+        this.showModal('Profile', modalContent);
     }
 
     
