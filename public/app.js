@@ -1965,7 +1965,8 @@ class CampingApp {
                                  onclick="this.querySelector('input').click()">
                                 <input type="radio" name="assignmentType" value="me" ${(!isEdit || editItem.assigned_to === 'me') ? 'checked' : ''}
                                        class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
-                                       style="accent-color: var(--ios-blue); margin-right: 16px;">
+                                       style="accent-color: var(--ios-blue);">
+                                <div style="width: 16px;"></div>
                                 <div class="flex-1">
                                     <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">For me</div>
                                     <div class="text-sm" style="color: var(--text-secondary);">I'll buy this item</div>
@@ -1977,7 +1978,8 @@ class CampingApp {
                                  onclick="this.querySelector('input').click()">
                                 <input type="radio" name="assignmentType" value="everyone" ${(isEdit && editItem.assigned_to === 'everyone') ? 'checked' : ''}
                                        class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
-                                       style="accent-color: var(--ios-blue); margin-right: 16px;">
+                                       style="accent-color: var(--ios-blue);">
+                                <div style="width: 16px;"></div>
                                 <div class="flex-1">
                                     <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">For everyone</div>
                                     <div class="text-sm" style="color: var(--text-secondary);">Everyone should buy this item</div>
