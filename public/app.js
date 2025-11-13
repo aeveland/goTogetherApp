@@ -3007,7 +3007,7 @@ class CampingApp {
                 </div>
                 
                 <div class="mt-6 pt-4 border-t">
-                    <button onclick="app.closeModal(); app.showEditProfile();" class="ios-button-primary w-full">
+                    <button onclick="app.showEditProfileModal();" class="ios-button-primary w-full">
                         <span class="material-icons mr-2" style="font-size: 16px;">edit</span>Edit Profile
                     </button>
                 </div>
@@ -3231,43 +3231,206 @@ class CampingApp {
     }
 
     showEditProfile() {
-        console.log('showEditProfile called - using existing profile system');
+        console.log('showEditProfile called - opening editable modal');
         
-        // Set profile context if not already set (for dashboard calls)
-        if (!this.currentProfileUser) {
-            this.currentProfileUser = this.currentUser;
-            this.isOwnProfile = true;
-        }
+        // Simply show the edit profile modal
+        this.showEditProfileModal();
+    }
+
+    showEditProfileModal(user = null) {
+        // Use provided user or current user
+        const profileUser = user || this.currentUser;
         
-        const user = this.currentProfileUser || this.currentUser;
-        
-        if (!user) {
-            console.error('No user data available for profile editing');
+        if (!profileUser) {
             this.showMessage('Unable to load profile data', 'error');
             return;
         }
+
+        const modalContent = `
+            <form id="modalProfileForm" class="modal-form">
+                <div class="space-y-6">
+                    <!-- Personal Information Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold flex items-center mb-4" style="color: var(--text-primary);">
+                            <span class="material-icons mr-2" style="font-size: 20px;">person</span>
+                            Personal Information
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="form-group">
+                                    <label for="modalFirstName">First Name *</label>
+                                    <input type="text" id="modalFirstName" name="firstName" required 
+                                           value="${profileUser.first_name || ''}" maxlength="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="modalLastName">Last Name *</label>
+                                    <input type="text" id="modalLastName" name="lastName" required 
+                                           value="${profileUser.last_name || ''}" maxlength="100">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalPhone">Phone</label>
+                                <input type="tel" id="modalPhone" name="phone" 
+                                       value="${profileUser.phone || ''}" placeholder="(555) 123-4567" maxlength="20">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalBio">Bio</label>
+                                <textarea id="modalBio" name="bio" rows="3" maxlength="1000"
+                                          placeholder="Tell other campers about yourself...">${profileUser.bio || ''}</textarea>
+                            </div>
+
+                            <!-- Address Fields -->
+                            <div class="form-group">
+                                <label for="modalHomeAddress">Home Address</label>
+                                <input type="text" id="modalHomeAddress" name="homeAddress" 
+                                       value="${profileUser.home_address || ''}" placeholder="123 Main Street" maxlength="200">
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="form-group">
+                                    <label for="modalHomeCity">City</label>
+                                    <input type="text" id="modalHomeCity" name="homeCity" 
+                                           value="${profileUser.home_city || ''}" placeholder="City" maxlength="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="modalHomeState">State</label>
+                                    <input type="text" id="modalHomeState" name="homeState" 
+                                           value="${profileUser.home_state || ''}" placeholder="CA" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="modalHomeZip">ZIP</label>
+                                    <input type="text" id="modalHomeZip" name="homeZip" 
+                                           value="${profileUser.home_zip || ''}" placeholder="12345" maxlength="20">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Camping Preferences Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold flex items-center mb-4" style="color: var(--text-primary);">
+                            <span class="material-icons mr-2" style="font-size: 20px;">nature</span>
+                            Camping Preferences
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label for="modalCamperType">Camping Style</label>
+                                <select id="modalCamperType" name="camperType">
+                                    <option value="">Select your style</option>
+                                    <option value="tent" ${profileUser.camper_type === 'tent' ? 'selected' : ''}>Tent Camping</option>
+                                    <option value="trailer" ${profileUser.camper_type === 'trailer' ? 'selected' : ''}>Travel Trailer</option>
+                                    <option value="rv" ${profileUser.camper_type === 'rv' ? 'selected' : ''}>RV/Motorhome</option>
+                                    <option value="cabin" ${profileUser.camper_type === 'cabin' ? 'selected' : ''}>Cabin</option>
+                                    <option value="glamping" ${profileUser.camper_type === 'glamping' ? 'selected' : ''}>Glamping</option>
+                                    <option value="backpacking" ${profileUser.camper_type === 'backpacking' ? 'selected' : ''}>Backpacking</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalGroupSize">Typical Group Size</label>
+                                <input type="number" id="modalGroupSize" name="groupSize" min="1" max="20" 
+                                       value="${profileUser.group_size || 1}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalDietary">Dietary Restrictions</label>
+                                <select id="modalDietary" name="dietaryRestrictions">
+                                    <option value="">No restrictions</option>
+                                    <option value="vegetarian" ${profileUser.dietary_restrictions === 'vegetarian' ? 'selected' : ''}>Vegetarian</option>
+                                    <option value="vegan" ${profileUser.dietary_restrictions === 'vegan' ? 'selected' : ''}>Vegan</option>
+                                    <option value="gluten_free" ${profileUser.dietary_restrictions === 'gluten_free' ? 'selected' : ''}>Gluten-Free</option>
+                                    <option value="dairy_free" ${profileUser.dietary_restrictions === 'dairy_free' ? 'selected' : ''}>Dairy-Free</option>
+                                    <option value="nut_allergy" ${profileUser.dietary_restrictions === 'nut_allergy' ? 'selected' : ''}>Nut Allergy</option>
+                                    <option value="kosher" ${profileUser.dietary_restrictions === 'kosher' ? 'selected' : ''}>Kosher</option>
+                                    <option value="halal" ${profileUser.dietary_restrictions === 'halal' ? 'selected' : ''}>Halal</option>
+                                    <option value="other" ${profileUser.dietary_restrictions === 'other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="ios-button-primary flex-1">
+                        <span class="material-icons mr-2" style="font-size: 16px;">save</span>Save Changes
+                    </button>
+                    <button type="button" onclick="app.closeModal()" class="ios-button-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        `;
         
-        // Hide dashboard and show profile container (existing system)
-        document.getElementById('dashboardContainer').style.display = 'none';
-        const profileContainer = document.getElementById('profileContainer');
+        this.showModal('Edit Profile', modalContent);
         
-        if (!profileContainer) {
-            console.error('Profile container not found!');
-            this.showMessage('Unable to load profile editor', 'error');
-            return;
+        // Handle form submission
+        document.getElementById('modalProfileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleModalProfileUpdate(e);
+        });
+        
+        // Focus first input
+        setTimeout(() => {
+            document.getElementById('modalFirstName').focus();
+        }, 100);
+    }
+
+    async handleModalProfileUpdate(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const profileData = {
+            firstName: (formData.get('firstName') || '').trim(),
+            lastName: (formData.get('lastName') || '').trim(),
+            phone: (formData.get('phone') || '').trim(),
+            bio: (formData.get('bio') || '').trim(),
+            camperType: formData.get('camperType') || '',
+            groupSize: parseInt(formData.get('groupSize')) || 1,
+            dietaryRestrictions: formData.get('dietaryRestrictions') || '',
+            homeAddress: (formData.get('homeAddress') || '').trim(),
+            homeCity: (formData.get('homeCity') || '').trim(),
+            homeState: (formData.get('homeState') || '').trim(),
+            homeZip: (formData.get('homeZip') || '').trim(),
+            homeCountry: 'United States'
+        };
+
+        try {
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(profileData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update current user data
+                this.currentUser = { ...this.currentUser, ...data.user };
+                
+                this.showMessage('Profile updated successfully!', 'success');
+                this.closeModal();
+                
+                // Refresh dashboard data to show updated profile completeness
+                this.loadDashboardData();
+            } else {
+                if (data.errors) {
+                    const errorMessages = data.errors.map(err => err.msg).join(', ');
+                    this.showMessage(errorMessages, 'error');
+                } else {
+                    this.showMessage(data.error || 'Failed to update profile', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            this.showMessage('Network error. Please try again.', 'error');
         }
-        
-        // Show profile container
-        profileContainer.style.display = 'block';
-        
-        // Hide profile view and show edit form (existing system)
-        document.getElementById('profileView').style.display = 'none';
-        document.getElementById('profileEditForm').style.display = 'block';
-        
-        // Populate the existing form with user data
-        this.populateProfileEditForm(user);
-        
-        console.log('Profile editing form should now be visible');
     }
     
     populateProfileEditForm(user) {
