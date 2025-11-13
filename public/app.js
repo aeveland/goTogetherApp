@@ -5046,8 +5046,9 @@ class CampingApp {
                                      style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                      onclick="this.querySelector('input').click()">
                                     <input type="radio" name="assignmentType" value="me" ${(!isEdit || task.assignment_type === 'me') ? 'checked' : ''}
-                                           class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
+                                           class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                            style="accent-color: var(--ios-blue);">
+                                    <div style="width: 16px;"></div>
                                     <div>
                                         <div class="font-medium" style="color: var(--text-primary);">For me</div>
                                         <div class="text-sm" style="color: var(--text-secondary);">I'll take care of this task</div>
@@ -5058,8 +5059,9 @@ class CampingApp {
                                      style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                      onclick="this.querySelector('input').click()">
                                     <input type="radio" name="assignmentType" value="everyone" ${(isEdit && task.assignment_type === 'everyone') ? 'checked' : ''}
-                                           class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-3"
+                                           class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                            style="accent-color: var(--ios-blue);">
+                                    <div style="width: 16px;"></div>
                                     <div>
                                         <div class="font-medium" style="color: var(--text-primary);">For everyone</div>
                                         <div class="text-sm" style="color: var(--text-secondary);">All trip participants should do this</div>
