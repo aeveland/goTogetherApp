@@ -4184,147 +4184,196 @@ class CampingApp {
         
         detailsSection.classList.remove('hidden');
         detailsSection.innerHTML = `
-            <!-- Streamlined Trip Header -->
-            <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <!-- Back Button -->
-                <button id="backFromDetailsBtn" style="width: 100%; padding: 12px; background: #f5f5f5; border: none; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
-                    <span class="material-icons" style="font-size: 16px; margin-right: 8px;">arrow_back</span>Back to Trips
-                </button>
-                
-                <!-- Trip Info -->
-                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px; color: #333;">${trip.title}</h1>
-                <p style="font-size: 16px; color: #666; margin-bottom: 12px;">${trip.location}</p>
-                
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #666;">
-                    <span style="display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 16px; margin-right: 4px;">event</span>
-                        ${startDate} - ${endDate}
-                    </span>
-                    <span style="display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 16px; margin-right: 4px;">group</span>
-                        ${trip.current_participants}/${trip.max_participants} joined
-                    </span>
-                </div>
-                
-                <span style="display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: #34C759; color: white;">
-                    <span class="material-icons" style="font-size: 14px; margin-right: 4px;">${typeIcons[trip.trip_type]}</span>
-                    ${trip.trip_type.replace('_', ' ')}
-                </span>
-
-                ${trip.description ? `
-                    <div style="margin-top: 16px; padding: 12px; background: #f9f9f9; border-radius: 8px;">
-                        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #333;">About This Trip</h4>
-                        <p style="font-size: 13px; color: #666; line-height: 1.4;">${trip.description}</p>
+            <!-- Trip Header -->
+            <div class="ios-card mb-6">
+                <div class="p-6">
+                    <!-- Back Button - Full Width -->
+                    <button id="backFromDetailsBtn" class="ios-button-secondary w-full mb-6">
+                        <span class="material-icons mr-2" style="font-size: 16px;">arrow_back</span>Back to Trips
+                    </button>
+                    
+                    <!-- Trip Info -->
+                    <div class="mb-6">
+                        <h1 class="ios-title-1 mb-2">${trip.title}</h1>
+                        <p class="ios-callout text-gray-600 mb-3">${trip.location}</p>
+                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
+                            <span class="flex items-center">
+                                <span class="material-icons mr-1" style="font-size: 16px;">event</span>
+                                ${startDate} - ${endDate}
+                            </span>
+                            <span class="flex items-center">
+                                <span class="material-icons mr-1" style="font-size: 16px;">group</span>
+                                ${trip.current_participants}/${trip.max_participants} joined
+                            </span>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" style="background: var(--ios-green); color: white;">
+                            <span class="material-icons text-sm mr-1" style="font-size: 16px;">${typeIcons[trip.trip_type]}</span>
+                            ${trip.trip_type.replace('_', ' ')}
+                        </span>
                     </div>
-                ` : ''}
 
-                <!-- Participants -->
-                <div style="margin-top: 16px;">
-                    <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #333;">Who's Going</h4>
-                    <div id="trip-participants-${trip.id}">
-                        <!-- Participants will be loaded here -->
+                    <!-- Trip Description -->
+                    ${trip.description ? `
+                        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="ios-callout font-medium text-gray-800 mb-2">About This Trip</h4>
+                            <p class="ios-footnote text-gray-600 leading-relaxed">${trip.description}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Who's Going -->
+                    <div class="mb-6">
+                        <h4 class="ios-callout font-medium text-gray-800 mb-3">Who's Going</h4>
+                        <div id="trip-participants-${trip.id}" class="space-y-2">
+                            <!-- Participants will be loaded here -->
+                        </div>
                     </div>
-                </div>
 
-                ${trip.trip_code ? `
-                    <div class="trip-code" style="margin-top: 16px; padding: 16px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); border: 2px solid #007AFF;">
-                        <h4 style="margin-bottom: 12px; display: flex; align-items: center; color: #007AFF; font-weight: 600; font-size: 16px;">
-                            <span class="material-icons" style="font-size: 18px; color: #007AFF; margin-right: 8px;">share</span>
-                            Trip Code
-                        </h4>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="padding: 16px; border-radius: 8px; font-family: monospace; font-size: 24px; font-weight: bold; text-align: center; background: white; border: 2px solid #007AFF; color: #007AFF; letter-spacing: 2px;">
-                                ${trip.trip_code}
+                    <!-- Trip Code -->
+                    ${trip.trip_code ? `
+                        <div class="trip-code mb-6" style="padding: 16px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); border: 2px solid #007AFF; margin: 16px 0;">
+                            <h4 style="margin-bottom: 12px; display: flex; align-items: center; color: #007AFF; font-weight: 600; font-size: 16px;">
+                                <span class="material-icons" style="font-size: 18px; color: #007AFF; margin-right: 8px;">share</span>
+                                Trip Code
+                            </h4>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="padding: 16px; border-radius: 8px; font-family: monospace; font-size: 24px; font-weight: bold; text-align: center; background: white; border: 2px solid #007AFF; color: #007AFF; letter-spacing: 2px;">
+                                    ${trip.trip_code}
+                                </div>
+                                <button onclick="app.copyTripCode('${trip.trip_code}')" 
+                                        class="ios-button-secondary" style="width: 100%; padding: 12px; font-size: 16px;">
+                                    <span class="material-icons" style="font-size: 16px; margin-right: 8px;">content_copy</span>
+                                    Copy Code
+                                </button>
                             </div>
-                            <button onclick="app.copyTripCode('${trip.trip_code}')" 
-                                    style="width: 100%; padding: 12px; background: #007AFF; color: white; border: none; border-radius: 8px; font-size: 16px;">
-                                <span class="material-icons" style="font-size: 16px; margin-right: 8px;">content_copy</span>
-                                Copy Code
+                            <p style="font-size: 12px; margin-top: 8px; color: #007AFF; text-align: center; line-height: 1.3;">Share this code with friends so they can join your trip</p>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Action Buttons - Edit Trip only -->
+                    <div>
+                        ${isOrganizer ? `
+                            <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                    class="ios-button-tertiary w-full py-3">
+                                <span class="material-icons mr-2" style="font-size: 16px;">edit</span>Edit Trip
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks & Shopping Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Tasks Summary -->
+                <div class="ios-card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="ios-title-3 flex items-center">
+                                <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-blue);">checklist</span>
+                                Trip Tasks
+                            </h3>
+                            <div class="flex items-center gap-3">
+                                <span id="tripTaskCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
+                                      style="background: var(--ios-blue); color: white;">0</span>
+                                <!-- Desktop Add Task Button -->
+                                <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
+                                        class="ios-button-primary ios-button-compact" 
+                                        style="display: none;"
+                                        data-desktop-button="true">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">add</span>
+                                    Add Task
+                                </button>
+                            </div>
+                        </div>
+                        <div id="tasksList-${trip.id}" class="space-y-3">
+                            <!-- Tasks will be loaded here -->
+                        </div>
+                        <!-- Mobile Add Task Button -->
+                        <button id="addTaskBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
+                                class="ios-button-primary w-full mt-4" 
+                                style="display: none;"
+                                data-mobile-button="true">
+                            <span class="material-icons mr-2" style="font-size: 18px;">add</span>
+                            Add Task
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Shopping Summary -->
+                <div class="ios-card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="ios-title-3 flex items-center">
+                                <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-purple);">shopping_cart</span>
+                                Shopping List
+                            </h3>
+                            <div class="flex items-center gap-3">
+                                <span id="tripShoppingCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
+                                      style="background: var(--ios-purple); color: white;">0</span>
+                                <!-- Desktop Add Item Button -->
+                                <button id="addShoppingItemBtn-${trip.id}" data-trip-id="${trip.id}"
+                                        class="ios-button-secondary ios-button-compact" 
+                                        style="display: none;"
+                                        data-desktop-button="true">
+                                    <span class="material-icons mr-1" style="font-size: 16px;">add</span>
+                                    Add Item
+                                </button>
+                            </div>
+                        </div>
+                        <div id="shoppingList-${trip.id}" class="space-y-3">
+                            <!-- Shopping items will be loaded here -->
+                        </div>
+                        <!-- Mobile Add Item Button -->
+                        <button id="addShoppingItemBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
+                                class="ios-button-secondary w-full mt-4" 
+                                style="display: none;"
+                                data-mobile-button="true">
+                            <span class="material-icons mr-2" style="font-size: 18px;">add</span>
+                            Add Item
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Forecast -->
+            <div class="ios-card mb-6">
+                <div class="p-6">
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="ios-title-3 flex items-center">
+                                <span class="material-icons mr-3" style="font-size: 24px; color: var(--ios-blue);">wb_sunny</span>
+                                Weather Forecast
+                            </h3>
+                            <button id="refreshWeatherBtn-${trip.id}" data-trip-id="${trip.id}" 
+                                    class="ios-button-secondary ios-button-compact hidden sm:flex">
+                                <span class="material-icons mr-1" style="font-size: 14px;">refresh</span>Refresh
                             </button>
                         </div>
-                        <p style="font-size: 12px; margin-top: 8px; color: #007AFF; text-align: center; line-height: 1.3;">Share this code with friends so they can join your trip</p>
+                        <div id="weatherForecast-${trip.id}">
+                            <div class="text-center py-4 text-gray-500">
+                                <span class="material-icons text-2xl mb-2 opacity-50">cloud</span>
+                                <p class="ios-footnote">Loading weather forecast...</p>
+                            </div>
+                        </div>
+                        <button id="refreshWeatherBtn-mobile-${trip.id}" data-trip-id="${trip.id}" 
+                                class="ios-button-secondary w-full sm:hidden mobile-full-width-btn mt-4">
+                            <span class="material-icons mr-2" style="font-size: 16px;">refresh</span>Refresh Weather
+                        </button>
                     </div>
-                ` : ''}
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div class="mb-6">
+                <div class="map-container" style="position: relative; margin-bottom: 16px;">
+                    <div id="trip-detail-map" style="height: 300px; width: 100%; border-radius: 12px; background: var(--ios-gray-6); position: relative; z-index: 1;"></div>
+                </div>
                 
-                ${isOrganizer ? `
-                    <button id="editTripBtn-${trip.id}" data-trip-id="${trip.id}" 
-                            style="width: 100%; padding: 12px; background: #f5f5f5; border: none; border-radius: 8px; margin-top: 16px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
-                        <span class="material-icons" style="font-size: 16px; margin-right: 8px;">edit</span>Edit Trip
-                    </button>
-                ` : ''}
-            </div>
-
-            <!-- Tasks Section -->
-            <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <h3 style="font-size: 18px; font-weight: 600; color: #333; display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 20px; color: #007AFF; margin-right: 8px;">checklist</span>
-                        Trip Tasks
-                    </h3>
-                    <span id="tripTaskCount-${trip.id}" style="padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #007AFF; color: white;">0</span>
-                </div>
-                <div id="tasksList-${trip.id}" style="margin-bottom: 12px;">
-                    <!-- Tasks will be loaded here -->
-                </div>
-                <button id="addTaskBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
-                        style="width: 100%; padding: 12px; background: #007AFF; color: white; border: none; border-radius: 8px; font-size: 14px; display: none;"
-                        data-mobile-button="true">
-                    <span class="material-icons" style="font-size: 16px; margin-right: 8px;">add</span>
-                    Add Task
-                </button>
-            </div>
-
-            <!-- Shopping Section -->
-            <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <h3 style="font-size: 18px; font-weight: 600; color: #333; display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 20px; color: #AF52DE; margin-right: 8px;">shopping_cart</span>
-                        Shopping List
-                    </h3>
-                    <span id="tripShoppingCount-${trip.id}" style="padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #AF52DE; color: white;">0</span>
-                </div>
-                <div id="shoppingList-${trip.id}" style="margin-bottom: 12px;">
-                    <!-- Shopping items will be loaded here -->
-                </div>
-                <button id="addShoppingItemBtn-mobile-${trip.id}" data-trip-id="${trip.id}"
-                        style="width: 100%; padding: 12px; background: #AF52DE; color: white; border: none; border-radius: 8px; font-size: 14px; display: none;"
-                        data-mobile-button="true">
-                    <span class="material-icons" style="font-size: 16px; margin-right: 8px;">add</span>
-                    Add Item
-                </button>
-            </div>
-
-            <!-- Weather Section -->
-            <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <h3 style="font-size: 18px; font-weight: 600; color: #333; display: flex; align-items: center;">
-                        <span class="material-icons" style="font-size: 20px; color: #FF9500; margin-right: 8px;">wb_sunny</span>
-                        Weather Forecast
-                    </h3>
-                    <button id="refreshWeatherBtn-mobile-${trip.id}" data-trip-id="${trip.id}" 
-                            style="padding: 8px 12px; background: #f5f5f5; border: none; border-radius: 6px; font-size: 12px;">
-                        <span class="material-icons" style="font-size: 14px; margin-right: 4px;">refresh</span>Refresh
-                    </button>
-                </div>
-                <div id="weatherForecast-${trip.id}">
-                    <div style="text-align: center; padding: 20px; color: #666;">
-                        <span class="material-icons" style="font-size: 32px; margin-bottom: 8px; opacity: 0.5;">cloud</span>
-                        <p style="font-size: 14px;">Loading weather forecast...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Map Section -->
-            <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <h3 style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 12px; display: flex; align-items: center;">
-                    <span class="material-icons" style="font-size: 20px; color: #34C759; margin-right: 8px;">map</span>
-                    Location & Directions
-                </h3>
-                <div id="trip-detail-map" style="height: 250px; width: 100%; border-radius: 8px; background: #f5f5f5; margin-bottom: 12px;"></div>
+                <!-- Directions Button -->
                 <button onclick="window.open('https://www.google.com/maps/search/' + encodeURIComponent('${trip.location.replace(/'/g, "\\'")}'), '_blank')" 
-                        id="directionsButton" style="width: 100%; padding: 12px; background: #34C759; color: white; border: none; border-radius: 8px; font-size: 14px;">
-                    <span class="material-icons" style="font-size: 16px; margin-right: 8px;">directions</span>Get Directions
+                        class="ios-button-secondary w-full" id="directionsButton">
+                    <span class="material-icons mr-2">directions</span>Get Directions
                 </button>
+                
             </div>
 
             <!-- Trip Actions -->
