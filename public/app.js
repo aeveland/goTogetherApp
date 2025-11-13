@@ -4272,8 +4272,7 @@ class CampingApp {
                                 Trip Tasks
                             </h3>
                             <div class="flex items-center gap-3">
-                                <span id="tripTaskCount-${trip.id}" class="px-3 py-1 rounded-full text-sm font-medium" 
-                                      style="background: var(--ios-blue); color: white;">0</span>
+                                <span id="tripTaskCount-${trip.id}" style="display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 8px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #007AFF; color: white;">0</span>
                                 <!-- Desktop Add Task Button -->
                                 <button id="addTaskBtn-${trip.id}" data-trip-id="${trip.id}"
                                         class="ios-button-primary ios-button-compact" 
@@ -4828,8 +4827,8 @@ class CampingApp {
                 <div class="flex items-start justify-between">
                     <div class="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
                         <button id="completeTask-${task.id}" 
-                                class="task-checkbox" style="margin-top: 4px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; ${task.is_completed ? 'background: #34C759; border-color: #34C759;' : 'background: white;'}">
-                            ${task.is_completed ? '<span class="material-icons" style="font-size: 14px; color: white;">check</span>' : ''}
+                                class="task-checkbox" style="margin-top: 2px; width: 18px; height: 18px; min-width: 18px; min-height: 18px; border-radius: 50%; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; padding: 0; ${task.is_completed ? 'background: #34C759; border-color: #34C759;' : 'background: white;'}">
+                            ${task.is_completed ? '<span class="material-icons" style="font-size: 12px; color: white;">check</span>' : ''}
                         </button>
                         <div class="flex-1 min-w-0">
                             <h4 class="font-medium text-sm sm:text-base text-gray-900 ${task.is_completed ? 'line-through text-gray-500' : ''} truncate-2">${task.title}</h4>
