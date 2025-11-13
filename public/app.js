@@ -511,7 +511,7 @@ class CampingApp {
         let dietaryInfo = '';
         if (dietaryRestrictions && dietaryRestrictions.length > 0) {
             const restrictionsList = dietaryRestrictions.map(person => 
-                `<span class="inline-block px-2 py-1 text-xs rounded-full mr-1 mb-1" style="background: var(--warning-orange); color: #000;">
+                `<span class="dietary-tag" style="display: inline-block; padding: 4px 8px; font-size: 10px; border-radius: 12px; margin: 2px; background: #FF9500; color: white; font-weight: 500; line-height: 1.2; white-space: nowrap;">
                     ${person.first_name}: ${person.dietary_restrictions}
                 </span>`
             ).join('');
@@ -1897,7 +1897,7 @@ class CampingApp {
             let dietaryInfo = '';
             if (dietaryRestrictions && dietaryRestrictions.length > 0) {
                 const restrictionsList = dietaryRestrictions.map(person => 
-                    `<span class="inline-block px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800 mr-1 mb-1">
+                    `<span class="dietary-tag" style="display: inline-block; padding: 4px 8px; font-size: 10px; border-radius: 12px; margin: 2px; background: #FF9500; color: white; font-weight: 500; line-height: 1.2; white-space: nowrap;">
                         ${person.first_name}: ${person.dietary_restrictions}
                     </span>`
                 ).join('');
@@ -3082,7 +3082,7 @@ class CampingApp {
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Dietary Restrictions</h4>
                             <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center px-2 py-1 rounded text-xs" style="background: var(--ios-orange); color: white;">
+                                <span class="dietary-tag" style="display: inline-block; padding: 4px 8px; font-size: 10px; border-radius: 12px; margin: 2px; background: #FF9500; color: white; font-weight: 500; line-height: 1.2; white-space: nowrap;">
                                     🍽️ ${profile.dietary_restrictions.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </span>
                             </div>
@@ -3614,7 +3614,7 @@ class CampingApp {
                         <div>
                             <h4 class="font-medium mb-2" style="color: var(--text-primary);">Dietary Restrictions</h4>
                             <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center px-2 py-1 rounded text-xs" style="background: var(--ios-orange); color: white;">
+                                <span class="dietary-tag" style="display: inline-block; padding: 4px 8px; font-size: 10px; border-radius: 12px; margin: 2px; background: #FF9500; color: white; font-weight: 500; line-height: 1.2; white-space: nowrap;">
                                     🍽️ ${profile.dietary_restrictions.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </span>
                             </div>
