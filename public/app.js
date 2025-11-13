@@ -1957,30 +1957,30 @@ class CampingApp {
                         </div>
                     </div>
                     
-                    <div class="form-group mb-6">
+                    <div class="form-group mb-8">
                         <label class="block text-sm font-medium mb-4" style="color: var(--text-primary)">Who should buy this item?</label>
-                        <div class="space-y-3">
-                            <div class="flex items-start p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                        <div class="space-y-4">
+                            <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                  style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                  onclick="this.querySelector('input').click()">
                                 <input type="radio" name="assignmentType" value="me" ${(!isEdit || editItem.assigned_to === 'me') ? 'checked' : ''}
-                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mt-0.5 mr-3 flex-shrink-0"
+                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-4 flex-shrink-0"
                                        style="accent-color: var(--ios-blue);">
                                 <div class="flex-1">
-                                    <div class="font-medium text-base" style="color: var(--text-primary);">For me</div>
-                                    <div class="text-sm mt-1" style="color: var(--text-secondary);">I'll buy this item</div>
+                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">For me</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">I'll buy this item</div>
                                 </div>
                             </div>
                             
-                            <div class="flex items-start p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                            <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                  style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                  onclick="this.querySelector('input').click()">
                                 <input type="radio" name="assignmentType" value="everyone" ${(isEdit && editItem.assigned_to === 'everyone') ? 'checked' : ''}
-                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mt-0.5 mr-3 flex-shrink-0"
+                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 mr-4 flex-shrink-0"
                                        style="accent-color: var(--ios-blue);">
                                 <div class="flex-1">
-                                    <div class="font-medium text-base" style="color: var(--text-primary);">For everyone</div>
-                                    <div class="text-sm mt-1" style="color: var(--text-secondary);">Everyone should buy this item</div>
+                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">For everyone</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">Everyone should buy this item</div>
                                 </div>
                             </div>
                         </div>
