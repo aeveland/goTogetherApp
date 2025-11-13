@@ -1876,6 +1876,38 @@
                     border-color: #34C759 !important;
                     transform: scale(1.05) !important;
                 }
+                
+                /* FIX: Trip details layout simplification */
+                #tripDetailsSection {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+                
+                #tripDetailsSection > div {
+                    margin-bottom: 12px !important;
+                }
+                
+                /* FIX: Remove excessive padding from nested elements */
+                .ios-card .ios-card {
+                    margin: 0 !important;
+                    box-shadow: none !important;
+                    border: 1px solid #e5e5e5 !important;
+                }
+                
+                /* FIX: Streamlined section headers */
+                .section-header {
+                    font-size: 16px !important;
+                    font-weight: 600 !important;
+                    margin-bottom: 8px !important;
+                    padding: 0 !important;
+                }
+                
+                /* FIX: Compact button styling */
+                .mobile-compact-btn {
+                    padding: 8px 12px !important;
+                    font-size: 12px !important;
+                    border-radius: 6px !important;
+                }
             }
 
             /* Weather Forecast Mobile Improvements */
