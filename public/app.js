@@ -585,6 +585,26 @@ class CampingApp {
                 html += `
                     <div class="flex items-center justify-between p-3 rounded-lg ${isCompleted ? 'opacity-60' : ''}" 
                          style="background: var(--ios-gray-6); border-left: 3px solid ${priorityColor};">
+                        ${item.amazon_link ? `
+                            <div class="flex-shrink-0 mr-3">
+                                <img src="https://images-na.ssl-images-amazon.com/images/P/${this.extractASIN(item.amazon_link)}.jpg" 
+                                     alt="${item.item_name}"
+                                     class="w-16 h-16 object-cover rounded"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                     style="border: 1px solid rgba(255,255,255,0.1);">
+                                <div class="w-16 h-16 rounded flex items-center justify-center" 
+                                     style="background: var(--ios-gray-5); display: none;">
+                                    <span class="material-icons text-gray-400" style="font-size: 32px;">shopping_bag</span>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="flex-shrink-0 mr-3">
+                                <div class="w-16 h-16 rounded flex items-center justify-center" 
+                                     style="background: var(--ios-gray-5);">
+                                    <span class="material-icons text-gray-400" style="font-size: 32px;">shopping_bag</span>
+                                </div>
+                            </div>
+                        `}
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
                                 <h5 class="ios-callout font-medium ${isCompleted ? 'line-through' : ''}">${item.item_name}</h5>
@@ -1354,6 +1374,30 @@ class CampingApp {
         if (assignedTo === 'anyone') return 'Anyone';
         // For specific user assignments, we'd need to look up the user name
         return 'Assigned';
+    }
+
+    extractASIN(amazonUrl) {
+        if (!amazonUrl) return '';
+        
+        // Match various Amazon URL formats
+        // https://www.amazon.com/dp/B0BNZJC7BM
+        // https://www.amazon.com/product-name/dp/B0BNZJC7BM
+        // https://a.co/d/abc123
+        const patterns = [
+            /\/dp\/([A-Z0-9]{10})/i,
+            /\/gp\/product\/([A-Z0-9]{10})/i,
+            /\/ASIN\/([A-Z0-9]{10})/i,
+            /\/([A-Z0-9]{10})(?:\/|\?|$)/i
+        ];
+        
+        for (const pattern of patterns) {
+            const match = amazonUrl.match(pattern);
+            if (match && match[1]) {
+                return match[1];
+            }
+        }
+        
+        return '';
     }
 
     async toggleShoppingItemPurchased(itemId) {
