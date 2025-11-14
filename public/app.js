@@ -591,21 +591,22 @@ class CampingApp {
                                 ${item.quantity > 1 ? `<span class="ios-caption text-gray-500">×${item.quantity}</span>` : ''}
                             </div>
                             ${item.description ? `<p class="ios-footnote text-gray-600 truncate">${item.description}</p>` : ''}
-                            <div class="flex items-center gap-4 mt-1">
+                            <div class="flex items-center gap-4 mt-1 flex-wrap">
                                 ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
                                 ${item.assigned_to !== 'anyone' ? `<span class="ios-caption" style="color: #00BFFF; font-weight: 600; background: rgba(0, 191, 255, 0.15); padding: 2px 6px; border-radius: 4px;">${this.getAssignmentText(item.assigned_to)}</span>` : ''}
                                 ${isCompleted ? `<span class="ios-caption text-green-600">✓ Purchased by ${item.purchaser_first_name || 'someone'}</span>` : ''}
+                                ${item.amazon_url ? `
+                                    <a href="${item.amazon_url}" target="_blank" 
+                                       class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
+                                       style="background: #FF9900; color: white; text-decoration: none;"
+                                       onclick="event.stopPropagation()">
+                                        <span class="material-icons" style="font-size: 14px;">shopping_cart</span>
+                                        View on Amazon
+                                    </a>
+                                ` : ''}
                             </div>
                         </div>
                         <div class="flex items-center gap-2 ml-3">
-                            <button onclick="app.showSuggestProductModal(${item.id}, '${item.item_name.replace(/'/g, "\\'")}')" 
-                                    class="p-2 rounded-full transition-colors"
-                                    style="min-height: 44px; min-width: 44px;"
-                                    title="Suggest Amazon Product"
-                                    onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
-                                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
-                                <span class="material-icons text-orange-500">local_offer</span>
-                            </button>
                             <button onclick="app.toggleShoppingItemPurchased(${item.id})" 
                                     class="p-2 rounded-full transition-colors"
                                     style="min-height: 44px; min-width: 44px;"

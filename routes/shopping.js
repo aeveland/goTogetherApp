@@ -22,7 +22,7 @@ router.get('/trip/:tripId', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Access denied to this trip' });
     }
 
-    // Get shopping items with user details
+    // Get shopping items with user details and Amazon links
     const result = await pool.query(`
       SELECT 
         tsi.*,
@@ -31,11 +31,20 @@ router.get('/trip/:tripId', authenticateToken, async (req, res) => {
         purchaser.first_name as purchaser_first_name,
         purchaser.last_name as purchaser_last_name,
         sc.icon as category_icon,
-        sc.color as category_color
+        sc.color as category_color,
+        amz.amazon_url,
+        amz.product_title as amazon_product_title
       FROM trip_shopping_items tsi
       LEFT JOIN users creator ON tsi.created_by = creator.id
       LEFT JOIN users purchaser ON tsi.purchased_by = purchaser.id
       LEFT JOIN shopping_categories sc ON tsi.category = sc.name
+      LEFT JOIN LATERAL (
+        SELECT amazon_url, product_title
+        FROM amazon_suggestions
+        WHERE shopping_item_id = tsi.id
+        ORDER BY vote_count DESC, suggested_at DESC
+        LIMIT 1
+      ) amz ON true
       WHERE tsi.trip_id = $1
       ORDER BY 
         tsi.is_purchased ASC,
@@ -370,10 +379,19 @@ router.get('/my-assignments', authenticateToken, async (req, res) => {
       SELECT 
         tsi.*,
         ct.title as trip_title,
-        ct.start_date as trip_start_date
+        ct.start_date as trip_start_date,
+        amz.amazon_url,
+        amz.product_title as amazon_product_title
       FROM trip_shopping_items tsi
       JOIN camping_trips ct ON tsi.trip_id = ct.id
       LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
+      LEFT JOIN LATERAL (
+        SELECT amazon_url, product_title
+        FROM amazon_suggestions
+        WHERE shopping_item_id = tsi.id
+        ORDER BY vote_count DESC, suggested_at DESC
+        LIMIT 1
+      ) amz ON true
       WHERE tsi.is_purchased = false
       AND (
         tsi.assigned_to = 'everyone'
