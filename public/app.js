@@ -599,18 +599,28 @@ class CampingApp {
                                 ${item.quantity > 1 ? `<span class="ios-caption text-gray-500">×${item.quantity}</span>` : ''}
                             </div>
                             ${item.description ? `<p class="ios-footnote text-gray-600 truncate">${item.description}</p>` : ''}
-                            <div class="flex items-center gap-4 mt-1 flex-wrap">
-                                ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
-                                ${item.assigned_to === 'specific' && item.assignments && item.assignments.length > 0 ? `
+                            
+                            <!-- Assignment Display - Show who it's assigned to -->
+                            ${item.assigned_to === 'specific' && item.assignments && item.assignments.length > 0 ? `
+                                <div class="flex items-center gap-2 mt-2 p-2 rounded" style="background: rgba(0, 122, 255, 0.08); border-left: 3px solid var(--ios-blue);">
+                                    <span class="material-icons" style="font-size: 16px; color: var(--ios-blue);">person</span>
                                     <div class="flex items-center gap-1 flex-wrap">
+                                        <span class="ios-caption font-semibold" style="color: var(--ios-blue);">Assigned to:</span>
                                         ${item.assignments.map(a => `
-                                            <span class="ios-caption flex items-center gap-1" style="color: ${a.is_completed ? 'var(--ios-green)' : 'var(--text-secondary)'}; background: ${a.is_completed ? 'rgba(52, 199, 89, 0.15)' : 'var(--ios-gray-5)'}; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+                                            <span class="ios-caption flex items-center gap-1" style="color: ${a.is_completed ? 'var(--ios-green)' : 'var(--text-primary)'}; background: ${a.is_completed ? 'rgba(52, 199, 89, 0.15)' : 'white'}; padding: 3px 8px; border-radius: 12px; font-weight: 600; border: 1px solid ${a.is_completed ? 'var(--ios-green)' : 'var(--border-primary)'};">
                                                 ${a.is_completed ? '✓' : '○'} ${a.first_name}
                                             </span>
                                         `).join('')}
                                     </div>
-                                ` : item.assigned_to === 'shared' ? `
+                                </div>
+                            ` : ''}
+                            
+                            <div class="flex items-center gap-4 mt-2 flex-wrap">
+                                ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
+                                ${item.assigned_to === 'shared' || item.assigned_to === 'anyone' ? `
                                     <span class="ios-caption" style="color: #00BFFF; font-weight: 600; background: rgba(0, 191, 255, 0.15); padding: 2px 6px; border-radius: 4px;">Shared</span>
+                                ` : item.assigned_to === 'me' ? `
+                                    <span class="ios-caption" style="color: var(--ios-blue); font-weight: 600; background: rgba(0, 122, 255, 0.15); padding: 2px 6px; border-radius: 4px;">Just Me</span>
                                 ` : ''}
                                 ${isCompleted && item.assigned_to !== 'specific' ? `<span class="ios-caption text-green-600">✓ Purchased by ${item.purchaser_first_name || 'someone'}</span>` : ''}
                                 ${item.amazon_link ? `
