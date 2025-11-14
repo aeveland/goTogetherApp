@@ -48,6 +48,28 @@ router.get('/trip/:tripId', authenticateToken, async (req, res) => {
         tsi.created_at DESC
     `, [tripId]);
 
+    // Get assignments for items with specific user assignments
+    const assignments = await pool.query(`
+      SELECT 
+        sia.shopping_item_id,
+        sia.user_id,
+        sia.is_completed,
+        sia.completed_at,
+        u.first_name,
+        u.last_name
+      FROM shopping_item_assignments sia
+      JOIN users u ON sia.user_id = u.id
+      WHERE sia.shopping_item_id = ANY(
+        SELECT id FROM trip_shopping_items WHERE trip_id = $1
+      )
+    `, [tripId]);
+
+    // Attach assignments to items
+    const items = result.rows.map(item => ({
+      ...item,
+      assignments: assignments.rows.filter(a => a.shopping_item_id === item.id)
+    }));
+
     // Get dietary restrictions for trip participants
     const dietaryResult = await pool.query(`
       SELECT DISTINCT 
@@ -73,7 +95,7 @@ router.get('/trip/:tripId', authenticateToken, async (req, res) => {
     `, [tripId]);
 
     res.json({ 
-      items: result.rows,
+      items: items,
       dietary_restrictions: dietaryResult.rows
     });
   } catch (error) {
@@ -162,7 +184,8 @@ router.post('/trip/:tripId', authenticateToken, [
       category = 'General',
       quantity = 1,
       estimated_cost,
-      assigned_to = 'anyone',
+      assigned_to = 'shared',
+      assigned_user_ids = [],
       priority = 'medium',
       notes,
       amazon_link
@@ -170,7 +193,7 @@ router.post('/trip/:tripId', authenticateToken, [
 
     console.log('Inserting shopping item with data:', {
       tripId, item_name, description, category, quantity,
-      estimated_cost, assigned_to, priority, notes, userId
+      estimated_cost, assigned_to, assigned_user_ids, priority, notes, userId
     });
 
     const result = await pool.query(`
@@ -184,7 +207,20 @@ router.post('/trip/:tripId', authenticateToken, [
       estimated_cost, assigned_to, priority, notes, userId, amazon_link
     ]);
 
+    const itemId = result.rows[0].id;
     console.log('Shopping item created successfully:', result.rows[0]);
+
+    // If specific users are assigned, create individual assignments
+    if (assigned_to === 'specific' && assigned_user_ids && assigned_user_ids.length > 0) {
+      for (const assignedUserId of assigned_user_ids) {
+        await pool.query(`
+          INSERT INTO shopping_item_assignments (shopping_item_id, user_id)
+          VALUES ($1, $2)
+          ON CONFLICT (shopping_item_id, user_id) DO NOTHING
+        `, [itemId, assignedUserId]);
+      }
+      console.log(`Created ${assigned_user_ids.length} individual assignments`);
+    }
 
     res.status(201).json({
       message: 'Shopping item added successfully',
@@ -289,7 +325,7 @@ router.patch('/:itemId/purchase', authenticateToken, async (req, res) => {
 
     // Verify user has access to this shopping item's trip
     const accessCheck = await pool.query(`
-      SELECT tsi.trip_id, tsi.is_purchased FROM trip_shopping_items tsi
+      SELECT tsi.trip_id, tsi.is_purchased, tsi.assigned_to FROM trip_shopping_items tsi
       JOIN camping_trips ct ON tsi.trip_id = ct.id
       LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
       WHERE tsi.id = $1 AND (ct.organizer_id = $2 OR tp.user_id = $2)
@@ -299,38 +335,84 @@ router.patch('/:itemId/purchase', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const currentStatus = accessCheck.rows[0].is_purchased;
-    const newStatus = !currentStatus;
+    const assignedTo = accessCheck.rows[0].assigned_to;
 
-    // Try the full update first, fall back to simple update if columns don't exist
-    let result;
-    try {
-      result = await pool.query(`
-        UPDATE trip_shopping_items 
+    // If item is assigned to specific people, toggle individual assignment
+    if (assignedTo === 'specific') {
+      const assignment = await pool.query(`
+        SELECT is_completed FROM shopping_item_assignments
+        WHERE shopping_item_id = $1 AND user_id = $2
+      `, [itemId, userId]);
+
+      if (assignment.rows.length === 0) {
+        return res.status(403).json({ error: 'This item is not assigned to you' });
+      }
+
+      const currentStatus = assignment.rows[0].is_completed;
+      const newStatus = !currentStatus;
+
+      await pool.query(`
+        UPDATE shopping_item_assignments
         SET 
-          is_purchased = $1,
-          purchased_by = CASE WHEN $1 THEN $2 ELSE NULL END,
-          purchased_at = CASE WHEN $1 THEN CURRENT_TIMESTAMP ELSE NULL END,
-          updated_by = $2,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = $3
-        RETURNING *
-      `, [newStatus, userId, itemId]);
-    } catch (columnError) {
-      console.log('Full update failed, trying simple update:', columnError.message);
-      // Fallback to simple update if some columns don't exist
-      result = await pool.query(`
+          is_completed = $1,
+          completed_at = CASE WHEN $1 THEN CURRENT_TIMESTAMP ELSE NULL END
+        WHERE shopping_item_id = $2 AND user_id = $3
+      `, [newStatus, itemId, userId]);
+
+      // Check if all assignments are complete
+      const allAssignments = await pool.query(`
+        SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_completed = true) as completed
+        FROM shopping_item_assignments
+        WHERE shopping_item_id = $1
+      `, [itemId]);
+
+      const allComplete = allAssignments.rows[0].total === allAssignments.rows[0].completed;
+
+      // Update main item status if all assignments complete
+      await pool.query(`
         UPDATE trip_shopping_items 
         SET is_purchased = $1
         WHERE id = $2
-        RETURNING *
-      `, [newStatus, itemId]);
-    }
+      `, [allComplete, itemId]);
 
-    res.json({
-      message: `Item marked as ${newStatus ? 'purchased' : 'not purchased'}`,
-      item: result.rows[0]
-    });
+      res.json({
+        message: `Marked as ${newStatus ? 'completed' : 'not completed'}`,
+        assignmentComplete: newStatus,
+        allComplete: allComplete
+      });
+    } else {
+      // Shared item - toggle for everyone
+      const currentStatus = accessCheck.rows[0].is_purchased;
+      const newStatus = !currentStatus;
+
+      let result;
+      try {
+        result = await pool.query(`
+          UPDATE trip_shopping_items 
+          SET 
+            is_purchased = $1,
+            purchased_by = CASE WHEN $1 THEN $2 ELSE NULL END,
+            purchased_at = CASE WHEN $1 THEN CURRENT_TIMESTAMP ELSE NULL END,
+            updated_by = $2,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $3
+          RETURNING *
+        `, [newStatus, userId, itemId]);
+      } catch (columnError) {
+        console.log('Full update failed, trying simple update:', columnError.message);
+        result = await pool.query(`
+          UPDATE trip_shopping_items 
+          SET is_purchased = $1
+          WHERE id = $2
+          RETURNING *
+        `, [newStatus, itemId]);
+      }
+
+      res.json({
+        message: `Item marked as ${newStatus ? 'purchased' : 'not purchased'}`,
+        item: result.rows[0]
+      });
+    }
   } catch (error) {
     console.error('Error toggling purchase status:', error);
     res.status(500).json({ error: 'Failed to update purchase status' });
