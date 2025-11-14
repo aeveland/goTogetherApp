@@ -21,6 +21,7 @@ const fixAllTablesRoutes = require('./routes/fix-all-tables');
 const debugRoutes = require('./routes/debug');
 const fixShoppingColumnsRoutes = require('./routes/fix-shopping-columns');
 const shoppingTableCheckRoutes = require('./routes/shopping-table-check');
+const fixAssignmentConstraintRoutes = require('./routes/fix-assignment-constraint');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +65,7 @@ app.use('/api/fix-all', fixAllTablesRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/fix-shopping', fixShoppingColumnsRoutes);
 app.use('/api/shopping-check', shoppingTableCheckRoutes);
+app.use('/api/fix-constraint', fixAssignmentConstraintRoutes);
 
 // Landing page route
 app.get('/', (req, res) => {
