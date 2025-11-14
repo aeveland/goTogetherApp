@@ -643,6 +643,13 @@ class CampingApp {
                                     onmouseout="this.style.backgroundColor=''; this.style.color=''">
                                 <span class="material-icons text-gray-400">edit</span>
                             </button>
+                            <button onclick="app.deleteShoppingItem(${item.id}, '${item.item_name.replace(/'/g, "\\'")}')" 
+                                    class="p-2 rounded-full transition-colors"
+                                    style="min-height: 44px; min-width: 44px;"
+                                    onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--ios-red)'"
+                                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                                <span class="material-icons text-gray-400">delete</span>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -2138,6 +2145,32 @@ class CampingApp {
             await this.showAddShoppingModal(this.getCurrentTripId(), item);
         } catch (error) {
             console.error('Error loading shopping item for edit:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
+    }
+
+    async deleteShoppingItem(itemId, itemName) {
+        if (!confirm(`Are you sure you want to delete "${itemName}"?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/shopping/${itemId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage('Shopping item deleted successfully!', 'success');
+                this.loadTripShopping(this.getCurrentTripId());
+                this.loadDashboardShopping();
+            } else {
+                this.showMessage(data.error || 'Failed to delete shopping item', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting shopping item:', error);
             this.showMessage('Network error. Please try again.', 'error');
         }
     }
