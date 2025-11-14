@@ -5512,11 +5512,14 @@ class CampingApp {
                 this.showTripDetails(tripId);
                 
             } else {
+                console.error('Task submit failed:', data);
                 if (data.errors) {
                     const errorMessages = data.errors.map(err => err.msg).join(', ');
                     this.showMessage(errorMessages, 'error');
                 } else {
-                    this.showMessage(data.error || `Failed to ${isEdit ? 'update' : 'create'} task`, 'error');
+                    const errorMsg = data.error || `Failed to ${isEdit ? 'update' : 'create'} task`;
+                    const details = data.details ? ` (${data.details})` : '';
+                    this.showMessage(errorMsg + details, 'error');
                 }
             }
         } catch (error) {
