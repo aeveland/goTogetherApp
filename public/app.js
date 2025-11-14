@@ -598,6 +598,14 @@ class CampingApp {
                             </div>
                         </div>
                         <div class="flex items-center gap-2 ml-3">
+                            <button onclick="app.showSuggestProductModal(${item.id}, '${item.item_name.replace(/'/g, "\\'")}')" 
+                                    class="p-2 rounded-full transition-colors"
+                                    style="min-height: 44px; min-width: 44px;"
+                                    title="Suggest Amazon Product"
+                                    onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
+                                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                                <span class="material-icons text-orange-500">local_offer</span>
+                            </button>
                             <button onclick="app.toggleShoppingItemPurchased(${item.id})" 
                                     class="p-2 rounded-full transition-colors"
                                     style="min-height: 44px; min-width: 44px;"
@@ -5685,6 +5693,103 @@ class CampingApp {
                 }
             }
         });
+    }
+
+    // Amazon Product Suggestions
+    showSuggestProductModal(shoppingItemId, itemName) {
+        const modalContent = `
+            <div class="space-y-6">
+                <div class="text-center mb-6">
+                    <span class="material-icons text-4xl mb-3 block" style="color: #FF9900;">local_offer</span>
+                    <p class="text-gray-600">Suggest an Amazon product for <strong>${itemName}</strong></p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amazonProductUrl">Amazon Product URL</label>
+                    <input type="url" id="amazonProductUrl" placeholder="https://www.amazon.com/dp/..."
+                           class="w-full form-input mb-2">
+                    <small class="text-gray-500">Copy the product URL from Amazon.com</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="productTitle">Product Title (Optional)</label>
+                    <input type="text" id="productTitle" placeholder="e.g., Coleman Tent Stakes 10-Pack"
+                           class="w-full form-input">
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                        <strong>💡 Tip:</strong> Find the product on Amazon, copy the URL from your browser, and paste it here. 
+                        Your suggestion will help everyone find the right product!
+                    </p>
+                </div>
+
+                <button id="submitProductSuggestion" class="ios-button-primary w-full">
+                    <span class="material-icons mr-2" style="font-size: 16px;">add_shopping_cart</span>
+                    Suggest Product
+                </button>
+            </div>
+        `;
+
+        this.showModal('Suggest Amazon Product', modalContent);
+
+        // Handle submit
+        document.getElementById('submitProductSuggestion').addEventListener('click', () => {
+            this.submitProductSuggestion(shoppingItemId);
+        });
+
+        // Handle enter key
+        document.getElementById('amazonProductUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.submitProductSuggestion(shoppingItemId);
+            }
+        });
+    }
+
+    async submitProductSuggestion(shoppingItemId) {
+        const url = document.getElementById('amazonProductUrl').value.trim();
+        const title = document.getElementById('productTitle').value.trim();
+
+        if (!url) {
+            this.showMessage('Please enter an Amazon product URL', 'error');
+            return;
+        }
+
+        if (!url.includes('amazon.com')) {
+            this.showMessage('Please enter a valid Amazon.com URL', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/amazon/suggest', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    shoppingItemId,
+                    amazonUrl: url,
+                    productTitle: title || null
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage('Product suggestion added! 🎉', 'success');
+                this.closeModal();
+                // Refresh the trip details to show new suggestion
+                if (this.currentTrip) {
+                    this.showTripDetails(this.currentTrip.id);
+                }
+            } else {
+                this.showMessage(data.error || 'Failed to add product suggestion', 'error');
+            }
+        } catch (error) {
+            console.error('Error suggesting product:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        }
     }
 }
 
