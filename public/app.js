@@ -446,24 +446,46 @@ class CampingApp {
                 'low': 'var(--ios-gray-2)'
             }[item.priority] || 'var(--ios-gray-2)';
             
+            const assignmentBadge = item.assignment_type === 'specific' 
+                ? '<span class="ios-caption px-2 py-1 rounded" style="background: rgba(0, 122, 255, 0.15); color: var(--ios-blue); font-weight: 600;">Assigned to you</span>'
+                : '<span class="ios-caption px-2 py-1 rounded" style="background: rgba(0, 191, 255, 0.15); color: #00BFFF; font-weight: 600;">Shared</span>';
+            
             return `
-                <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--ios-gray-6);">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <h4 class="ios-callout font-medium truncate">${item.item_name}</h4>
-                            <span class="w-2 h-2 rounded-full" style="background: ${priorityColor};" title="${item.priority} priority"></span>
+                <div class="p-4 rounded-lg mb-3 cursor-pointer transition-all hover:shadow-md" 
+                     style="background: white; border: 1px solid var(--border-primary);"
+                     onclick="app.showTripDetails(${item.trip_id})">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <!-- Item Name and Priority -->
+                            <div class="flex items-center gap-2 mb-2">
+                                <h4 class="ios-callout font-semibold truncate" style="color: var(--text-primary);">${item.item_name}</h4>
+                                <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: ${priorityColor};" title="${item.priority} priority"></span>
+                            </div>
+                            
+                            <!-- Trip Info -->
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="material-icons text-gray-500" style="font-size: 16px;">terrain</span>
+                                <span class="ios-footnote font-medium" style="color: var(--ios-blue);">${item.trip_title}</span>
+                                ${item.trip_location ? `<span class="ios-caption text-gray-500">• ${item.trip_location}</span>` : ''}
+                            </div>
+                            
+                            <!-- Assignment Badge and Details -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                ${assignmentBadge}
+                                ${item.quantity > 1 ? `<span class="ios-caption text-gray-500">Qty: ${item.quantity}</span>` : ''}
+                                ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
+                            </div>
                         </div>
-                        <p class="ios-footnote text-gray-600 truncate">${item.trip_title}</p>
-                        ${item.quantity > 1 ? `<p class="ios-caption text-gray-500">Qty: ${item.quantity}</p>` : ''}
-                        ${item.estimated_cost ? `<p class="ios-caption text-gray-500">~$${item.estimated_cost}</p>` : ''}
+                        
+                        <!-- Check Button -->
+                        <button onclick="event.stopPropagation(); app.toggleShoppingItemPurchased(${item.id})" 
+                                class="p-2 rounded-full transition-colors flex-shrink-0"
+                                style="min-height: 44px; min-width: 44px; background: var(--ios-gray-6);"
+                                onmouseover="this.style.backgroundColor='var(--bg-hover)'"
+                                onmouseout="this.style.backgroundColor='var(--ios-gray-6)'">
+                            <span class="material-icons" style="color: var(--text-secondary);">radio_button_unchecked</span>
+                        </button>
                     </div>
-                    <button onclick="app.toggleShoppingItemPurchased(${item.id})" 
-                            class="ml-3 p-2 rounded-full transition-colors"
-                            style="min-height: 44px; min-width: 44px;"
-                            onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
-                            onmouseout="this.style.backgroundColor=''; this.style.color=''">
-                        <span class="material-icons text-gray-400">radio_button_unchecked</span>
-                    </button>
                 </div>
             `;
         }).join('');

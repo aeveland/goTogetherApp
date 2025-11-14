@@ -450,33 +450,54 @@ router.get('/my-assignments', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     
-    const result = await pool.query(`
-      SELECT 
+    // Get shared items from user's trips (not completed)
+    const sharedItems = await pool.query(`
+      SELECT DISTINCT
         tsi.*,
         ct.title as trip_title,
-        ct.start_date as trip_start_date
+        ct.start_date as trip_start_date,
+        ct.location as trip_location,
+        'shared' as assignment_type,
+        false as my_completion_status
       FROM trip_shopping_items tsi
       JOIN camping_trips ct ON tsi.trip_id = ct.id
       LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
       WHERE tsi.is_purchased = false
-      AND (
-        tsi.assigned_to = 'everyone'
-        OR (tsi.assigned_to = 'anyone' AND (ct.organizer_id = $1 OR tp.user_id = $1))
-        OR tsi.assigned_to = $1::text
-      )
+      AND (tsi.assigned_to = 'shared' OR tsi.assigned_to = 'anyone' OR tsi.assigned_to = 'me')
       AND (ct.organizer_id = $1 OR tp.user_id = $1)
-      ORDER BY 
-        CASE tsi.priority 
-          WHEN 'high' THEN 1 
-          WHEN 'medium' THEN 2 
-          WHEN 'low' THEN 3 
-        END,
-        ct.start_date ASC,
-        tsi.created_at DESC
-      LIMIT 10
+      AND ct.is_active = true
     `, [userId]);
+
+    // Get items specifically assigned to this user
+    const specificItems = await pool.query(`
+      SELECT DISTINCT
+        tsi.*,
+        ct.title as trip_title,
+        ct.start_date as trip_start_date,
+        ct.location as trip_location,
+        'specific' as assignment_type,
+        sia.is_completed as my_completion_status
+      FROM trip_shopping_items tsi
+      JOIN shopping_item_assignments sia ON tsi.id = sia.shopping_item_id
+      JOIN camping_trips ct ON tsi.trip_id = ct.id
+      WHERE sia.user_id = $1
+      AND sia.is_completed = false
+      AND tsi.assigned_to = 'specific'
+      AND ct.is_active = true
+    `, [userId]);
+
+    // Combine and sort
+    const allItems = [...sharedItems.rows, ...specificItems.rows].sort((a, b) => {
+      // Sort by priority first
+      const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
+      const priorityDiff = (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      // Then by trip start date
+      return new Date(a.trip_start_date) - new Date(b.trip_start_date);
+    });
     
-    res.json({ assignments: result.rows });
+    res.json({ assignments: allItems.slice(0, 10) });
   } catch (error) {
     console.error('Error getting shopping assignments:', error);
     res.status(500).json({ error: 'Failed to get shopping assignments' });
