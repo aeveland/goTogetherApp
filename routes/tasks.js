@@ -171,18 +171,19 @@ router.put('/:taskId', [
   param('taskId').isInt().withMessage('Task ID must be a valid integer'),
   body('title').trim().isLength({ min: 1, max: 255 }).withMessage('Title must be between 1 and 255 characters'),
   body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be less than 1000 characters'),
-  body('assignmentType').isIn(['everyone', 'anyone', 'specific']).withMessage('Invalid assignment type'),
-  body('assignedTo').custom((value, { req }) => {
-    const assignmentType = req.body.assignmentType;
-    if (assignmentType === 'specific') {
-      if (!value || !Number.isInteger(parseInt(value))) {
-        throw new Error('Assigned user must be a valid integer when assignment type is specific');
+  body('assignmentType').isIn(['everyone', 'anyone', 'specific', 'shared']).withMessage('Invalid assignment type'),
+  body('assigned_user_ids').optional().isArray().withMessage('Assigned user IDs must be an array'),
+  body('hasDueDate').isBoolean().withMessage('Has due date must be a boolean'),
+  body('dueDate').optional().custom((value, { req }) => {
+    // Only validate if hasDueDate is true and value is provided
+    if (req.body.hasDueDate && value) {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) {
+        throw new Error('Due date must be a valid date');
       }
     }
     return true;
-  }),
-  body('hasDueDate').isBoolean().withMessage('Has due date must be a boolean'),
-  body('dueDate').optional().isISO8601().withMessage('Due date must be a valid date')
+  })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -197,6 +198,7 @@ router.put('/:taskId', [
       description,
       assignmentType,
       assignedTo,
+      assigned_user_ids = [],
       hasDueDate,
       dueDate
     } = req.body;
@@ -215,20 +217,10 @@ router.put('/:taskId', [
 
     const task = taskAccess.rows[0];
 
-    // If specific assignment, verify the assigned user is part of the trip
-    if (assignmentType === 'specific' && assignedTo) {
-      const userAccess = await pool.query(`
-        SELECT u.id 
-        FROM users u
-        LEFT JOIN camping_trips ct ON ct.organizer_id = u.id AND ct.id = $1
-        LEFT JOIN trip_participants tp ON tp.user_id = u.id AND tp.trip_id = $1
-        WHERE u.id = $2 AND (ct.id IS NOT NULL OR tp.user_id IS NOT NULL)
-      `, [task.trip_id, assignedTo]);
-
-      if (userAccess.rows.length === 0) {
-        return res.status(400).json({ error: 'Assigned user is not part of this trip' });
-      }
-    }
+    // Normalize assignment type ('everyone' and 'anyone' become 'shared')
+    const normalizedAssignmentType = (assignmentType === 'everyone' || assignmentType === 'anyone') 
+      ? 'shared' 
+      : assignmentType;
 
     // Update the task
     const result = await pool.query(`
@@ -246,12 +238,36 @@ router.put('/:taskId', [
     `, [
       title,
       description || null,
-      assignmentType === 'specific' ? assignedTo : null,
-      assignmentType,
+      normalizedAssignmentType === 'specific' ? assignedTo : null,
+      normalizedAssignmentType,
       hasDueDate,
       hasDueDate && dueDate ? dueDate : null,
       taskId
     ]);
+
+    // Handle specific user assignments
+    if (normalizedAssignmentType === 'specific') {
+      // Delete old assignments
+      await pool.query(`
+        DELETE FROM task_assignments WHERE task_id = $1
+      `, [taskId]);
+
+      // Create new assignments
+      if (assigned_user_ids && assigned_user_ids.length > 0) {
+        for (const assignedUserId of assigned_user_ids) {
+          await pool.query(`
+            INSERT INTO task_assignments (task_id, user_id)
+            VALUES ($1, $2)
+            ON CONFLICT (task_id, user_id) DO NOTHING
+          `, [taskId, assignedUserId]);
+        }
+      }
+    } else {
+      // If changing from specific to shared, delete all assignments
+      await pool.query(`
+        DELETE FROM task_assignments WHERE task_id = $1
+      `, [taskId]);
+    }
 
     res.json({ 
       message: 'Task updated successfully',
