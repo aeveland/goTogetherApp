@@ -276,7 +276,12 @@ router.put('/:taskId', [
 
   } catch (error) {
     console.error('Error updating task:', error);
-    res.status(500).json({ error: 'Failed to update task' });
+    console.error('Error details:', error.message, error.code);
+    res.status(500).json({ 
+      error: 'Failed to update task',
+      details: error.message,
+      code: error.code
+    });
   }
 });
 
