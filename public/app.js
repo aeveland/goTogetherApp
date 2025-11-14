@@ -601,8 +601,18 @@ class CampingApp {
                             ${item.description ? `<p class="ios-footnote text-gray-600 truncate">${item.description}</p>` : ''}
                             <div class="flex items-center gap-4 mt-1 flex-wrap">
                                 ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
-                                ${item.assigned_to !== 'anyone' ? `<span class="ios-caption" style="color: #00BFFF; font-weight: 600; background: rgba(0, 191, 255, 0.15); padding: 2px 6px; border-radius: 4px;">${this.getAssignmentText(item.assigned_to)}</span>` : ''}
-                                ${isCompleted ? `<span class="ios-caption text-green-600">✓ Purchased by ${item.purchaser_first_name || 'someone'}</span>` : ''}
+                                ${item.assigned_to === 'specific' && item.assignments && item.assignments.length > 0 ? `
+                                    <div class="flex items-center gap-1 flex-wrap">
+                                        ${item.assignments.map(a => `
+                                            <span class="ios-caption flex items-center gap-1" style="color: ${a.is_completed ? 'var(--ios-green)' : 'var(--text-secondary)'}; background: ${a.is_completed ? 'rgba(52, 199, 89, 0.15)' : 'var(--ios-gray-5)'}; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+                                                ${a.is_completed ? '✓' : '○'} ${a.first_name}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                ` : item.assigned_to === 'shared' ? `
+                                    <span class="ios-caption" style="color: #00BFFF; font-weight: 600; background: rgba(0, 191, 255, 0.15); padding: 2px 6px; border-radius: 4px;">Shared</span>
+                                ` : ''}
+                                ${isCompleted && item.assigned_to !== 'specific' ? `<span class="ios-caption text-green-600">✓ Purchased by ${item.purchaser_first_name || 'someone'}</span>` : ''}
                                 ${item.amazon_link ? `
                                     <a href="${item.amazon_link}${item.amazon_link.includes('?') ? '&' : '?'}tag=gotogether-20" target="_blank" 
                                        class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
@@ -1395,6 +1405,17 @@ class CampingApp {
         return '';
     }
 
+    toggleParticipantSelect() {
+        const container = document.getElementById('participantSelectContainer');
+        const specificRadio = document.querySelector('input[name="assignmentType"][value="specific"]');
+        
+        if (specificRadio && specificRadio.checked) {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
     async toggleShoppingItemPurchased(itemId) {
         try {
             const response = await fetch(`/api/shopping/${itemId}/purchase`, {
@@ -1954,6 +1975,7 @@ class CampingApp {
             let categories = [];
             let dietaryRestrictions = [];
             let trip = null;
+            let participants = [];
             
             if (categoriesResponse.ok) {
                 const data = await categoriesResponse.json();
@@ -1966,7 +1988,9 @@ class CampingApp {
             }
             
             if (tripResponse.ok) {
-                trip = await tripResponse.json();
+                const tripData = await tripResponse.json();
+                trip = tripData.trip || tripData;
+                participants = tripData.participants || [];
             }
 
             // Create dietary restrictions info for modal
@@ -2024,31 +2048,44 @@ class CampingApp {
                     </div>
                     
                     <div class="form-group mb-8">
-                        <label class="block text-sm font-medium mb-4" style="color: var(--text-primary)">Who should buy this item?</label>
+                        <label class="block text-sm font-medium mb-4" style="color: var(--text-primary)">Who should handle this?</label>
                         <div class="space-y-4">
                             <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                  style="background: var(--bg-secondary); border-color: var(--border-primary);"
-                                 onclick="this.querySelector('input').click()">
-                                <input type="radio" name="assignmentType" value="me" ${(!isEdit || editItem.assigned_to === 'me') ? 'checked' : ''}
+                                 onclick="this.querySelector('input').click(); app.toggleParticipantSelect();">
+                                <input type="radio" name="assignmentType" value="shared" ${(!isEdit || editItem.assigned_to === 'shared' || editItem.assigned_to === 'anyone' || editItem.assigned_to === 'me') ? 'checked' : ''}
                                        class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                        style="accent-color: var(--ios-blue);">
                                 <div style="width: 16px;"></div>
                                 <div class="flex-1">
-                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">For me</div>
-                                    <div class="text-sm" style="color: var(--text-secondary);">I'll buy this item</div>
+                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">Shared</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">Anyone can handle this (one checkbox for the group)</div>
                                 </div>
                             </div>
                             
                             <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                  style="background: var(--bg-secondary); border-color: var(--border-primary);"
-                                 onclick="this.querySelector('input').click()">
-                                <input type="radio" name="assignmentType" value="everyone" ${(isEdit && editItem.assigned_to === 'everyone') ? 'checked' : ''}
+                                 onclick="this.querySelector('input').click(); app.toggleParticipantSelect();">
+                                <input type="radio" name="assignmentType" value="specific" ${(isEdit && editItem.assigned_to === 'specific') ? 'checked' : ''}
                                        class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                        style="accent-color: var(--ios-blue);">
                                 <div style="width: 16px;"></div>
                                 <div class="flex-1">
-                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">For everyone</div>
-                                    <div class="text-sm" style="color: var(--text-secondary);">Everyone should buy this item</div>
+                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">Specific People</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">Assign to one or more people (each tracks their own)</div>
+                                </div>
+                            </div>
+                            
+                            <div id="participantSelectContainer" style="display: ${(isEdit && editItem.assigned_to === 'specific') ? 'block' : 'none'}; padding: 16px; background: var(--ios-gray-6); border-radius: 8px;">
+                                <label class="block text-sm font-medium mb-2" style="color: var(--text-primary)">Select People:</label>
+                                <div class="space-y-2">
+                                    ${participants.map(p => `
+                                        <label class="flex items-center px-3 py-2 rounded hover:bg-gray-50" style="cursor: pointer;">
+                                            <input type="checkbox" name="assignedUser" value="${p.user_id}" 
+                                                   class="h-4 w-4 text-blue-600" style="accent-color: var(--ios-blue);">
+                                            <span class="ml-2 text-sm">${p.first_name} ${p.last_name}</span>
+                                        </label>
+                                    `).join('')}
                                 </div>
                             </div>
                         </div>
@@ -2170,6 +2207,18 @@ class CampingApp {
         const assignmentType = formData.get('assignmentType');
         const amazonUrl = formData.get('amazonUrl')?.trim();
         
+        // Get assigned user IDs if specific assignment type
+        const assigned_user_ids = [];
+        if (assignmentType === 'specific') {
+            const checkboxes = document.querySelectorAll('input[name="assignedUser"]:checked');
+            checkboxes.forEach(cb => assigned_user_ids.push(parseInt(cb.value)));
+            
+            if (assigned_user_ids.length === 0) {
+                this.showMessage('Please select at least one person for this assignment', 'error');
+                return;
+            }
+        }
+        
         const shoppingData = {
             item_name: formData.get('itemName'),
             description: formData.get('description'),
@@ -2177,7 +2226,8 @@ class CampingApp {
             quantity: parseInt(formData.get('quantity')) || 1,
             estimated_cost: parseFloat(formData.get('estimatedCost')) || null,
             priority: formData.get('priority'),
-            assigned_to: assignmentType === 'me' ? 'me' : assignmentType,
+            assigned_to: assignmentType,
+            assigned_user_ids: assigned_user_ids,
             notes: formData.get('notes'),
             amazon_link: amazonUrl || null
         };
