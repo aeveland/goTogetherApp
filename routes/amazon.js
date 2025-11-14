@@ -44,18 +44,18 @@ router.post('/suggest', authenticateToken, [
     const { shoppingItemId, amazonUrl, productTitle } = req.body;
     const userId = req.user.id;
 
-    // Verify user has access to this shopping list
+    // Verify user has access to this shopping item
     const accessCheck = await pool.query(`
-      SELECT sl.trip_id
-      FROM shopping_list sl
-      JOIN camping_trips t ON sl.trip_id = t.id
+      SELECT tsi.trip_id
+      FROM trip_shopping_items tsi
+      JOIN camping_trips t ON tsi.trip_id = t.id
       LEFT JOIN trip_participants tp ON t.id = tp.trip_id AND tp.user_id = $1
-      WHERE sl.id = $2
+      WHERE tsi.id = $2
       AND (t.organizer_id = $1 OR tp.user_id IS NOT NULL)
     `, [userId, shoppingItemId]);
 
     if (accessCheck.rows.length === 0) {
-      return res.status(403).json({ error: 'You do not have access to this shopping list' });
+      return res.status(403).json({ error: 'You do not have access to this shopping item' });
     }
 
     // Parse and clean Amazon URL
@@ -127,8 +127,8 @@ router.delete('/suggestion/:suggestionId', authenticateToken, async (req, res) =
     const authCheck = await pool.query(`
       SELECT s.user_id, t.organizer_id
       FROM amazon_suggestions s
-      JOIN shopping_list sl ON s.shopping_item_id = sl.id
-      JOIN camping_trips t ON sl.trip_id = t.id
+      JOIN trip_shopping_items tsi ON s.shopping_item_id = tsi.id
+      JOIN camping_trips t ON tsi.trip_id = t.id
       WHERE s.id = $1
     `, [suggestionId]);
 

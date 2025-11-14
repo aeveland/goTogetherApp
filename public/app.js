@@ -1976,6 +1976,13 @@ class CampingApp {
                         </div>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="modalItemAmazonUrl">Amazon Product Link (Optional)</label>
+                        <input type="url" id="modalItemAmazonUrl" name="amazonUrl" 
+                               placeholder="https://www.amazon.com/dp/..." value="${isEdit ? editItem.amazon_url || '' : ''}">
+                        <small class="text-gray-500">Paste an Amazon product link to help others find the right item</small>
+                    </div>
+                    
                     <div class="form-group mb-8">
                         <label class="block text-sm font-medium mb-4" style="color: var(--text-primary)">Who should buy this item?</label>
                         <div class="space-y-4">
@@ -2095,6 +2102,7 @@ class CampingApp {
         
         const formData = new FormData(e.target);
         const assignmentType = formData.get('assignmentType');
+        const amazonUrl = formData.get('amazonUrl')?.trim();
         
         const shoppingData = {
             item_name: formData.get('itemName'),
@@ -2123,6 +2131,28 @@ class CampingApp {
             const data = await response.json();
 
             if (response.ok) {
+                // If Amazon URL provided, add it as a product suggestion
+                const createdItemId = isEdit ? itemId : data.item?.id;
+                if (amazonUrl && amazonUrl.includes('amazon.com') && createdItemId) {
+                    try {
+                        await fetch('/api/amazon/suggest', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                                shoppingItemId: createdItemId,
+                                amazonUrl: amazonUrl,
+                                productTitle: shoppingData.item_name
+                            })
+                        });
+                    } catch (amazonError) {
+                        console.error('Error adding Amazon suggestion:', amazonError);
+                        // Don't fail the whole operation if Amazon suggestion fails
+                    }
+                }
+                
                 this.showMessage(`Shopping item ${isEdit ? 'updated' : 'added'} successfully!`, 'success');
                 this.closeModal();
                 this.loadTripShopping(tripId);
