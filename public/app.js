@@ -1860,15 +1860,48 @@ class CampingApp {
                                   placeholder="Describe what needs to be done"></textarea>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="modalTaskAssignment">Assign To *</label>
-                        <select id="modalTaskAssignment" name="assignedTo" required>
-                            <option value="everyone">Everyone</option>
-                            <option value="anyone" selected>Anyone</option>
-                            ${participants.map(p => `
-                                <option value="${p.user_id}">${p.first_name} ${p.last_name}</option>
-                            `).join('')}
-                        </select>
+                    <div class="form-group mb-8">
+                        <label class="block text-sm font-medium mb-4" style="color: var(--text-primary)">Who should handle this?</label>
+                        <div class="space-y-4">
+                            <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                                 style="background: var(--bg-secondary); border-color: var(--border-primary);"
+                                 onclick="this.querySelector('input').click(); app.toggleTaskParticipantSelect();">
+                                <input type="radio" name="taskAssignmentType" value="shared" checked
+                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
+                                       style="accent-color: var(--ios-blue);">
+                                <div style="width: 16px;"></div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">Shared</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">Anyone can handle this (one checkbox for the group)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                                 style="background: var(--bg-secondary); border-color: var(--border-primary);"
+                                 onclick="this.querySelector('input').click(); app.toggleTaskParticipantSelect();">
+                                <input type="radio" name="taskAssignmentType" value="specific"
+                                       class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
+                                       style="accent-color: var(--ios-blue);">
+                                <div style="width: 16px;"></div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">Specific People</div>
+                                    <div class="text-sm" style="color: var(--text-secondary);">Assign to one or more people (each tracks their own)</div>
+                                </div>
+                            </div>
+                            
+                            <div id="taskParticipantSelectContainer" style="display: none; padding: 16px; background: var(--ios-gray-6); border-radius: 8px;">
+                                <label class="block text-sm font-medium mb-2" style="color: var(--text-primary)">Select People:</label>
+                                <div class="space-y-2">
+                                    ${participants.map(p => `
+                                        <label class="flex items-center px-3 py-2 rounded hover:bg-gray-50" style="cursor: pointer;">
+                                            <input type="checkbox" name="taskAssignedUser" value="${p.user_id}" 
+                                                   class="h-4 w-4 text-blue-600" style="accent-color: var(--ios-blue);">
+                                            <span class="ml-2 text-sm">${p.first_name} ${p.last_name}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -1930,28 +1963,42 @@ class CampingApp {
         }
     }
 
+    toggleTaskParticipantSelect() {
+        const container = document.getElementById('taskParticipantSelectContainer');
+        const specificRadio = document.querySelector('input[name="taskAssignmentType"][value="specific"]');
+        
+        if (specificRadio && specificRadio.checked) {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
     async handleModalAddTask(e, tripId) {
         e.preventDefault();
         
         const formData = new FormData(e.target);
         const hasDueDate = document.getElementById('modalHasDueDate').checked;
+        const assignmentType = document.querySelector('input[name="taskAssignmentType"]:checked').value;
         
-        const assignedToValue = formData.get('assignedTo');
-        let assignmentType, assignedTo;
-        
-        if (assignedToValue === 'everyone' || assignedToValue === 'anyone') {
-            assignmentType = assignedToValue;
-            assignedTo = null;
-        } else {
-            assignmentType = 'specific';
-            assignedTo = assignedToValue;
+        // Get assigned user IDs if specific assignment type
+        const assigned_user_ids = [];
+        if (assignmentType === 'specific') {
+            const checkboxes = document.querySelectorAll('input[name="taskAssignedUser"]:checked');
+            checkboxes.forEach(cb => assigned_user_ids.push(parseInt(cb.value)));
+            
+            if (assigned_user_ids.length === 0) {
+                this.showMessage('Please select at least one person for this assignment', 'error');
+                return;
+            }
         }
         
         const taskData = {
             title: formData.get('title'),
             description: formData.get('description'),
             assignmentType: assignmentType,
-            assignedTo: assignedTo,
+            assigned_user_ids: assigned_user_ids,
+            assignedTo: null,
             hasDueDate: hasDueDate
         };
         
