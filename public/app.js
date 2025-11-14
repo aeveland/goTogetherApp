@@ -585,26 +585,14 @@ class CampingApp {
                 html += `
                     <div class="flex items-center justify-between p-3 rounded-lg ${isCompleted ? 'opacity-60' : ''}" 
                          style="background: var(--ios-gray-6); border-left: 3px solid ${priorityColor};">
-                        ${item.amazon_link ? `
-                            <div class="flex-shrink-0 mr-3">
-                                <img src="https://images-na.ssl-images-amazon.com/images/P/${this.extractASIN(item.amazon_link)}.jpg" 
-                                     alt="${item.item_name}"
-                                     class="w-16 h-16 object-cover rounded"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                     style="border: 1px solid rgba(255,255,255,0.1);">
-                                <div class="w-16 h-16 rounded flex items-center justify-center" 
-                                     style="background: var(--ios-gray-5); display: none;">
-                                    <span class="material-icons text-gray-400" style="font-size: 32px;">shopping_bag</span>
-                                </div>
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-16 h-16 rounded flex items-center justify-center" 
+                                 style="background: ${item.amazon_link ? '#FF9900' : 'var(--ios-gray-5)'}; opacity: ${item.amazon_link ? '0.2' : '1'};">
+                                <span class="material-icons ${item.amazon_link ? 'text-white' : 'text-gray-400'}" style="font-size: 32px;">
+                                    ${item.amazon_link ? 'shopping_cart' : 'shopping_bag'}
+                                </span>
                             </div>
-                        ` : `
-                            <div class="flex-shrink-0 mr-3">
-                                <div class="w-16 h-16 rounded flex items-center justify-center" 
-                                     style="background: var(--ios-gray-5);">
-                                    <span class="material-icons text-gray-400" style="font-size: 32px;">shopping_bag</span>
-                                </div>
-                            </div>
-                        `}
+                        </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
                                 <h5 class="ios-callout font-medium ${isCompleted ? 'line-through' : ''}">${item.item_name}</h5>
