@@ -1997,6 +1997,17 @@ class CampingApp {
         }
     }
 
+    toggleEditTaskParticipantSelect() {
+        const container = document.getElementById('editTaskParticipantSelectContainer');
+        const specificRadio = document.querySelector('input[name="assignmentType"][value="specific"]');
+        
+        if (specificRadio && specificRadio.checked) {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
     async handleModalAddTask(e, tripId) {
         e.preventDefault();
         
@@ -5292,31 +5303,48 @@ class CampingApp {
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-sm font-medium mb-3" style="color: var(--text-primary)">Who should do this task? *</label>
-                            <div class="space-y-2">
-                                <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                            <label class="block text-sm font-medium mb-4" style="color: var(--text-primary)">Who should handle this? *</label>
+                            <div class="space-y-4">
+                                <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                      style="background: var(--bg-secondary); border-color: var(--border-primary);"
-                                     onclick="this.querySelector('input').click()">
-                                    <input type="radio" name="assignmentType" value="me" ${(!isEdit || task.assignment_type === 'me') ? 'checked' : ''}
+                                     onclick="this.querySelector('input').click(); app.toggleEditTaskParticipantSelect();">
+                                    <input type="radio" name="assignmentType" value="shared" ${(!isEdit || task.assignment_type === 'shared' || task.assignment_type === 'anyone' || task.assignment_type === 'me') ? 'checked' : ''}
                                            class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                            style="accent-color: var(--ios-blue);">
                                     <div style="width: 16px;"></div>
-                                    <div>
-                                        <div class="font-medium" style="color: var(--text-primary);">For me</div>
-                                        <div class="text-sm" style="color: var(--text-secondary);">I'll take care of this task</div>
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">Shared</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">Anyone can handle this (one checkbox for the group)</div>
                                     </div>
                                 </div>
                                 
-                                <div class="flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
+                                <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                      style="background: var(--bg-secondary); border-color: var(--border-primary);"
-                                     onclick="this.querySelector('input').click()">
-                                    <input type="radio" name="assignmentType" value="everyone" ${(isEdit && task.assignment_type === 'everyone') ? 'checked' : ''}
+                                     onclick="this.querySelector('input').click(); app.toggleEditTaskParticipantSelect();">
+                                    <input type="radio" name="assignmentType" value="specific" ${(isEdit && task.assignment_type === 'specific') ? 'checked' : ''}
                                            class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                            style="accent-color: var(--ios-blue);">
                                     <div style="width: 16px;"></div>
-                                    <div>
-                                        <div class="font-medium" style="color: var(--text-primary);">For everyone</div>
-                                        <div class="text-sm" style="color: var(--text-secondary);">All trip participants should do this</div>
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-base mb-1" style="color: var(--text-primary);">Specific People</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">Assign to one or more people (each tracks their own)</div>
+                                    </div>
+                                </div>
+                                
+                                <div id="editTaskParticipantSelectContainer" style="display: ${(isEdit && task.assignment_type === 'specific') ? 'block' : 'none'}; padding: 16px; background: var(--ios-gray-6); border-radius: 8px;">
+                                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary)">Select People:</label>
+                                    <div class="space-y-2">
+                                        ${(trip.participants || []).map(p => {
+                                            const isAssigned = isEdit && task.assignments && task.assignments.some(a => a.user_id === p.user_id);
+                                            return `
+                                                <label class="flex items-center px-3 py-2 rounded hover:bg-gray-50" style="cursor: pointer;">
+                                                    <input type="checkbox" name="taskAssignedUser" value="${p.user_id}" 
+                                                           ${isAssigned ? 'checked' : ''}
+                                                           class="h-4 w-4 text-blue-600" style="accent-color: var(--ios-blue);">
+                                                    <span class="ml-2 text-sm">${p.first_name} ${p.last_name}</span>
+                                                </label>
+                                            `;
+                                        }).join('')}
                                     </div>
                                 </div>
                             </div>
@@ -5412,14 +5440,16 @@ class CampingApp {
         
         // Prepare task data
         const assignmentType = formData.get('assignmentType');
-        let assignedToValue = formData.get('assignedTo');
         
-        // Fallback: if FormData doesn't capture the dropdown value, get it directly
-        if (assignmentType === 'specific' && (!assignedToValue || assignedToValue === '')) {
-            const assignedToSelect = document.getElementById('assignedTo');
-            if (assignedToSelect) {
-                assignedToValue = assignedToSelect.value;
-                console.log('Fallback: Got assignedTo value directly from dropdown:', assignedToValue);
+        // Get assigned user IDs if specific assignment type
+        const assigned_user_ids = [];
+        if (assignmentType === 'specific') {
+            const checkboxes = document.querySelectorAll('input[name="taskAssignedUser"]:checked');
+            checkboxes.forEach(cb => assigned_user_ids.push(parseInt(cb.value)));
+            
+            if (assigned_user_ids.length === 0) {
+                this.showMessage('Please select at least one person for this assignment', 'error');
+                return;
             }
         }
         
@@ -5427,18 +5457,11 @@ class CampingApp {
             title: formData.get('title'),
             description: formData.get('description'),
             assignmentType: assignmentType,
+            assigned_user_ids: assigned_user_ids,
             assignedTo: null,
             hasDueDate: document.getElementById('hasDueDate').checked,
             dueDate: null
         };
-
-        // Handle assignedTo based on assignment type
-        if (assignmentType === 'me') {
-            // For "me" assignments, we'll set it to the current user ID (handled by backend)
-            taskData.assignedTo = 'me';
-        } else if (assignmentType === 'everyone') {
-            taskData.assignedTo = null; // Everyone assignment
-        }
 
         // Handle due date/time
         if (taskData.hasDueDate) {
