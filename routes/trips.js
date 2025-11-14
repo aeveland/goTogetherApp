@@ -89,7 +89,7 @@ router.get('/:id', [
       return res.status(404).json({ error: 'Trip not found' });
     }
 
-    // Get participants including organizer
+    // Get participants including organizer (but avoid duplicates)
     const participantsResult = await pool.query(`
       SELECT 
         u.id as user_id,
@@ -100,7 +100,9 @@ router.get('/:id', [
         tp.status
       FROM trip_participants tp
       JOIN users u ON tp.user_id = u.id
-      WHERE tp.trip_id = $1 AND tp.status = 'confirmed'
+      WHERE tp.trip_id = $1 
+        AND tp.status = 'confirmed'
+        AND tp.user_id != (SELECT organizer_id FROM camping_trips WHERE id = $1)
       UNION
       SELECT 
         u.id as user_id,
