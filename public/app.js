@@ -1990,7 +1990,7 @@ class CampingApp {
             if (tripResponse.ok) {
                 const tripData = await tripResponse.json();
                 trip = tripData.trip || tripData;
-                participants = tripData.participants || [];
+                participants = (tripData.trip && tripData.trip.participants) || tripData.participants || [];
             }
 
             // Create dietary restrictions info for modal

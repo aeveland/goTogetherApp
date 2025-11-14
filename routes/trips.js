@@ -89,17 +89,30 @@ router.get('/:id', [
       return res.status(404).json({ error: 'Trip not found' });
     }
 
-    // Get participants
+    // Get participants including organizer
     const participantsResult = await pool.query(`
       SELECT 
         u.id as user_id,
+        u.first_name,
+        u.last_name,
         u.first_name || ' ' || u.last_name as name,
         tp.joined_at,
         tp.status
       FROM trip_participants tp
       JOIN users u ON tp.user_id = u.id
       WHERE tp.trip_id = $1 AND tp.status = 'confirmed'
-      ORDER BY tp.joined_at ASC
+      UNION
+      SELECT 
+        u.id as user_id,
+        u.first_name,
+        u.last_name,
+        u.first_name || ' ' || u.last_name as name,
+        ct.created_at as joined_at,
+        'confirmed' as status
+      FROM camping_trips ct
+      JOIN users u ON ct.organizer_id = u.id
+      WHERE ct.id = $1
+      ORDER BY joined_at ASC
     `, [tripId]);
 
     const trip = tripResult.rows[0];
