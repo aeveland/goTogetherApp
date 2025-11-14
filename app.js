@@ -22,6 +22,7 @@ const debugRoutes = require('./routes/debug');
 const fixShoppingColumnsRoutes = require('./routes/fix-shopping-columns');
 const shoppingTableCheckRoutes = require('./routes/shopping-table-check');
 const fixAssignmentConstraintRoutes = require('./routes/fix-assignment-constraint');
+const addAmazonColumnRoutes = require('./routes/add-amazon-column');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,6 +67,7 @@ app.use('/api/debug', debugRoutes);
 app.use('/api/fix-shopping', fixShoppingColumnsRoutes);
 app.use('/api/shopping-check', shoppingTableCheckRoutes);
 app.use('/api/fix-constraint', fixAssignmentConstraintRoutes);
+app.use('/api/add-amazon-col', addAmazonColumnRoutes);
 
 // Landing page route
 app.get('/', (req, res) => {

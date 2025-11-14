@@ -551,12 +551,6 @@ class CampingApp {
             return;
         }
 
-        // Debug: Log first item to see if amazon_url is included
-        if (items.length > 0) {
-            console.log('First shopping item data:', items[0]);
-            console.log('Has amazon_url?', 'amazon_url' in items[0], items[0].amazon_url);
-        }
-
         // Group items by category
         const itemsByCategory = items.reduce((acc, item) => {
             const category = item.category || 'General';
@@ -601,8 +595,8 @@ class CampingApp {
                                 ${item.estimated_cost ? `<span class="ios-caption text-gray-500">~$${item.estimated_cost}</span>` : ''}
                                 ${item.assigned_to !== 'anyone' ? `<span class="ios-caption" style="color: #00BFFF; font-weight: 600; background: rgba(0, 191, 255, 0.15); padding: 2px 6px; border-radius: 4px;">${this.getAssignmentText(item.assigned_to)}</span>` : ''}
                                 ${isCompleted ? `<span class="ios-caption text-green-600">✓ Purchased by ${item.purchaser_first_name || 'someone'}</span>` : ''}
-                                ${item.amazon_url ? `
-                                    <a href="${item.amazon_url}" target="_blank" 
+                                ${item.amazon_link ? `
+                                    <a href="${item.amazon_link}${item.amazon_link.includes('?') ? '&' : '?'}tag=gotogether-20" target="_blank" 
                                        class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
                                        style="background: #FF9900; color: white; text-decoration: none;"
                                        onclick="event.stopPropagation()">
@@ -1986,7 +1980,7 @@ class CampingApp {
                     <div class="form-group">
                         <label for="modalItemAmazonUrl">Amazon Product Link (Optional)</label>
                         <input type="url" id="modalItemAmazonUrl" name="amazonUrl" 
-                               placeholder="https://www.amazon.com/dp/..." value="${isEdit ? editItem.amazon_url || '' : ''}">
+                               placeholder="https://www.amazon.com/dp/..." value="${isEdit ? editItem.amazon_link || '' : ''}">
                         <small class="text-gray-500">Paste an Amazon product link to help others find the right item</small>
                     </div>
                     
@@ -2119,7 +2113,8 @@ class CampingApp {
             estimated_cost: parseFloat(formData.get('estimatedCost')) || null,
             priority: formData.get('priority'),
             assigned_to: assignmentType === 'me' ? 'me' : assignmentType,
-            notes: formData.get('notes')
+            notes: formData.get('notes'),
+            amazon_link: amazonUrl || null
         };
 
         try {
@@ -2138,35 +2133,6 @@ class CampingApp {
             const data = await response.json();
 
             if (response.ok) {
-                // If Amazon URL provided, add it as a product suggestion
-                const createdItemId = isEdit ? itemId : data.item?.id;
-                console.log('Shopping item created:', { createdItemId, amazonUrl, hasUrl: !!amazonUrl });
-                
-                if (amazonUrl && amazonUrl.includes('amazon.com') && createdItemId) {
-                    try {
-                        console.log('Adding Amazon suggestion:', { shoppingItemId: createdItemId, amazonUrl });
-                        const amazonResponse = await fetch('/api/amazon/suggest', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            credentials: 'include',
-                            body: JSON.stringify({
-                                shoppingItemId: createdItemId,
-                                amazonUrl: amazonUrl,
-                                productTitle: shoppingData.item_name
-                            })
-                        });
-                        const amazonData = await amazonResponse.json();
-                        console.log('Amazon suggestion response:', amazonData);
-                    } catch (amazonError) {
-                        console.error('Error adding Amazon suggestion:', amazonError);
-                        // Don't fail the whole operation if Amazon suggestion fails
-                    }
-                } else {
-                    console.log('Skipping Amazon suggestion:', { hasUrl: !!amazonUrl, includesAmazon: amazonUrl?.includes('amazon.com'), hasItemId: !!createdItemId });
-                }
-                
                 this.showMessage(`Shopping item ${isEdit ? 'updated' : 'added'} successfully!`, 'success');
                 this.closeModal();
                 this.loadTripShopping(tripId);
