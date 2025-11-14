@@ -77,16 +77,8 @@ router.post('/trip/:tripId', [
   param('tripId').isInt().withMessage('Trip ID must be a valid integer'),
   body('title').trim().isLength({ min: 1, max: 255 }).withMessage('Title must be between 1 and 255 characters'),
   body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be less than 1000 characters'),
-  body('assignmentType').isIn(['everyone', 'anyone', 'specific']).withMessage('Invalid assignment type'),
-  body('assignedTo').custom((value, { req }) => {
-    const assignmentType = req.body.assignmentType;
-    if (assignmentType === 'specific') {
-      if (!value || !Number.isInteger(parseInt(value))) {
-        throw new Error('Assigned user must be a valid integer when assignment type is specific');
-      }
-    }
-    return true;
-  }),
+  body('assignmentType').isIn(['everyone', 'anyone', 'specific', 'shared']).withMessage('Invalid assignment type'),
+  body('assigned_user_ids').optional().isArray().withMessage('Assigned user IDs must be an array'),
   body('hasDueDate').isBoolean().withMessage('Has due date must be a boolean'),
   body('dueDate').optional().isISO8601().withMessage('Due date must be a valid date')
 ], async (req, res) => {

@@ -1867,7 +1867,7 @@ class CampingApp {
 
             const data = await response.json();
             const trip = data.trip;
-            const participants = data.participants || [];
+            const participants = (data.trip && data.trip.participants) || data.participants || [];
 
             const modalContent = `
                 <form id="modalAddTaskForm" class="modal-form">
