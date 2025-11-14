@@ -156,7 +156,12 @@ router.post('/trip/:tripId', [
 
   } catch (error) {
     console.error('Error creating task:', error);
-    res.status(500).json({ error: 'Failed to create task' });
+    console.error('Error details:', error.message, error.code);
+    res.status(500).json({ 
+      error: 'Failed to create task',
+      details: error.message,
+      code: error.code
+    });
   }
 });
 

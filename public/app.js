@@ -2051,11 +2051,14 @@ class CampingApp {
                 this.loadTripTasks(tripId);
                 this.loadDashboardTasks(); // Refresh dashboard
             } else {
+                console.error('Task creation failed:', data);
                 if (data.errors) {
                     const errorMessages = data.errors.map(err => err.msg).join(', ');
                     this.showMessage(errorMessages, 'error');
                 } else {
-                    this.showMessage(data.error || 'Failed to create task', 'error');
+                    const errorMsg = data.error || 'Failed to create task';
+                    const details = data.details ? ` (${data.details})` : '';
+                    this.showMessage(errorMsg + details, 'error');
                 }
             }
         } catch (error) {
