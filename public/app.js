@@ -236,27 +236,50 @@ class CampingApp {
         const tasksToShow = pendingTasks.slice(0, 5);
         
         container.innerHTML = progressHtml + tasksToShow.map(task => {
-            const isOverdue = task.due_date && new Date(task.due_date) < new Date();
-            const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : null;
+            const isOverdue = task.has_due_date && task.due_date && new Date(task.due_date) < new Date();
+            const dueDate = task.has_due_date && task.due_date ? new Date(task.due_date).toLocaleDateString() : null;
+            
+            const assignmentBadge = task.assignment_type_label === 'specific' 
+                ? '<span class="ios-caption px-2 py-1 rounded" style="background: rgba(0, 122, 255, 0.15); color: var(--ios-blue); font-weight: 600;">Assigned to you</span>'
+                : '<span class="ios-caption px-2 py-1 rounded" style="background: rgba(0, 191, 255, 0.15); color: #00BFFF; font-weight: 600;">Shared</span>';
             
             return `
-                <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--ios-gray-6);">
-                    <div class="flex-1 min-w-0">
-                        <h4 class="ios-callout font-medium truncate">${task.title}</h4>
-                        <p class="ios-footnote text-gray-600 truncate">${task.trip_title}</p>
-                        ${dueDate ? `
-                            <p class="ios-caption ${isOverdue ? 'text-red-600' : 'text-gray-500'}">
-                                ${isOverdue ? '⚠️ Overdue: ' : 'Due: '}${dueDate}
-                            </p>
-                        ` : ''}
+                <div class="p-4 rounded-lg mb-3 cursor-pointer transition-all hover:shadow-md" 
+                     style="background: white; border: 1px solid var(--border-primary);"
+                     onclick="app.showTripDetails(${task.trip_id})">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <!-- Task Title -->
+                            <h4 class="ios-callout font-semibold truncate mb-2" style="color: var(--text-primary);">${task.title}</h4>
+                            
+                            <!-- Trip Info -->
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="material-icons text-gray-500" style="font-size: 16px;">terrain</span>
+                                <span class="ios-footnote font-medium" style="color: var(--ios-blue);">${task.trip_title}</span>
+                                ${task.trip_location ? `<span class="ios-caption text-gray-500">• ${task.trip_location}</span>` : ''}
+                            </div>
+                            
+                            <!-- Assignment Badge and Due Date -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                ${assignmentBadge}
+                                ${dueDate ? `
+                                    <span class="ios-caption px-2 py-1 rounded ${isOverdue ? 'text-red-600' : 'text-gray-700'}" 
+                                          style="background: ${isOverdue ? 'rgba(255, 59, 48, 0.1)' : 'var(--ios-gray-6)'}; font-weight: 600;">
+                                        ${isOverdue ? '⚠️ Overdue: ' : '📅 Due: '}${dueDate}
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Check Button -->
+                        <button onclick="event.stopPropagation(); app.toggleTaskCompletion(${task.id}, ${task.trip_id})" 
+                                class="p-2 rounded-full transition-colors flex-shrink-0"
+                                style="min-height: 44px; min-width: 44px; background: var(--ios-gray-6);"
+                                onmouseover="this.style.backgroundColor='var(--bg-hover)'"
+                                onmouseout="this.style.backgroundColor='var(--ios-gray-6)'">
+                            <span class="material-icons" style="color: var(--text-secondary);">radio_button_unchecked</span>
+                        </button>
                     </div>
-                    <button onclick="app.toggleTaskCompletion(${task.id}, ${task.trip_id})" 
-                            class="ml-3 p-2 rounded-full transition-colors"
-                            style="min-height: 44px; min-width: 44px;"
-                            onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-primary)'"
-                            onmouseout="this.style.backgroundColor=''; this.style.color=''">
-                        <span class="material-icons text-gray-400">radio_button_unchecked</span>
-                    </button>
                 </div>
             `;
         }).join('');
