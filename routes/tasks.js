@@ -42,7 +42,29 @@ router.get('/trip/:tripId', authenticateToken, async (req, res) => {
         tt.created_at DESC
     `, [tripId]);
 
-    res.json({ tasks: result.rows });
+    // Get assignments for tasks with specific user assignments
+    const assignments = await pool.query(`
+      SELECT 
+        ta.task_id,
+        ta.user_id,
+        ta.is_completed,
+        ta.completed_at,
+        u.first_name,
+        u.last_name
+      FROM task_assignments ta
+      JOIN users u ON ta.user_id = u.id
+      WHERE ta.task_id = ANY(
+        SELECT id FROM trip_tasks WHERE trip_id = $1
+      )
+    `, [tripId]);
+
+    // Attach assignments to tasks
+    const tasks = result.rows.map(task => ({
+      ...task,
+      assignments: assignments.rows.filter(a => a.task_id === task.id)
+    }));
+
+    res.json({ tasks: tasks });
   } catch (error) {
     console.error('Error fetching tasks:', error);
     res.status(500).json({ error: 'Failed to fetch tasks' });
@@ -81,6 +103,7 @@ router.post('/trip/:tripId', [
       description,
       assignmentType,
       assignedTo,
+      assigned_user_ids = [],
       hasDueDate,
       dueDate
     } = req.body;
@@ -98,20 +121,10 @@ router.post('/trip/:tripId', [
       return res.status(403).json({ error: 'Access denied to this trip' });
     }
 
-    // If specific assignment, verify the assigned user is part of the trip
-    if (assignmentType === 'specific' && assignedTo) {
-      const userAccess = await pool.query(`
-        SELECT u.id 
-        FROM users u
-        LEFT JOIN camping_trips ct ON ct.organizer_id = u.id AND ct.id = $1
-        LEFT JOIN trip_participants tp ON tp.user_id = u.id AND tp.trip_id = $1
-        WHERE u.id = $2 AND (ct.id IS NOT NULL OR tp.user_id IS NOT NULL)
-      `, [tripId, assignedTo]);
-
-      if (userAccess.rows.length === 0) {
-        return res.status(400).json({ error: 'Assigned user is not part of this trip' });
-      }
-    }
+    // Normalize assignment type ('everyone' and 'anyone' become 'shared')
+    const normalizedAssignmentType = (assignmentType === 'everyone' || assignmentType === 'anyone') 
+      ? 'shared' 
+      : assignmentType;
 
     // Create the task
     const result = await pool.query(`
@@ -125,11 +138,24 @@ router.post('/trip/:tripId', [
       title,
       description || null,
       userId,
-      assignmentType === 'specific' ? assignedTo : null,
-      assignmentType,
+      normalizedAssignmentType === 'specific' ? assignedTo : null,
+      normalizedAssignmentType,
       hasDueDate,
       hasDueDate && dueDate ? dueDate : null
     ]);
+
+    const taskId = result.rows[0].id;
+
+    // If specific users are assigned, create individual assignments
+    if (normalizedAssignmentType === 'specific' && assigned_user_ids && assigned_user_ids.length > 0) {
+      for (const assignedUserId of assigned_user_ids) {
+        await pool.query(`
+          INSERT INTO task_assignments (task_id, user_id)
+          VALUES ($1, $2)
+          ON CONFLICT (task_id, user_id) DO NOTHING
+        `, [taskId, assignedUserId]);
+      }
+    }
 
     res.status(201).json({ 
       message: 'Task created successfully',
@@ -320,34 +346,62 @@ router.delete('/:taskId', authenticateToken, async (req, res) => {
   }
 });
 
-// Get tasks created by current user across all their trips
+// Get user's task assignments across all trips
 router.get('/my-tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     
-    const result = await pool.query(`
-      SELECT 
+    // Get shared tasks from user's trips (not completed)
+    const sharedTasks = await pool.query(`
+      SELECT DISTINCT
         tt.*,
         ct.title as trip_title,
-        ct.start_date as trip_start_date
+        ct.start_date as trip_start_date,
+        ct.location as trip_location,
+        'shared' as assignment_type_label,
+        false as my_completion_status
       FROM trip_tasks tt
       JOIN camping_trips ct ON tt.trip_id = ct.id
-      WHERE (
-        -- Tasks from trips where user is organizer
-        ct.organizer_id = $1
-        -- Or tasks from trips where user is participant
-        OR EXISTS (
-          SELECT 1 FROM trip_participants tp 
-          WHERE tp.trip_id = ct.id AND tp.user_id = $1
-        )
-      )
-      ORDER BY 
-        CASE WHEN tt.due_date IS NULL THEN 1 ELSE 0 END,
-        tt.due_date ASC,
-        tt.created_at DESC
+      LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
+      WHERE tt.is_completed = false
+      AND (tt.assignment_type = 'shared' OR tt.assignment_type = 'anyone' OR tt.assignment_type = 'everyone')
+      AND (ct.organizer_id = $1 OR tp.user_id = $1)
+      AND ct.is_active = true
     `, [userId]);
+
+    // Get tasks specifically assigned to this user
+    const specificTasks = await pool.query(`
+      SELECT DISTINCT
+        tt.*,
+        ct.title as trip_title,
+        ct.start_date as trip_start_date,
+        ct.location as trip_location,
+        'specific' as assignment_type_label,
+        ta.is_completed as my_completion_status
+      FROM trip_tasks tt
+      JOIN task_assignments ta ON tt.id = ta.task_id
+      JOIN camping_trips ct ON tt.trip_id = ct.id
+      WHERE ta.user_id = $1
+      AND ta.is_completed = false
+      AND tt.assignment_type = 'specific'
+      AND ct.is_active = true
+    `, [userId]);
+
+    // Combine and sort
+    const allTasks = [...sharedTasks.rows, ...specificTasks.rows].sort((a, b) => {
+      // Sort by due date first (tasks with due dates come first)
+      if (a.has_due_date && !b.has_due_date) return -1;
+      if (!a.has_due_date && b.has_due_date) return 1;
+      if (a.has_due_date && b.has_due_date) {
+        const dateDiff = new Date(a.due_date) - new Date(b.due_date);
+        if (dateDiff !== 0) return dateDiff;
+      }
+      
+      // Then by trip start date
+      return new Date(a.trip_start_date) - new Date(b.trip_start_date);
+    });
     
-    res.json({ tasks: result.rows });
+    res.json({ tasks: allTasks.slice(0, 10) });
   } catch (error) {
     console.error('Error getting user tasks:', error);
     res.status(500).json({ error: 'Failed to get tasks' });

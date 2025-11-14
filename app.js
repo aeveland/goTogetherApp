@@ -24,6 +24,7 @@ const shoppingTableCheckRoutes = require('./routes/shopping-table-check');
 const fixAssignmentConstraintRoutes = require('./routes/fix-assignment-constraint');
 const addAmazonColumnRoutes = require('./routes/add-amazon-column');
 const setupAssignmentsRoutes = require('./routes/setup-assignments');
+const setupTaskAssignmentsRoutes = require('./routes/setup-task-assignments');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -70,6 +71,7 @@ app.use('/api/shopping-check', shoppingTableCheckRoutes);
 app.use('/api/fix-constraint', fixAssignmentConstraintRoutes);
 app.use('/api/add-amazon-col', addAmazonColumnRoutes);
 app.use('/api/setup-assignments', setupAssignmentsRoutes);
+app.use('/api/setup-task-assignments', setupTaskAssignmentsRoutes);
 
 // Landing page route
 app.get('/', (req, res) => {
