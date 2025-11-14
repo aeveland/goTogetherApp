@@ -551,6 +551,12 @@ class CampingApp {
             return;
         }
 
+        // Debug: Log first item to see if amazon_url is included
+        if (items.length > 0) {
+            console.log('First shopping item data:', items[0]);
+            console.log('Has amazon_url?', 'amazon_url' in items[0], items[0].amazon_url);
+        }
+
         // Group items by category
         const itemsByCategory = items.reduce((acc, item) => {
             const category = item.category || 'General';
@@ -2134,9 +2140,12 @@ class CampingApp {
             if (response.ok) {
                 // If Amazon URL provided, add it as a product suggestion
                 const createdItemId = isEdit ? itemId : data.item?.id;
+                console.log('Shopping item created:', { createdItemId, amazonUrl, hasUrl: !!amazonUrl });
+                
                 if (amazonUrl && amazonUrl.includes('amazon.com') && createdItemId) {
                     try {
-                        await fetch('/api/amazon/suggest', {
+                        console.log('Adding Amazon suggestion:', { shoppingItemId: createdItemId, amazonUrl });
+                        const amazonResponse = await fetch('/api/amazon/suggest', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -2148,10 +2157,14 @@ class CampingApp {
                                 productTitle: shoppingData.item_name
                             })
                         });
+                        const amazonData = await amazonResponse.json();
+                        console.log('Amazon suggestion response:', amazonData);
                     } catch (amazonError) {
                         console.error('Error adding Amazon suggestion:', amazonError);
                         // Don't fail the whole operation if Amazon suggestion fails
                     }
+                } else {
+                    console.log('Skipping Amazon suggestion:', { hasUrl: !!amazonUrl, includesAmazon: amazonUrl?.includes('amazon.com'), hasItemId: !!createdItemId });
                 }
                 
                 this.showMessage(`Shopping item ${isEdit ? 'updated' : 'added'} successfully!`, 'success');
