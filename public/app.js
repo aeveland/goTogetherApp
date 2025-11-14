@@ -1576,14 +1576,12 @@ class CampingApp {
                 
                 <div class="form-group">
                     <label for="modalTripCode">Trip Code</label>
-                    <div class="flex gap-3">
-                        <input type="text" id="modalTripCode" placeholder="Enter trip code (e.g., CAMP2024)"
-                               class="flex-1 form-input">
-                        <button id="modalJoinByCodeBtn" class="ios-button-primary">
-                            Join
-                        </button>
-                    </div>
-                    <small class="text-gray-500">Ask the trip organizer for the trip code</small>
+                    <input type="text" id="modalTripCode" placeholder="Enter trip code (e.g., CAMP2024)"
+                           class="w-full form-input mb-3">
+                    <button id="modalJoinByCodeBtn" class="ios-button-primary w-full">
+                        Join
+                    </button>
+                    <small class="text-gray-500 block mt-2">Ask the trip organizer for the trip code</small>
                 </div>
                 
                 <div class="text-center">
