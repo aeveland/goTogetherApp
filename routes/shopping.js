@@ -129,11 +129,18 @@ router.post('/trip/:tripId', authenticateToken, [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      console.error('Validation errors:', errors.array());
+      return res.status(400).json({ 
+        error: 'Validation failed',
+        errors: errors.array(),
+        details: errors.array().map(e => e.msg).join(', ')
+      });
     }
 
     const tripId = req.params.tripId;
     const userId = req.user.id;
+
+    console.log('Creating shopping item:', { tripId, userId, body: req.body });
 
     // Verify user has access to this trip
     const tripAccess = await pool.query(`
@@ -141,6 +148,8 @@ router.post('/trip/:tripId', authenticateToken, [
       LEFT JOIN trip_participants tp ON ct.id = tp.trip_id
       WHERE ct.id = $1 AND (ct.organizer_id = $2 OR tp.user_id = $2)
     `, [tripId, userId]);
+
+    console.log('Trip access check:', { tripId, userId, hasAccess: tripAccess.rows.length > 0 });
 
     if (tripAccess.rows.length === 0) {
       return res.status(403).json({ error: 'Access denied to this trip' });
@@ -157,6 +166,11 @@ router.post('/trip/:tripId', authenticateToken, [
       notes
     } = req.body;
 
+    console.log('Inserting shopping item with data:', {
+      tripId, item_name, description, category, quantity,
+      estimated_cost, assigned_to, priority, notes, userId
+    });
+
     const result = await pool.query(`
       INSERT INTO trip_shopping_items (
         trip_id, item_name, description, category, quantity, 
@@ -168,13 +182,25 @@ router.post('/trip/:tripId', authenticateToken, [
       estimated_cost, assigned_to, priority, notes, userId
     ]);
 
+    console.log('Shopping item created successfully:', result.rows[0]);
+
     res.status(201).json({
       message: 'Shopping item added successfully',
       item: result.rows[0]
     });
   } catch (error) {
     console.error('Error creating shopping item:', error);
-    res.status(500).json({ error: 'Failed to create shopping item' });
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      detail: error.detail,
+      constraint: error.constraint
+    });
+    res.status(500).json({ 
+      error: 'Failed to create shopping item',
+      message: error.message,
+      detail: error.detail || 'Database error'
+    });
   }
 });
 

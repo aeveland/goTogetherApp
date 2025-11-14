@@ -2158,9 +2158,12 @@ class CampingApp {
                 this.loadTripShopping(tripId);
                 this.loadDashboardShopping(); // Refresh dashboard
             } else {
+                console.error('Shopping item error response:', data);
                 if (data.errors) {
                     const errorMessages = data.errors.map(err => err.msg).join(', ');
                     this.showMessage(errorMessages, 'error');
+                } else if (data.details) {
+                    this.showMessage(data.details, 'error');
                 } else {
                     this.showMessage(data.error || `Failed to ${isEdit ? 'update' : 'add'} shopping item`, 'error');
                 }
