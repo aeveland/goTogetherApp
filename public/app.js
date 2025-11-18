@@ -476,15 +476,15 @@ class CampingApp {
                      style="background: white; border: 1px solid var(--border-primary);"
                      onclick="app.showTripDetails(${item.trip_id})">
                     <div class="flex items-start gap-3">
-                        <!-- Amazon Thumbnail -->
-                        ${item.amazon_link ? `
-                            <div class="flex-shrink-0">
+                        <!-- Amazon Thumbnail (only if valid ASIN) -->
+                        ${item.amazon_link && this.extractASIN(item.amazon_link).length > 0 ? `
+                            <div class="flex-shrink-0" id="thumb-${item.id}">
                                 <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center" 
                                      style="background: white; border: 1px solid #e0e0e0;">
                                     <img src="https://m.media-amazon.com/images/I/${this.extractASIN(item.amazon_link)}.jpg" 
                                          alt="${item.item_name}"
                                          style="width: 100%; height: 100%; object-fit: contain;"
-                                         onerror="this.src='https://images-na.ssl-images-amazon.com/images/P/${this.extractASIN(item.amazon_link)}.jpg'; this.onerror=function(){this.parentElement.innerHTML='<span class=\\'material-icons\\' style=\\'font-size: 32px; color: #FF9900;\\'>shopping_cart</span>';}">
+                                         onerror="document.getElementById('thumb-${item.id}').style.display='none'">
                                 </div>
                             </div>
                         ` : ''}
