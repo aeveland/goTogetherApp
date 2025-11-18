@@ -631,12 +631,20 @@ class CampingApp {
                     <div class="flex items-center justify-between p-3 rounded-lg ${isCompleted ? 'opacity-60' : ''}" 
                          style="background: var(--ios-gray-6); border-left: 3px solid ${priorityColor};">
                         <div class="flex-shrink-0 mr-3">
-                            <div class="w-16 h-16 rounded flex items-center justify-center" 
-                                 style="background: ${item.amazon_link ? '#FF9900' : 'var(--ios-gray-5)'}; opacity: ${item.amazon_link ? '0.2' : '1'};">
-                                <span class="material-icons ${item.amazon_link ? 'text-white' : 'text-gray-400'}" style="font-size: 32px;">
-                                    ${item.amazon_link ? 'shopping_cart' : 'shopping_bag'}
-                                </span>
-                            </div>
+                            ${item.amazon_link ? `
+                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center" 
+                                     style="background: white; border: 1px solid #e0e0e0;">
+                                    <img src="https://images-na.ssl-images-amazon.com/images/P/${this.extractASIN(item.amazon_link)}.jpg" 
+                                         alt="${item.item_name}"
+                                         style="width: 100%; height: 100%; object-fit: contain;"
+                                         onerror="this.parentElement.innerHTML='<span class=\\'material-icons\\' style=\\'font-size: 32px; color: #FF9900;\\'>shopping_cart</span>'">
+                                </div>
+                            ` : `
+                                <div class="w-16 h-16 rounded flex items-center justify-center" 
+                                     style="background: var(--ios-gray-5);">
+                                    <span class="material-icons text-gray-400" style="font-size: 32px;">shopping_bag</span>
+                                </div>
+                            `}
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
