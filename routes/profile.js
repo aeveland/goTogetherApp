@@ -50,7 +50,7 @@ router.put('/', authenticateToken, [
   body('firstName').trim().isLength({ min: 1, max: 100 }).withMessage('First name required (1-100 chars)'),
   body('lastName').trim().isLength({ min: 1, max: 100 }).withMessage('Last name required (1-100 chars)'),
   body('bio').optional().trim().isLength({ max: 1000 }).withMessage('Bio too long (max 1000 chars)'),
-  body('camperType').optional({ nullable: true, checkFalsy: true }).isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel']).withMessage('Invalid camper type'),
+  body('camperType').optional({ nullable: true, checkFalsy: true }).isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel', 'cabin', 'glamping', 'backpacking']).withMessage('Invalid camper type'),
   body('groupSize').optional().isInt({ min: 1, max: 20 }).withMessage('Group size must be 1-20'),
   body('dietaryRestrictions').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 50 }).withMessage('Dietary restrictions too long'),
   body('phone').optional().trim().isLength({ max: 20 }).withMessage('Phone number too long'),

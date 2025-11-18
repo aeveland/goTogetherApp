@@ -15,7 +15,7 @@ router.post('/register', [
   body('lastName').trim().isLength({ min: 1 }).withMessage('Last name is required'),
   // Optional profile fields
   body('bio').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 1000 }).withMessage('Bio too long'),
-  body('camperType').optional({ nullable: true, checkFalsy: true }).isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel']).withMessage('Invalid camper type'),
+  body('camperType').optional({ nullable: true, checkFalsy: true }).isIn(['tent', 'trailer', 'rv', 'van', 'fifth_wheel', 'cabin', 'glamping', 'backpacking']).withMessage('Invalid camper type'),
   body('groupSize').optional().isInt({ min: 1, max: 20 }).withMessage('Group size must be 1-20'),
   body('dietaryRestrictions').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 50 }).withMessage('Dietary restrictions too long'),
   body('phone').optional({ nullable: true, checkFalsy: true }).trim().isLength({ max: 20 }).withMessage('Phone number too long')
