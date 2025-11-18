@@ -664,7 +664,7 @@ class CampingApp {
                             
                             <!-- Assignment Display - Show who it's assigned to -->
                             ${item.assigned_to === 'specific' && item.assignments && item.assignments.length > 0 ? `
-                                <div class="flex items-center gap-2 mt-2 p-2 rounded" style="background: rgba(0, 122, 255, 0.08); border-left: 3px solid var(--ios-blue);">
+                                <div class="flex items-center gap-2 mt-2 p-2 rounded" style="background: rgba(0, 122, 255, 0.08);">
                                     <span class="material-icons" style="font-size: 16px; color: var(--ios-blue);">person</span>
                                     <div class="flex items-center gap-1 flex-wrap">
                                         <span class="ios-caption font-semibold" style="color: var(--ios-blue);">Assigned to:</span>
