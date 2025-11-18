@@ -271,14 +271,12 @@ class CampingApp {
                             </div>
                         </div>
                         
-                        <!-- Check Button -->
-                        <button onclick="event.stopPropagation(); app.toggleTaskCompletion(${task.id}, ${task.trip_id})" 
-                                class="p-2 rounded-full transition-colors flex-shrink-0"
-                                style="min-height: 44px; min-width: 44px; background: var(--ios-gray-6);"
-                                onmouseover="this.style.backgroundColor='var(--bg-hover)'"
-                                onmouseout="this.style.backgroundColor='var(--ios-gray-6)'">
-                            <span class="material-icons" style="color: var(--text-secondary);">radio_button_unchecked</span>
-                        </button>
+                        <!-- Simple Radio Button -->
+                        <div class="flex-shrink-0 flex items-center" style="min-width: 44px; min-height: 44px;">
+                            <input type="radio" 
+                                   onclick="event.stopPropagation(); app.toggleTaskCompletion(${task.id}, ${task.trip_id})"
+                                   style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--ios-blue);">
+                        </div>
                     </div>
                 </div>
             `;
@@ -477,7 +475,20 @@ class CampingApp {
                 <div class="p-4 rounded-lg mb-3 cursor-pointer transition-all hover:shadow-md" 
                      style="background: white; border: 1px solid var(--border-primary);"
                      onclick="app.showTripDetails(${item.trip_id})">
-                    <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <!-- Amazon Thumbnail -->
+                        ${item.amazon_link ? `
+                            <div class="flex-shrink-0">
+                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center" 
+                                     style="background: white; border: 1px solid #e0e0e0;">
+                                    <img src="https://m.media-amazon.com/images/I/${this.extractASIN(item.amazon_link)}.jpg" 
+                                         alt="${item.item_name}"
+                                         style="width: 100%; height: 100%; object-fit: contain;"
+                                         onerror="this.src='https://images-na.ssl-images-amazon.com/images/P/${this.extractASIN(item.amazon_link)}.jpg'; this.onerror=function(){this.parentElement.innerHTML='<span class=\\'material-icons\\' style=\\'font-size: 32px; color: #FF9900;\\'>shopping_cart</span>';}">
+                                </div>
+                            </div>
+                        ` : ''}
+                        
                         <div class="flex-1 min-w-0">
                             <!-- Item Name and Priority -->
                             <div class="flex items-center gap-2 mb-2">
@@ -500,14 +511,12 @@ class CampingApp {
                             </div>
                         </div>
                         
-                        <!-- Check Button -->
-                        <button onclick="event.stopPropagation(); app.toggleShoppingItemPurchased(${item.id})" 
-                                class="p-2 rounded-full transition-colors flex-shrink-0"
-                                style="min-height: 44px; min-width: 44px; background: var(--ios-gray-6);"
-                                onmouseover="this.style.backgroundColor='var(--bg-hover)'"
-                                onmouseout="this.style.backgroundColor='var(--ios-gray-6)'">
-                            <span class="material-icons" style="color: var(--text-secondary);">radio_button_unchecked</span>
-                        </button>
+                        <!-- Simple Radio Button -->
+                        <div class="flex-shrink-0 flex items-center" style="min-width: 44px; min-height: 44px;">
+                            <input type="radio" 
+                                   onclick="event.stopPropagation(); app.toggleShoppingItemPurchased(${item.id})"
+                                   style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--ios-blue);">
+                        </div>
                     </div>
                 </div>
             `;
