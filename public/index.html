@@ -2493,10 +2493,22 @@
                         Sign In
                     </button>
                 </form>
-                <p class="mt-4 text-center text-sm text-gray-600">
-                    Don't have an account? 
-                    <button id="showRegister" class="text-blue-600 hover:text-blue-800 font-medium">Sign up</button>
-                </p>
+                
+                <div class="mt-6">
+                    <div class="relative mb-4">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 text-gray-500" style="background: var(--bg-primary);">or</span>
+                        </div>
+                    </div>
+                    
+                    <button id="showRegister" class="w-full ios-button-secondary">
+                        <span class="material-icons mr-2" style="font-size: 18px;">person_add</span>
+                        Create New Account
+                    </button>
+                </div>
             </div>
 
             <!-- Register Form -->
@@ -2615,11 +2627,20 @@
                     </button>
                 </form>
                 
-                <div class="text-center mt-6">
-                    <p class="ios-footnote text-gray-600">
-                        Already have an account? 
-                        <button id="showLogin" class="text-blue-600 hover:text-blue-800 font-medium">Sign in here</button>
-                    </p>
+                <div class="mt-6">
+                    <div class="relative mb-4">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 text-gray-500" style="background: var(--bg-primary);">or</span>
+                        </div>
+                    </div>
+                    
+                    <button id="showLogin" class="w-full ios-button-secondary">
+                        <span class="material-icons mr-2" style="font-size: 18px;">login</span>
+                        Sign In to Existing Account
+                    </button>
                 </div>
             </div>
 
