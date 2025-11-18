@@ -5316,7 +5316,7 @@ class CampingApp {
                                 <div class="flex items-center px-5 py-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50" 
                                      style="background: var(--bg-secondary); border-color: var(--border-primary);"
                                      onclick="this.querySelector('input').click(); app.toggleEditTaskParticipantSelect();">
-                                    <input type="radio" name="assignmentType" value="shared" ${(!isEdit || task.assignment_type === 'shared' || task.assignment_type === 'anyone' || task.assignment_type === 'me') ? 'checked' : ''}
+                                    <input type="radio" name="assignmentType" value="anyone" ${(!isEdit || task.assignment_type === 'anyone') ? 'checked' : ''}
                                            class="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                            style="accent-color: var(--ios-blue);">
                                     <div style="width: 16px;"></div>
