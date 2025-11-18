@@ -25,6 +25,7 @@ const fixAssignmentConstraintRoutes = require('./routes/fix-assignment-constrain
 const addAmazonColumnRoutes = require('./routes/add-amazon-column');
 const setupAssignmentsRoutes = require('./routes/setup-assignments');
 const setupTaskAssignmentsRoutes = require('./routes/setup-task-assignments');
+const onboardingRoutes = require('./routes/onboarding');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -72,6 +73,7 @@ app.use('/api/fix-constraint', fixAssignmentConstraintRoutes);
 app.use('/api/add-amazon-col', addAmazonColumnRoutes);
 app.use('/api/setup-assignments', setupAssignmentsRoutes);
 app.use('/api/setup-task-assignments', setupTaskAssignmentsRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 
 // Landing page route
 app.get('/', (req, res) => {

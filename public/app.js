@@ -164,6 +164,9 @@ class CampingApp {
             this.updateRecentActivity();
             this.updateWeatherInsights();
             this.updateProfileCompleteness();
+            
+            // Check if user needs onboarding (after data is loaded)
+            setTimeout(() => this.checkOnboardingStatus(), 500);
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             this.showMessage('Failed to load dashboard data', 'error');
@@ -6057,6 +6060,387 @@ class CampingApp {
             console.error('Error suggesting product:', error);
             this.showMessage('Network error. Please try again.', 'error');
         }
+    }
+
+    // ==================== ONBOARDING WIZARD ====================
+    
+    async checkOnboardingStatus() {
+        try {
+            const response = await fetch('/api/onboarding/status', {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                // Show onboarding if not completed and not skipped
+                if (!data.completed && !data.skipped) {
+                    this.startOnboarding(data.currentStep || 0);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking onboarding status:', error);
+            // If error (e.g., columns don't exist), don't show onboarding
+        }
+    }
+    
+    startOnboarding(startStep = 0) {
+        this.onboardingStep = startStep;
+        this.onboardingOverlay = document.getElementById('onboardingOverlay');
+        this.onboardingContent = document.getElementById('onboardingContent');
+        this.onboardingProgress = document.getElementById('onboardingProgress');
+        this.onboardingStepText = document.getElementById('onboardingStepText');
+        this.onboardingNext = document.getElementById('onboardingNext');
+        this.onboardingBack = document.getElementById('onboardingBack');
+        this.onboardingSkip = document.getElementById('onboardingSkip');
+        
+        // Event listeners
+        this.onboardingNext.addEventListener('click', () => this.nextOnboardingStep());
+        this.onboardingBack.addEventListener('click', () => this.previousOnboardingStep());
+        this.onboardingSkip.addEventListener('click', () => this.skipOnboarding());
+        
+        // Show onboarding
+        this.onboardingOverlay.classList.remove('hidden');
+        this.renderOnboardingStep();
+    }
+    
+    renderOnboardingStep() {
+        const steps = [
+            this.getWelcomeStep(),
+            this.getProfileStep(),
+            this.getTripStep(),
+            this.getShoppingTaskStep(),
+            this.getShareStep()
+        ];
+        
+        if (this.onboardingStep >= 0 && this.onboardingStep < steps.length) {
+            this.onboardingContent.innerHTML = steps[this.onboardingStep];
+            this.updateOnboardingProgress();
+            this.updateOnboardingNavigation();
+        }
+    }
+    
+    getWelcomeStep() {
+        return `
+            <span class="material-icons onboarding-icon" style="color: var(--ios-blue);">
+                explore
+            </span>
+            <h2 class="onboarding-title">Welcome to GoTogether! 🏕️</h2>
+            <p class="onboarding-description">
+                Let's get you started on your camping adventure! This quick tutorial will show you 
+                how to plan amazing trips with your friends and family.
+            </p>
+            
+            <div class="onboarding-feature-list">
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">map</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Plan Trips Together</h4>
+                        <p>Create and organize camping trips with all the details in one place</p>
+                    </div>
+                </div>
+                
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">checklist</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Shared Task Lists</h4>
+                        <p>Assign tasks and keep everyone on the same page</p>
+                    </div>
+                </div>
+                
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">shopping_cart</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Shopping Coordination</h4>
+                        <p>Manage shared shopping lists with Amazon integration</p>
+                    </div>
+                </div>
+                
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">cloud</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Weather Insights</h4>
+                        <p>Get camping-specific weather forecasts for your trips</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    getProfileStep() {
+        const user = this.currentUser;
+        const hasProfile = user && user.bio;
+        
+        return `
+            <span class="material-icons onboarding-icon" style="color: var(--ios-green);">
+                account_circle
+            </span>
+            <h2 class="onboarding-title">Complete Your Profile</h2>
+            <p class="onboarding-description">
+                ${hasProfile 
+                    ? "Great! Your profile is set up. Let others know about your camping style and preferences."
+                    : "Tell others about your camping style! Add your bio, camper type, and preferences to help your trip mates know you better."
+                }
+            </p>
+            
+            ${!hasProfile ? `
+                <button class="onboarding-action-btn" onclick="app.editProfileFromOnboarding()">
+                    <span class="material-icons">edit</span>
+                    Complete Profile Now
+                </button>
+                <p style="margin-top: 16px; color: var(--text-secondary); font-size: 14px;">
+                    Or skip this step and add it later
+                </p>
+            ` : `
+                <div style="background: var(--ios-green); color: white; padding: 16px 24px; border-radius: 12px; margin-top: 24px; display: inline-block;">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</span>
+                    <strong>Profile Complete!</strong>
+                </div>
+            `}
+        `;
+    }
+    
+    getTripStep() {
+        const hasTrips = this.trips && this.trips.length > 0;
+        
+        return `
+            <span class="material-icons onboarding-icon" style="color: var(--ios-orange);">
+                terrain
+            </span>
+            <h2 class="onboarding-title">Create Your First Trip</h2>
+            <p class="onboarding-description">
+                ${hasTrips
+                    ? "Awesome! You've already created a trip. You can create more anytime from your dashboard."
+                    : "Ready for adventure? Create your first camping trip! Add the location, dates, and invite your friends."
+                }
+            </p>
+            
+            ${!hasTrips ? `
+                <button class="onboarding-action-btn" onclick="app.createTripFromOnboarding()">
+                    <span class="material-icons">add_location</span>
+                    Create First Trip
+                </button>
+                <p style="margin-top: 16px; color: var(--text-secondary); font-size: 14px;">
+                    You can also skip and create one later
+                </p>
+            ` : `
+                <div style="background: var(--ios-orange); color: white; padding: 16px 24px; border-radius: 12px; margin-top: 24px; display: inline-block;">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</span>
+                    <strong>Trip Created!</strong>
+                </div>
+            `}
+        `;
+    }
+    
+    getShoppingTaskStep() {
+        return `
+            <span class="material-icons onboarding-icon" style="color: var(--ios-purple);">
+                fact_check
+            </span>
+            <h2 class="onboarding-title">Tasks & Shopping Lists</h2>
+            <p class="onboarding-description">
+                Stay organized! Once you create a trip, you can add tasks and shopping items. 
+                Assign them to specific people or share them with everyone.
+            </p>
+            
+            <div class="onboarding-feature-list">
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">assignment</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Create Tasks</h4>
+                        <p>Set up to-do items with due dates and assignments</p>
+                    </div>
+                </div>
+                
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">shopping_bag</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Add Shopping Items</h4>
+                        <p>Build shared lists with Amazon product links</p>
+                    </div>
+                </div>
+                
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">group</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Coordinate Together</h4>
+                        <p>Everyone can see what's done and what's needed</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    getShareStep() {
+        return `
+            <span class="material-icons onboarding-icon" style="color: var(--ios-blue);">
+                share
+            </span>
+            <h2 class="onboarding-title">Share & Collaborate</h2>
+            <p class="onboarding-description">
+                Invite friends to your trips! You can make trips public for anyone to join, 
+                or keep them private and share a unique trip code with your group.
+            </p>
+            
+            <div class="onboarding-feature-list">
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">public</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Public Trips</h4>
+                        <p>Let anyone discover and join your adventure</p>
+                    </div>
+                </div>
+                
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">lock</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Private Trips</h4>
+                        <p>Share a unique code with your specific group</p>
+                    </div>
+                </div>
+                
+                <div class="onboarding-feature-item">
+                    <span class="material-icons onboarding-feature-icon">notifications</span>
+                    <div class="onboarding-feature-text">
+                        <h4>Stay Connected</h4>
+                        <p>Everyone sees updates in real-time</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 32px; color: var(--text-secondary);">
+                You're all set! Start planning your next camping adventure.
+            </p>
+        `;
+    }
+    
+    updateOnboardingProgress() {
+        const progress = ((this.onboardingStep + 1) / 5) * 100;
+        this.onboardingProgress.style.width = `${progress}%`;
+        this.onboardingStepText.textContent = `Step ${this.onboardingStep + 1} of 5`;
+    }
+    
+    updateOnboardingNavigation() {
+        // Back button visibility
+        if (this.onboardingStep === 0) {
+            this.onboardingBack.style.visibility = 'hidden';
+        } else {
+            this.onboardingBack.style.visibility = 'visible';
+        }
+        
+        // Next button text
+        if (this.onboardingStep === 4) {
+            this.onboardingNext.innerHTML = `
+                Get Started!
+                <span class="material-icons" style="font-size: 18px;">done</span>
+            `;
+        } else {
+            this.onboardingNext.innerHTML = `
+                Next
+                <span class="material-icons" style="font-size: 18px;">arrow_forward</span>
+            `;
+        }
+    }
+    
+    async nextOnboardingStep() {
+        if (this.onboardingStep < 4) {
+            this.onboardingStep++;
+            await this.saveOnboardingProgress();
+            this.renderOnboardingStep();
+        } else {
+            // Complete onboarding
+            await this.completeOnboarding();
+        }
+    }
+    
+    async previousOnboardingStep() {
+        if (this.onboardingStep > 0) {
+            this.onboardingStep--;
+            await this.saveOnboardingProgress();
+            this.renderOnboardingStep();
+        }
+    }
+    
+    async saveOnboardingProgress() {
+        try {
+            await fetch('/api/onboarding/progress', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ step: this.onboardingStep })
+            });
+        } catch (error) {
+            console.error('Error saving onboarding progress:', error);
+        }
+    }
+    
+    async skipOnboarding() {
+        if (confirm('Are you sure you want to skip the tutorial? You can always explore the features later.')) {
+            try {
+                await fetch('/api/onboarding/skip', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                this.closeOnboarding();
+            } catch (error) {
+                console.error('Error skipping onboarding:', error);
+                this.closeOnboarding();
+            }
+        }
+    }
+    
+    async completeOnboarding() {
+        try {
+            await fetch('/api/onboarding/complete', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            // Show completion message
+            this.onboardingContent.innerHTML = `
+                <span class="material-icons onboarding-completion-icon">
+                    celebration
+                </span>
+                <h2 class="onboarding-title">You're All Set! 🎉</h2>
+                <p class="onboarding-description">
+                    Welcome to GoTogether! Start creating trips, inviting friends, 
+                    and planning amazing camping adventures.
+                </p>
+                <button class="onboarding-action-btn" onclick="app.closeOnboarding()">
+                    <span class="material-icons">explore</span>
+                    Start Exploring
+                </button>
+            `;
+            
+            this.onboardingNext.style.display = 'none';
+            this.onboardingBack.style.display = 'none';
+            this.onboardingSkip.style.display = 'none';
+            this.onboardingProgress.style.width = '100%';
+            this.onboardingStepText.textContent = 'Complete!';
+        } catch (error) {
+            console.error('Error completing onboarding:', error);
+            this.closeOnboarding();
+        }
+    }
+    
+    closeOnboarding() {
+        this.onboardingOverlay.classList.add('hidden');
+        this.showMessage('Welcome to GoTogether! 🏕️', 'success');
+    }
+    
+    editProfileFromOnboarding() {
+        this.closeOnboarding();
+        setTimeout(() => {
+            this.showUserProfile(this.currentUser.id);
+            setTimeout(() => this.showEditProfile(), 300);
+        }, 300);
+    }
+    
+    createTripFromOnboarding() {
+        this.closeOnboarding();
+        setTimeout(() => {
+            this.showMyTripsView();
+            setTimeout(() => this.showCreateTripModal(), 300);
+        }, 300);
     }
 }
 

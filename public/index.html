@@ -1208,6 +1208,303 @@
             }
         }
         
+        /* Onboarding Wizard Styles */
+        .onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.95) 0%, rgba(52, 199, 89, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            visibility: visible;
+            transition: all 0.3s ease;
+        }
+        
+        .onboarding-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .onboarding-container {
+            background: white;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .onboarding-header {
+            background: linear-gradient(135deg, var(--ios-blue) 0%, #0051D5 100%);
+            padding: 24px;
+            position: relative;
+        }
+        
+        .onboarding-progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        
+        .onboarding-progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 20%;
+        }
+        
+        .onboarding-step-indicator {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+        
+        .onboarding-skip-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .onboarding-skip-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .onboarding-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .onboarding-icon {
+            font-size: 80px !important;
+            margin-bottom: 24px;
+            display: block;
+            animation: onboardingFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes onboardingFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .onboarding-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        
+        .onboarding-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 32px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .onboarding-feature-list {
+            text-align: left;
+            max-width: 500px;
+            margin: 32px auto;
+        }
+        
+        .onboarding-feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--ios-gray-6);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .onboarding-feature-item:hover {
+            background: var(--ios-gray-5);
+            transform: translateX(4px);
+        }
+        
+        .onboarding-feature-icon {
+            color: var(--ios-blue);
+            font-size: 28px !important;
+            flex-shrink: 0;
+        }
+        
+        .onboarding-feature-text h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .onboarding-feature-text p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .onboarding-footer {
+            padding: 24px;
+            background: var(--ios-gray-6);
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            border-top: 1px solid var(--border-primary);
+        }
+        
+        .onboarding-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+        
+        .onboarding-btn-primary {
+            background: var(--ios-blue);
+            color: white;
+            justify-content: center;
+        }
+        
+        .onboarding-btn-primary:hover {
+            background: #0051D5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+        
+        .onboarding-btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            justify-content: center;
+        }
+        
+        .onboarding-btn-secondary:hover {
+            background: var(--ios-gray-6);
+            transform: translateY(-2px);
+        }
+        
+        .onboarding-action-btn {
+            background: linear-gradient(135deg, var(--ios-blue) 0%, #0051D5 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            margin-top: 16px;
+        }
+        
+        .onboarding-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.4);
+        }
+        
+        .onboarding-completion-icon {
+            font-size: 100px !important;
+            color: var(--ios-green);
+            margin-bottom: 24px;
+            display: block;
+            animation: onboardingSuccess 0.6s ease-out;
+        }
+        
+        @keyframes onboardingSuccess {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Mobile Onboarding Styles */
+        @media (max-width: 768px) {
+            .onboarding-container {
+                width: 95%;
+                max-height: 90vh;
+                border-radius: 16px;
+            }
+            
+            .onboarding-header {
+                padding: 20px;
+            }
+            
+            .onboarding-skip-btn {
+                top: 20px;
+                right: 20px;
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            
+            .onboarding-content {
+                padding: 24px 20px;
+            }
+            
+            .onboarding-icon {
+                font-size: 60px !important;
+            }
+            
+            .onboarding-title {
+                font-size: 24px;
+            }
+            
+            .onboarding-description {
+                font-size: 15px;
+            }
+            
+            .onboarding-footer {
+                padding: 16px;
+                flex-direction: column;
+            }
+            
+            .onboarding-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .onboarding-feature-item {
+                padding: 12px;
+            }
+        }
+        
         /* Custom textarea styling */
         textarea {
             font-family: inherit;
@@ -3151,6 +3448,40 @@
         </div>
     </div>
 
+    <!-- Onboarding Wizard -->
+    <div id="onboardingOverlay" class="onboarding-overlay hidden">
+        <div class="onboarding-container">
+            <!-- Header with progress -->
+            <div class="onboarding-header">
+                <div class="onboarding-progress-bar">
+                    <div id="onboardingProgress" class="onboarding-progress-fill"></div>
+                </div>
+                <div class="onboarding-step-indicator">
+                    <span id="onboardingStepText">Step 1 of 5</span>
+                </div>
+                <button id="onboardingSkip" class="onboarding-skip-btn">
+                    Skip Tutorial
+                </button>
+            </div>
+
+            <!-- Step Content -->
+            <div id="onboardingContent" class="onboarding-content">
+                <!-- Content will be dynamically inserted -->
+            </div>
+
+            <!-- Navigation -->
+            <div class="onboarding-footer">
+                <button id="onboardingBack" class="onboarding-btn onboarding-btn-secondary" style="visibility: hidden;">
+                    <span class="material-icons" style="font-size: 18px;">arrow_back</span>
+                    Back
+                </button>
+                <button id="onboardingNext" class="onboarding-btn onboarding-btn-primary">
+                    Next
+                    <span class="material-icons" style="font-size: 18px;">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
     <script>
