@@ -6121,7 +6121,7 @@ class CampingApp {
     
     getWelcomeStep() {
         return `
-            <span class="material-icons onboarding-icon" style="color: var(--ios-blue);">
+            <span class="material-icons onboarding-icon" style="color: #007AFF;">
                 explore
             </span>
             <h2 class="onboarding-title">Welcome to GoTogether! 🏕️</h2>
@@ -6171,7 +6171,7 @@ class CampingApp {
         const hasProfile = user && user.bio;
         
         return `
-            <span class="material-icons onboarding-icon" style="color: var(--ios-green);">
+            <span class="material-icons onboarding-icon" style="color: #34C759;">
                 account_circle
             </span>
             <h2 class="onboarding-title">Complete Your Profile</h2>
@@ -6187,11 +6187,11 @@ class CampingApp {
                     <span class="material-icons">edit</span>
                     Complete Profile Now
                 </button>
-                <p style="margin-top: 16px; color: var(--text-secondary); font-size: 14px;">
+                <p style="margin-top: 16px; color: #6e6e73; font-size: 14px;">
                     Or skip this step and add it later
                 </p>
             ` : `
-                <div style="background: var(--ios-green); color: white; padding: 16px 24px; border-radius: 12px; margin-top: 24px; display: inline-block;">
+                <div style="background: #34C759; color: white; padding: 16px 24px; border-radius: 12px; margin-top: 24px; display: inline-block;">
                     <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</span>
                     <strong>Profile Complete!</strong>
                 </div>
@@ -6203,7 +6203,7 @@ class CampingApp {
         const hasTrips = this.trips && this.trips.length > 0;
         
         return `
-            <span class="material-icons onboarding-icon" style="color: var(--ios-orange);">
+            <span class="material-icons onboarding-icon" style="color: #FF9500;">
                 terrain
             </span>
             <h2 class="onboarding-title">Create Your First Trip</h2>
@@ -6219,11 +6219,11 @@ class CampingApp {
                     <span class="material-icons">add_location</span>
                     Create First Trip
                 </button>
-                <p style="margin-top: 16px; color: var(--text-secondary); font-size: 14px;">
+                <p style="margin-top: 16px; color: #6e6e73; font-size: 14px;">
                     You can also skip and create one later
                 </p>
             ` : `
-                <div style="background: var(--ios-orange); color: white; padding: 16px 24px; border-radius: 12px; margin-top: 24px; display: inline-block;">
+                <div style="background: #FF9500; color: white; padding: 16px 24px; border-radius: 12px; margin-top: 24px; display: inline-block;">
                     <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</span>
                     <strong>Trip Created!</strong>
                 </div>
@@ -6233,7 +6233,7 @@ class CampingApp {
     
     getShoppingTaskStep() {
         return `
-            <span class="material-icons onboarding-icon" style="color: var(--ios-purple);">
+            <span class="material-icons onboarding-icon" style="color: #AF52DE;">
                 fact_check
             </span>
             <h2 class="onboarding-title">Tasks & Shopping Lists</h2>
@@ -6272,7 +6272,7 @@ class CampingApp {
     
     getShareStep() {
         return `
-            <span class="material-icons onboarding-icon" style="color: var(--ios-blue);">
+            <span class="material-icons onboarding-icon" style="color: #007AFF;">
                 share
             </span>
             <h2 class="onboarding-title">Share & Collaborate</h2>
@@ -6307,7 +6307,7 @@ class CampingApp {
                 </div>
             </div>
             
-            <p style="margin-top: 32px; color: var(--text-secondary);">
+            <p style="margin-top: 32px; color: #6e6e73; font-size: 15px;">
                 You're all set! Start planning your next camping adventure.
             </p>
         `;
