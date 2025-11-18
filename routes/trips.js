@@ -172,14 +172,20 @@ router.post('/', authenticateToken, [
   body('endDate').isISO8601().withMessage('Invalid end date'),
   body('tripType').isIn(['car_camping', 'backpacking', 'rv_camping', 'glamping']).withMessage('Invalid trip type'),
   body('status').optional().isIn(['planning', 'active', 'completed']).withMessage('Invalid status'),
-  body('isPublic').isBoolean().withMessage('isPublic must be boolean'),
-  body('tripCode').optional().trim().custom((value, { req }) => {
+  body('isPublic').custom((value) => {
+    if (typeof value === 'boolean' || value === 'true' || value === 'false' || value === true || value === false) {
+      return true;
+    }
+    throw new Error('isPublic must be a boolean value');
+  }).toBoolean(),
+  body('tripCode').optional({ nullable: true, checkFalsy: true }).trim().custom((value, { req }) => {
     // Only validate trip code if it's provided or if the trip is private
     if (value && (value.length < 6 || value.length > 10)) {
       throw new Error('Trip code must be 6-10 characters');
     }
     // For private trips, trip code is required
-    if (!req.body.isPublic && !value) {
+    const isPublic = req.body.isPublic === true || req.body.isPublic === 'true';
+    if (!isPublic && !value) {
       throw new Error('Private trips require a trip code');
     }
     return true;
