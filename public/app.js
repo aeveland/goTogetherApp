@@ -58,8 +58,6 @@ class CampingApp {
         // Main action buttons
         document.getElementById('createTripBtn').addEventListener('click', () => this.showCreateTripModal());
         document.getElementById('joinTripBtn').addEventListener('click', () => this.showJoinTripModal());
-        document.getElementById('browseTripsBtn').addEventListener('click', () => this.showBrowseTripsView());
-        document.getElementById('browseTripsBtn-mobile').addEventListener('click', () => this.showBrowseTripsView());
         document.getElementById('backToMyTripsBtn').addEventListener('click', () => this.showMyTripsView());
         
         // Inline form actions
@@ -159,7 +157,6 @@ class CampingApp {
             }
             
             // Update dashboard sections
-            this.updateDashboardUpcomingTrips();
             this.updateDashboardStats();
             this.updateRecentActivity();
             this.updateWeatherInsights();
@@ -313,67 +310,6 @@ class CampingApp {
         document.getElementById('organizedTrips').textContent = stats.organizedTrips || 0;
         document.getElementById('joinedTrips').textContent = stats.joinedTrips || 0;
         document.getElementById('completedTasks').textContent = stats.completedTasks || 0;
-    }
-
-    updateDashboardUpcomingTrips() {
-        const container = document.getElementById('dashboardUpcomingTrips');
-        
-        if (!this.myTrips || this.myTrips.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <span class="material-icons text-4xl mb-2 opacity-50">terrain</span>
-                    <p class="ios-callout">No upcoming trips</p>
-                    <button onclick="document.getElementById('createTripBtn').click()" 
-                            class="ios-button-primary mt-4 mx-auto">
-                        <span class="material-icons mr-2" style="font-size: 16px;">add_circle</span>Create Your First Trip
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
-        // Show next 3 upcoming trips
-        const upcomingTrips = this.myTrips
-            .filter(trip => new Date(trip.start_date) >= new Date())
-            .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-            .slice(0, 3);
-
-        if (upcomingTrips.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <span class="material-icons text-4xl mb-2 opacity-50">event_available</span>
-                    <p class="ios-callout">No upcoming trips scheduled</p>
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = upcomingTrips.map(trip => {
-            const startDate = new Date(trip.start_date);
-            const daysUntil = Math.ceil((startDate - new Date()) / (1000 * 60 * 60 * 24));
-            const isOrganizer = this.currentUser && this.currentUser.id === trip.organizer_id;
-            
-            return `
-                <div class="flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors"
-                     onclick="app.showTripDetails(${trip.id})" style="border: 1px solid var(--ios-gray-5);">
-                    <div class="flex-1 min-w-0">
-                        <h4 class="ios-callout font-medium truncate">${trip.title}</h4>
-                        <p class="ios-footnote text-gray-600 truncate">${trip.location}</p>
-                        <p class="ios-caption text-gray-500">
-                            ${daysUntil === 0 ? 'Today!' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`}
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-2 ml-3">
-                        ${isOrganizer ? `
-                            <span class="px-3 py-1.5 rounded-full text-xs font-medium" style="background: var(--ios-blue); color: white;">
-                                Organizer
-                            </span>
-                        ` : ''}
-                        <span class="material-icons text-gray-400">chevron_right</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
     }
 
     updateRecentActivity() {
