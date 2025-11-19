@@ -4747,14 +4747,14 @@ class CampingApp {
                     <!-- Trip Info -->
                     <div class="mb-6">
                         <h1 class="ios-title-1 mb-2">${trip.title}</h1>
-                        <p class="ios-callout text-gray-600 mb-3">${trip.location}</p>
-                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
+                        <p class="text-base text-gray-600 mb-3">${trip.location}</p>
+                        <div class="flex flex-wrap items-center gap-4 text-base text-gray-600 mb-3">
                             <span class="flex items-center">
-                                <span class="material-icons mr-1" style="font-size: 16px;">event</span>
+                                <span class="material-icons mr-1" style="font-size: 18px;">event</span>
                                 ${startDate} - ${endDate}
                             </span>
                             <span class="flex items-center">
-                                <span class="material-icons mr-1" style="font-size: 16px;">group</span>
+                                <span class="material-icons mr-1" style="font-size: 18px;">group</span>
                                 ${trip.current_participants}/${trip.max_participants} joined
                             </span>
                         </div>
@@ -4767,14 +4767,14 @@ class CampingApp {
                     <!-- Trip Description -->
                     ${trip.description ? `
                         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                            <h4 class="ios-callout font-medium text-gray-800 mb-2">About This Trip</h4>
-                            <p class="ios-footnote text-gray-600 leading-relaxed">${trip.description}</p>
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">About This Trip</h4>
+                            <p class="text-base text-gray-600 leading-relaxed">${trip.description}</p>
                         </div>
                     ` : ''}
 
                     <!-- Who's Going -->
                     <div class="mb-6">
-                        <h4 class="ios-callout font-medium text-gray-800 mb-3">Who's Going</h4>
+                        <h4 class="text-base font-semibold text-gray-800 mb-3">Who's Going</h4>
                         <div id="trip-participants-${trip.id}" class="space-y-2">
                             <!-- Participants will be loaded here -->
                         </div>
