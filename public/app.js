@@ -1782,6 +1782,9 @@ class CampingApp {
             const data = await response.json();
             let publicTrips = data.trips || [];
             
+            console.log('📊 Public trips loaded:', publicTrips.length);
+            console.log('🗺️ Trips:', publicTrips);
+            
             // Get user's location for distance calculation
             const userAddress = this.getUserFullAddress();
             let userCoords = null;
@@ -1816,9 +1819,26 @@ class CampingApp {
             // Render trips in modal
             if (publicTrips.length === 0) {
                 modalContent.innerHTML = `
-                    <div class="text-center py-8">
+                    <div class="text-center py-8 px-4">
                         <span class="material-icons text-6xl text-gray-300 mb-4 block">explore_off</span>
-                        <p class="text-gray-600 mb-4">No public trips available</p>
+                        <h3 class="text-lg font-semibold mb-2">No Public Trips Found</h3>
+                        <div class="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+                            <p class="mb-3">Public trips must meet these criteria:</p>
+                            <ul class="text-left space-y-2">
+                                <li class="flex items-start gap-2">
+                                    <span class="material-icons text-sm mt-0.5">check_circle</span>
+                                    <span>Marked as <strong>Public</strong> when created</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="material-icons text-sm mt-0.5">check_circle</span>
+                                    <span>Start date is <strong>today or in the future</strong></span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="material-icons text-sm mt-0.5">check_circle</span>
+                                    <span>Trip is <strong>active</strong> (not cancelled)</span>
+                                </li>
+                            </ul>
+                        </div>
                         <button onclick="app.showJoinTripModal()" class="ios-button-secondary">
                             <span class="material-icons mr-2" style="font-size: 16px;">arrow_back</span>
                             Back to Join Trip
