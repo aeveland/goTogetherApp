@@ -1761,8 +1761,7 @@ class CampingApp {
 
     async showPublicTripsInModal() {
         // Show loading state
-        const modalContent = document.getElementById('modalContent');
-        modalContent.innerHTML = `
+        this.modalBody.innerHTML = `
             <div class="text-center py-8">
                 <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
                 <p class="mt-4 text-gray-600">Loading public trips...</p>
@@ -1818,7 +1817,7 @@ class CampingApp {
             
             // Render trips in modal
             if (publicTrips.length === 0) {
-                modalContent.innerHTML = `
+                this.modalBody.innerHTML = `
                     <div class="text-center py-8 px-4">
                         <span class="material-icons text-6xl text-gray-300 mb-4 block">explore_off</span>
                         <h3 class="text-lg font-semibold mb-2">No Public Trips Found</h3>
@@ -1905,7 +1904,7 @@ class CampingApp {
                     `;
                 }).join('');
                 
-                modalContent.innerHTML = `
+                this.modalBody.innerHTML = `
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <button onclick="app.showJoinTripModal()" class="ios-button-secondary text-sm px-3 py-2">
@@ -1937,7 +1936,7 @@ class CampingApp {
             }
         } catch (error) {
             console.error('Error loading public trips:', error);
-            modalContent.innerHTML = `
+            this.modalBody.innerHTML = `
                 <div class="text-center py-8">
                     <span class="material-icons text-6xl text-red-300 mb-4 block">error_outline</span>
                     <p class="text-gray-600 mb-4">Failed to load public trips</p>
