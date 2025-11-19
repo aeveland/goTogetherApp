@@ -415,20 +415,13 @@ class CampingApp {
                         <!-- Product Thumbnail -->
                         ${item.amazon_link ? `
                             <div class="flex-shrink-0">
-                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center" 
-                                     style="background: white; border: 1px solid #e0e0e0;">
-                                    ${item.amazon_image_url ? `
-                                        <img src="${item.amazon_image_url}" 
-                                             alt="${item.item_name}"
-                                             class="w-full h-full object-contain"
-                                             onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center p-2\\' style=\\'background: #FF9900;\\'><svg viewBox=\\'0 0 603 182\\' style=\\'width: 100%; height: auto; fill: white;\\'><path d=\\'M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z\\'></path></svg></div>'">
-                                    ` : `
-                                        <div class="w-full h-full flex items-center justify-center p-2" style="background: #FF9900;">
-                                            <svg viewBox="0 0 603 182" style="width: 100%; height: auto; fill: white;">
-                                                <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"></path>
-                                            </svg>
-                                        </div>
-                                    `}
+                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center amazon-thumb-${item.id}" 
+                                     style="background: #FF9900;" data-amazon-url="${item.amazon_link}">
+                                    <div class="w-full h-full flex items-center justify-center p-2">
+                                        <svg viewBox="0 0 603 182" style="width: 100%; height: auto; fill: white;">
+                                            <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"></path>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         ` : ''}
@@ -473,6 +466,43 @@ class CampingApp {
                     </button>
                 </div>
             `;
+        }
+
+        // Load Amazon product images
+        this.loadAmazonImages();
+    }
+
+    async loadAmazonImages() {
+        // Find all Amazon thumbnail containers
+        const thumbContainers = document.querySelectorAll('[class*="amazon-thumb-"]');
+        
+        for (const container of thumbContainers) {
+            const amazonUrl = container.dataset.amazonUrl;
+            if (!amazonUrl) continue;
+            
+            try {
+                const response = await fetch(`/api/amazon-image/proxy?url=${encodeURIComponent(amazonUrl)}`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.imageUrl) {
+                        // Replace logo with actual product image
+                        container.style.background = 'white';
+                        container.style.border = '1px solid #e0e0e0';
+                        container.innerHTML = `
+                            <img src="${data.imageUrl}" 
+                                 alt="Product" 
+                                 class="w-full h-full object-contain"
+                                 onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center p-2\\' style=\\'background: #FF9900;\\'><svg viewBox=\\'0 0 603 182\\' style=\\'width: 100%; height: auto; fill: white;\\'><path d=\\'M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z\\'></path></svg></div>'">
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.log('Failed to load Amazon image (non-critical):', error);
+                // Keep the logo on error
+            }
         }
     }
 
@@ -585,28 +615,16 @@ class CampingApp {
                         <!-- Product Thumbnail -->
                         ${item.amazon_link ? `
                             <div class="flex-shrink-0 mr-3">
-                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center" 
-                                     style="background: white; border: 1px solid #e0e0e0;">
-                                    ${item.amazon_image_url ? `
-                                        <img src="${item.amazon_image_url}" 
-                                             alt="${item.item_name}"
-                                             class="w-full h-full object-contain"
-                                             onerror="this.parentElement.innerHTML=\'<div class=\\\'w-full h-full flex items-center justify-center p-2\\\' style=\\\'background: #FF9900;\\\'><svg viewBox=\\\'0 0 603 182\\\' style=\\\'width: 100%; height: auto; fill: white;\\\'><path d=\\\'M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z\\\'></path></svg></div>\'">
-                                    ` : `
-                                        <div class="w-full h-full flex items-center justify-center p-2" style="background: #FF9900;">
-                                            <svg viewBox="0 0 603 182" style="width: 100%; height: auto; fill: white;">
-                                                <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"></path>
-                                            </svg>
-                                        </div>
-                                    `}
+                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center amazon-thumb-trip-${item.id}" 
+                                     style="background: #FF9900;" data-amazon-url="${item.amazon_link}">
+                                    <div class="w-full h-full flex items-center justify-center p-2">
+                                        <svg viewBox="0 0 603 182" style="width: 100%; height: auto; fill: white;">
+                                            <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"></path>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
-                        ` : `
-                            <div class="w-16 h-16 rounded flex items-center justify-center" 
-                                 style="background: var(--ios-gray-5);">
-                                <span class="material-icons text-gray-400" style="font-size: 32px;">shopping_bag</span>
-                            </div>
-                        `}
+                        ` : ''}
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
                                 <h5 class="ios-callout font-medium ${isCompleted ? 'line-through' : ''}">${item.item_name}</h5>
@@ -684,6 +702,9 @@ class CampingApp {
         });
         
         container.innerHTML = dietaryInfo + progressHtml + html;
+        
+        // Load Amazon product images
+        this.loadAmazonImages();
     }
 
     updateDashboardStats() {
