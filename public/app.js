@@ -1750,14 +1750,155 @@ class CampingApp {
         
         // Handle browse public trips
         document.getElementById('modalSearchTripsBtn').addEventListener('click', () => {
-            this.closeModal();
-            this.showBrowseTripsView();
+            this.showPublicTripsInModal();
         });
         
         // Focus the trip code input
         setTimeout(() => {
             document.getElementById('modalTripCode').focus();
         }, 100);
+    }
+
+    async showPublicTripsInModal() {
+        // Show loading state
+        const modalContent = document.getElementById('modalContent');
+        modalContent.innerHTML = `
+            <div class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
+                <p class="mt-4 text-gray-600">Loading public trips...</p>
+            </div>
+        `;
+        
+        try {
+            // Load all trips
+            const response = await fetch('/api/trips', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to load trips');
+            }
+            
+            const data = await response.json();
+            const publicTrips = data.trips || [];
+            
+            // Render trips in modal
+            if (publicTrips.length === 0) {
+                modalContent.innerHTML = `
+                    <div class="text-center py-8">
+                        <span class="material-icons text-6xl text-gray-300 mb-4 block">explore_off</span>
+                        <p class="text-gray-600 mb-4">No public trips available</p>
+                        <button onclick="app.showJoinTripModal()" class="ios-button-secondary">
+                            <span class="material-icons mr-2" style="font-size: 16px;">arrow_back</span>
+                            Back to Join Trip
+                        </button>
+                    </div>
+                `;
+            } else {
+                const tripsHtml = publicTrips.map(trip => {
+                    const startDate = new Date(trip.start_date).toLocaleDateString();
+                    const isParticipant = trip.participants && trip.participants.some(p => 
+                        p.name === `${this.currentUser.firstName} ${this.currentUser.lastName}`
+                    );
+                    const canJoin = !isParticipant && trip.current_participants < trip.max_participants;
+                    
+                    return `
+                        <div class="ios-card p-4 mb-3 hover:shadow-lg transition-shadow cursor-pointer" 
+                             onclick="app.showTripDetailsInModal(${trip.id})">
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="font-semibold text-lg flex-1">${trip.title}</h4>
+                                ${isParticipant ? `
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium" style="background: var(--ios-green); color: white;">
+                                        <span class="material-icons" style="font-size: 12px; vertical-align: middle;">check_circle</span>
+                                        Joined
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <div class="space-y-2 text-sm text-gray-600">
+                                <div class="flex items-center">
+                                    <span class="material-icons mr-2" style="font-size: 16px;">place</span>
+                                    <span>${trip.location}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="material-icons mr-2" style="font-size: 16px;">event</span>
+                                    <span>${startDate}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="material-icons mr-2" style="font-size: 16px;">group</span>
+                                    <span>${trip.current_participants}/${trip.max_participants} going</span>
+                                </div>
+                            </div>
+                            ${canJoin ? `
+                                <button onclick="event.stopPropagation(); app.handleJoinTripFromModal(${trip.id})" 
+                                        class="mt-3 w-full ios-button-primary text-sm py-2">
+                                    Join Trip
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                modalContent.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <button onclick="app.showJoinTripModal()" class="ios-button-secondary text-sm px-3 py-2">
+                                <span class="material-icons mr-1" style="font-size: 16px;">arrow_back</span>
+                                Back
+                            </button>
+                            <h3 class="font-semibold text-lg">Public Trips</h3>
+                            <div style="width: 70px;"></div>
+                        </div>
+                        <div style="max-height: 60vh; overflow-y: auto;" class="pr-2">
+                            ${tripsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading public trips:', error);
+            modalContent.innerHTML = `
+                <div class="text-center py-8">
+                    <span class="material-icons text-6xl text-red-300 mb-4 block">error_outline</span>
+                    <p class="text-gray-600 mb-4">Failed to load public trips</p>
+                    <button onclick="app.showJoinTripModal()" class="ios-button-secondary">
+                        <span class="material-icons mr-2" style="font-size: 16px;">arrow_back</span>
+                        Back to Join Trip
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    async handleJoinTripFromModal(tripId) {
+        try {
+            const response = await fetch(`/api/trips/${tripId}/join`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                this.showMessage('Successfully joined the trip!', 'success');
+                this.closeModal();
+                setTimeout(() => {
+                    this.loadMyTrips();
+                    this.loadDashboardData();
+                }, 1000);
+            } else {
+                this.showMessage(data.error || 'Failed to join trip', 'error');
+            }
+        } catch (error) {
+            console.error('Error joining trip:', error);
+            this.showMessage('An error occurred while joining the trip', 'error');
+        }
+    }
+
+    async showTripDetailsInModal(tripId) {
+        // You can implement this to show full trip details in the modal
+        // For now, just show the trip details page
+        this.closeModal();
+        this.showTripDetails(tripId);
     }
 
     async handleModalJoinByCode() {
