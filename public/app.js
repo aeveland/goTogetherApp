@@ -1780,7 +1780,38 @@ class CampingApp {
             }
             
             const data = await response.json();
-            const publicTrips = data.trips || [];
+            let publicTrips = data.trips || [];
+            
+            // Get user's location for distance calculation
+            const userAddress = this.getUserFullAddress();
+            let userCoords = null;
+            
+            if (userAddress) {
+                userCoords = await this.geocodeLocation(userAddress);
+            }
+            
+            // Calculate distances and add to each trip
+            if (userCoords) {
+                for (const trip of publicTrips) {
+                    try {
+                        const tripCoords = await this.geocodeLocation(trip.location);
+                        if (tripCoords) {
+                            trip.distance = this.calculateDistance(
+                                userCoords.lat, userCoords.lon,
+                                tripCoords.lat, tripCoords.lon
+                            );
+                        } else {
+                            trip.distance = Infinity; // Put trips without coords at the end
+                        }
+                    } catch (error) {
+                        console.error('Error calculating distance for trip:', trip.title, error);
+                        trip.distance = Infinity;
+                    }
+                }
+                
+                // Sort trips by distance (closest first)
+                publicTrips.sort((a, b) => a.distance - b.distance);
+            }
             
             // Render trips in modal
             if (publicTrips.length === 0) {
@@ -1802,11 +1833,27 @@ class CampingApp {
                     );
                     const canJoin = !isParticipant && trip.current_participants < trip.max_participants;
                     
+                    // Format distance display
+                    let distanceDisplay = '';
+                    if (trip.distance && trip.distance !== Infinity) {
+                        distanceDisplay = trip.distance < 100 
+                            ? `${Math.round(trip.distance)} miles away`
+                            : `${Math.round(trip.distance)} mi away`;
+                    }
+                    
                     return `
                         <div class="ios-card p-4 mb-3 hover:shadow-lg transition-shadow cursor-pointer" 
                              onclick="app.showTripDetailsInModal(${trip.id})">
                             <div class="flex justify-between items-start mb-3">
-                                <h4 class="font-semibold text-lg flex-1">${trip.title}</h4>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-lg">${trip.title}</h4>
+                                    ${distanceDisplay ? `
+                                        <div class="flex items-center mt-1 text-xs" style="color: var(--ios-blue);">
+                                            <span class="material-icons mr-1" style="font-size: 14px;">near_me</span>
+                                            <span class="font-semibold">${distanceDisplay}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
                                 ${isParticipant ? `
                                     <span class="px-2 py-1 rounded-full text-xs font-medium" style="background: var(--ios-green); color: white;">
                                         <span class="material-icons" style="font-size: 12px; vertical-align: middle;">check_circle</span>
@@ -1845,9 +1892,23 @@ class CampingApp {
                                 <span class="material-icons mr-1" style="font-size: 16px;">arrow_back</span>
                                 Back
                             </button>
-                            <h3 class="font-semibold text-lg">Public Trips</h3>
+                            <div class="text-center">
+                                <h3 class="font-semibold text-lg">Public Trips</h3>
+                                ${userCoords ? '<p class="text-xs text-gray-500">Sorted by distance</p>' : ''}
+                            </div>
                             <div style="width: 70px;"></div>
                         </div>
+                        ${!userCoords ? `
+                            <div class="mb-4 p-3 rounded-lg" style="background: rgba(255, 193, 7, 0.1); border-left: 3px solid #FFC107;">
+                                <div class="flex items-start gap-2">
+                                    <span class="material-icons text-yellow-600" style="font-size: 20px;">info</span>
+                                    <div class="text-sm text-gray-700">
+                                        <strong>Add your address to see distances</strong><br>
+                                        Go to Profile → Edit Profile → Home Address to sort trips by proximity
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
                         <div style="max-height: 60vh; overflow-y: auto;" class="pr-2">
                             ${tripsHtml}
                         </div>
