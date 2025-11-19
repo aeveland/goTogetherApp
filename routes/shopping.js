@@ -210,6 +210,55 @@ router.post('/trip/:tripId', authenticateToken, [
     const itemId = result.rows[0].id;
     console.log('Shopping item created successfully:', result.rows[0]);
 
+    // If Amazon link provided, fetch and store product image
+    if (amazon_link && amazon_link.includes('amazon.com')) {
+      try {
+        console.log('Fetching Amazon product image for:', item_name);
+        const imageResponse = await fetch(amazon_link, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        
+        if (imageResponse.ok) {
+          const html = await imageResponse.text();
+          
+          // Try multiple methods to extract image
+          let imageUrl = null;
+          
+          // Method 1: Open Graph
+          const ogMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+          if (ogMatch && ogMatch[1]) imageUrl = ogMatch[1];
+          
+          // Method 2: data-old-hires
+          if (!imageUrl) {
+            const hiresMatch = html.match(/data-old-hires="([^"]+)"/);
+            if (hiresMatch && hiresMatch[1]) imageUrl = hiresMatch[1];
+          }
+          
+          // Method 3: landingImage JSON
+          if (!imageUrl) {
+            const landingMatch = html.match(/"large":"([^"]+)"/);
+            if (landingMatch && landingMatch[1]) {
+              imageUrl = landingMatch[1].replace(/\\/g, '');
+            }
+          }
+          
+          if (imageUrl) {
+            await pool.query(`
+              UPDATE trip_shopping_items
+              SET amazon_image_url = $1
+              WHERE id = $2
+            `, [imageUrl, itemId]);
+            console.log('✓ Saved Amazon product image');
+          }
+        }
+      } catch (imageError) {
+        console.error('Failed to fetch Amazon image (non-critical):', imageError.message);
+        // Don't fail the whole request if image fetch fails
+      }
+    }
+
     // If specific users are assigned, create individual assignments
     if (assigned_to === 'specific' && assigned_user_ids && assigned_user_ids.length > 0) {
       for (const assignedUserId of assigned_user_ids) {
