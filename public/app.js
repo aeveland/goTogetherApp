@@ -1711,7 +1711,6 @@ class CampingApp {
         const modalContent = `
             <div class="space-y-6">
                 <div class="text-center mb-6">
-                    <span class="material-icons text-4xl mb-3 block" style="color: var(--ios-blue);">search</span>
                     <p class="text-gray-600">Enter a trip code or search for public trips to join</p>
                 </div>
                 
@@ -3195,7 +3194,6 @@ class CampingApp {
             joinSection.innerHTML = `
                 <div class="apple-card p-8 max-w-2xl mx-auto">
                     <div class="text-center mb-8">
-                        <span class="material-icons text-4xl text-blue-600 mb-4 block">search</span>
                         <h3 class="text-2xl font-bold text-gray-900 mb-2 tracking-tight">Join a Trip</h3>
                         <p class="text-gray-600">Enter a trip code or search for trips to join</p>
                     </div>
