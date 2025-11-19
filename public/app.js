@@ -412,22 +412,26 @@ class CampingApp {
                      style="background: white; border: 1px solid var(--border-primary);"
                      onclick="app.showTripDetails(${item.trip_id})">
                     <div class="flex items-start gap-3">
-                        <!-- Amazon Icon (if Amazon link) -->
+                        <!-- Product Thumbnail -->
                         ${item.amazon_link ? `
                             <div class="flex-shrink-0">
-                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center p-2" 
-                                     style="background: #FF9900;">
-                                    <svg viewBox="0 0 603 182" style="width: 100%; height: auto; max-height: 100%; fill: white;">
-                                        <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"/>
-                                    </svg>
+                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center" 
+                                     style="background: white; border: 1px solid #e0e0e0;">
+                                    ${item.amazon_image_url ? `
+                                        <img src="${item.amazon_image_url}" 
+                                             alt="${item.item_name}"
+                                             class="w-full h-full object-contain"
+                                             onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center p-2\\' style=\\'background: #FF9900;\\'><svg viewBox=\\'0 0 603 182\\' style=\\'width: 100%; height: auto; fill: white;\\'><path d=\\'M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z\\'></path></svg></div>'">
+                                    ` : `
+                                        <div class="w-full h-full flex items-center justify-center p-2" style="background: #FF9900;">
+                                            <svg viewBox="0 0 603 182" style="width: 100%; height: auto; fill: white;">
+                                                <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"></path>
+                                            </svg>
+                                        </div>
+                                    `}
                                 </div>
                             </div>
-                        ` : `
-                            <div class="w-16 h-16 rounded flex items-center justify-center" 
-                                 style="background: var(--ios-gray-5);">
-                                <span class="material-icons text-gray-400" style="font-size: 32px;">shopping_bag</span>
-                            </div>
-                        `}
+                        ` : ''}
                         <div class="flex-1 min-w-0">
                             <!-- Item Name and Priority -->
                             <div class="flex items-center gap-2 mb-2">
@@ -578,14 +582,23 @@ class CampingApp {
                 html += `
                     <div class="flex items-center justify-between p-3 rounded-lg ${isCompleted ? 'opacity-60' : ''}" 
                          style="background: var(--ios-gray-6); border-left: 3px solid ${priorityColor};">
-                        <!-- Amazon Icon (if Amazon link) -->
+                        <!-- Product Thumbnail -->
                         ${item.amazon_link ? `
-                            <div class="flex-shrink-0">
-                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center p-2" 
-                                     style="background: #FF9900;">
-                                    <svg viewBox="0 0 603 182" style="width: 100%; height: auto; max-height: 100%; fill: white;">
-                                        <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"/>
-                                    </svg>
+                            <div class="flex-shrink-0 mr-3">
+                                <div class="w-16 h-16 rounded overflow-hidden flex items-center justify-center" 
+                                     style="background: white; border: 1px solid #e0e0e0;">
+                                    ${item.amazon_image_url ? `
+                                        <img src="${item.amazon_image_url}" 
+                                             alt="${item.item_name}"
+                                             class="w-full h-full object-contain"
+                                             onerror="this.parentElement.innerHTML=\'<div class=\\\'w-full h-full flex items-center justify-center p-2\\\' style=\\\'background: #FF9900;\\\'><svg viewBox=\\\'0 0 603 182\\\' style=\\\'width: 100%; height: auto; fill: white;\\\'><path d=\\\'M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z\\\'></path></svg></div>\'">
+                                    ` : `
+                                        <div class="w-full h-full flex items-center justify-center p-2" style="background: #FF9900;">
+                                            <svg viewBox="0 0 603 182" style="width: 100%; height: auto; fill: white;">
+                                                <path d="M374 141.5c-48.5 35.8-118.9 54.8-179.4 54.8-84.9 0-161.3-31.4-219.2-83.7-4.5-4.1-.5-9.7 5-6.5 62.3 36.3 139.4 58.1 218.9 58.1 53.7 0 112.7-11.1 167-34.2 8.2-3.5 15 5.4 7.8 11.5zm20.2-23c-6.2-7.9-41-3.8-56.6-1.9-4.8.6-5.5-3.6-.9-6.6 27.7-19.5 73.3-13.9 78.6-7.3 5.3 6.6-1.4 52.1-27.4 73.8-4 3.3-7.8 1.6-6-2.8 5.9-14.6 19-47.5 12.3-55.2z"></path>
+                                            </svg>
+                                        </div>
+                                    `}
                                 </div>
                             </div>
                         ` : `
